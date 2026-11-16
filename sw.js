@@ -1,5 +1,5 @@
 // R11: depois de aberto uma vez com rede, o jogo funciona sem internet.
-const CACHE = "ch-v10";
+const CACHE = "ch-v11";
 const NIVEIS = {
   fsm: ["muralha", "portao", "canhao", "azulejos", "baluarte", "estatua"],
   pf: ["colunas", "andar", "varanda", "telhado", "porta", "escadaria"],

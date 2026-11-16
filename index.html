@@ -72,7 +72,7 @@ input[type=text]:focus,textarea:focus{border-color:var(--ouro)}
 .escolha button{background:var(--bg2)}
 .escolha button[aria-pressed=true]{background:var(--ouro);color:var(--tinta);border-color:var(--ouro)}
 .papel{display:inline-flex;align-items:center;gap:.35rem;background:var(--ouro);color:var(--tinta);font-weight:900;border-radius:999px;padding:.25rem .8rem;font-size:.9rem}
-.barra-topo{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem}
+.barra-topo{display:flex;justify-content:flex-start;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem}
 .pill{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--linha);background:var(--sup);border-radius:999px;padding:.3rem .8rem;font-weight:800;white-space:nowrap}
 .barra-prog{height:.6rem;border-radius:999px;background:var(--bg2);overflow:hidden;margin:.6rem 0}
 .barra-prog i{display:block;height:100%;background:var(--ouro);border-radius:999px}
@@ -214,6 +214,30 @@ th{background:var(--sup2);color:var(--fg2);font-weight:700}
 /* ---------- Significantes de jogo: pegadas, setas, mão ---------- */
 .xr-ov{position:fixed;inset:0;z-index:40;pointer-events:none;color:#fff}
 .xr-ov button{pointer-events:auto}
+.xr-ov .dica{white-space:normal;width:max-content;max-width:calc(100% - 2rem);font-size:1.1rem;line-height:1.3;bottom:calc(5.6rem + env(safe-area-inset-bottom))}
+.xr-ov .pegadas{bottom:calc(11rem + env(safe-area-inset-bottom))}
+.xr-ov .info-topo{right:9rem}
+.xr-ov .xfechar{position:absolute;top:max(.8rem,env(safe-area-inset-top));right:.8rem;width:3.2rem;height:3.2rem;min-width:0;padding:0;border-radius:50%;background:rgba(11,16,22,.85);border-color:rgba(255,255,255,.4);color:#fff}
+.xr-ov .radar{top:calc(max(.8rem,env(safe-area-inset-top)) + 4rem)}
+.xr-ov .ajuda-chao{position:absolute;left:1rem;right:1rem;top:40%;background:rgba(11,16,22,.9);border:1px solid rgba(255,255,255,.3);border-radius:1.2rem;padding:1rem;text-align:center;font-size:1.05rem}
+.xr-ov .ajuda-chao button{margin-top:.6rem;width:100%}
+.xr-ov .toast{z-index:5}
+.cam.pers{background:#9fd3f5;touch-action:none}
+.joy{position:absolute;width:7.5rem;height:7.5rem;margin:-3.75rem 0 0 -3.75rem;border-radius:50%;background:rgba(11,16,22,.3);border:2px solid rgba(255,255,255,.7);pointer-events:none;display:none}
+.joy i{position:absolute;left:50%;top:50%;width:3.2rem;height:3.2rem;margin:-1.6rem;border-radius:50%;background:var(--ouro);box-shadow:0 .3rem .8rem rgba(0,0,0,.4)}
+.joy.on{display:block}
+.joy.repouso{display:block;left:5.5rem;top:auto;bottom:calc(6.2rem + env(safe-area-inset-bottom));margin:0;opacity:.85;animation:joyMexe 2s infinite}
+.joy.repouso span{position:absolute;left:50%;top:-1.9rem;transform:translateX(-50%);white-space:nowrap;font-weight:800;font-size:.85rem;background:rgba(11,16,22,.85);padding:.2rem .6rem;border-radius:999px;color:#fff}
+.joy.repouso{left:1.2rem}
+.joy span{display:none}.joy.repouso span{display:block}
+@keyframes joyMexe{0%,100%{}}
+.joy.repouso i{animation:joyI 2s infinite ease-in-out}
+@keyframes joyI{0%,100%{transform:none}30%{transform:translate(0,-1.6rem)}60%{transform:translate(1.4rem,-.6rem)}}
+.cam.pers .dica{bottom:calc(5.4rem + env(safe-area-inset-bottom));left:auto;right:.8rem;transform:none;max-width:calc(100% - 10.5rem);white-space:normal;font-size:1.05rem}
+.xvoz{position:absolute;right:.8rem;top:calc(max(.8rem,env(safe-area-inset-top)) + 11.2rem);min-height:2.6rem;padding:.3rem .8rem;gap:.35rem;border-radius:999px;
+  background:rgba(11,16,22,.85);border-color:rgba(255,255,255,.35);color:#fff;font-size:.85rem}
+.xvoz[aria-pressed=false]{color:var(--fg2)}
+.cam .xvoz{top:calc(max(.8rem,env(safe-area-inset-top)) + 7.3rem)}
 .pegadas{position:absolute;left:50%;bottom:calc(10.4rem + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:.8rem;pointer-events:none}
 .pegadas span{display:flex;opacity:.15;animation:passo 1.2s infinite}
 .pegadas .i{width:2.4rem;height:2.4rem}
@@ -311,8 +335,10 @@ input[type=text],textarea{min-height:3.4rem;border-radius:1rem;padding:.8rem 1re
 .seg button{flex:1;min-width:0;border:0;background:transparent;border-radius:999px;padding:.5rem .3rem;color:var(--fg2);font-size:1rem}
 .seg button[aria-pressed=true]{background:var(--ouro);color:var(--tinta);box-shadow:0 .15rem .6rem rgba(0,0,0,.35)}
 /* cartões de escolha (escolha com explicação) */
-.cartoes{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
-.cartao{position:relative;flex-direction:column;align-items:flex-start;justify-content:flex-start;text-align:left;gap:.35rem;padding:.9rem;background:var(--sup);min-height:7.4rem;border-radius:1.2rem}
+.cartoes{display:grid;grid-template-columns:1fr;gap:.55rem}
+.cartao{position:relative;flex-direction:row;align-items:center;justify-content:flex-start;text-align:left;gap:.85rem;padding:.8rem 2.6rem .8rem .9rem;background:var(--sup);min-height:4.8rem;border-radius:1.2rem}
+.cartao>span{display:flex;flex-direction:column;gap:.15rem}
+.cartao[aria-pressed=true]::after{top:50%;margin-top:-.75rem}
 .cartao .i{width:2rem;height:2rem;color:var(--ouro)}
 .cartao b{font-size:1.08rem;font-weight:600}
 .cartao small{font-family:system-ui,sans-serif;font-weight:500;color:var(--fg2);font-size:.85rem;line-height:1.3}
@@ -462,6 +488,7 @@ const ICONES={
   formulario:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>', camara:'<path d="M3 8a2 2 0 0 1 2-2h2l2-3h6l2 3h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/>',
   texto:'<path d="M4 7V5h16v2M9 19h6M12 5v14"/>',
   pe:'<path class="pe" d="M9.2 22c-2.4 0-3.7-2.1-3.7-5.1 0-3 1.4-6.4 4.2-6.4 2.5 0 3.3 2.7 3.1 5.4-.2 3.4-1.5 6.1-3.6 6.1z"/><circle class="pe" cx="7.3" cy="7.6" r="1.6"/><circle class="pe" cx="10.4" cy="6.3" r="1.7"/><circle class="pe" cx="13.4" cy="6.9" r="1.4"/><circle class="pe" cx="15.6" cy="8.6" r="1.2"/><circle class="pe" cx="16.8" cy="11" r="1"/>',
+  relogio:'<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.6 2.2M9.5 2.5h5M12 2.5V6"/>',
   mao:'<path class="maoi" d="M9 11V4.5a1.6 1.6 0 0 1 3.2 0V10h.4V8.6a1.6 1.6 0 0 1 3.2 0V10.4h.4V9.6a1.6 1.6 0 0 1 3.2 0v5.6c0 3.8-2.7 6.8-6.4 6.8h-1c-2.1 0-3.8-1-4.9-2.7l-2.8-4.4a1.6 1.6 0 0 1 2.6-1.9L9 15z"/>',
 };
 const I=(n,cls="")=>`<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONES[n]||""}</svg>`;
@@ -652,6 +679,13 @@ let J = lerJogo(); // jogo em curso (do nível actual)
 function irNivel(id){usarNivel(id);try{localStorage.setItem("ch-nivel-atual",id)}catch(e){}J=lerJogo()}
 const concluido=id=>{const c=conta();return c?!!(c.niveis&&c.niveis[id]&&c.niveis[id].concluido):ler("ch-concluidos",[]).includes(id)};
 const desbloqueado=i=>i===0||concluido(NIVEIS[i-1].id)||NIVEIS[i].id===NIVEL_URL||ler("ch-todos-niveis",false);
+/* Cronómetro: tempo de jogo, sem contar as pausas */
+const tempoJogo=()=>J?Math.max(0,Date.now()-J.inicio-(J.tPausa||0)-(J.pausaDesde?Date.now()-J.pausaDesde:0)):0;
+const mmss=ms=>{const t=Math.floor(ms/1000);return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0")};
+function pausarTempo(){if(J&&emCurso()&&!J.pausaDesde){J.pausaDesde=Date.now();guardar()}}
+function continuarTempo(){if(J&&J.pausaDesde){J.tPausa=(J.tPausa||0)+Date.now()-J.pausaDesde;J.pausaDesde=null;guardar()}}
+const crono=()=>`<span class="pill crono" role="timer" aria-label="Tempo de jogo">${I("relogio")}<b>${mmss(tempoJogo())}</b></span>`;
+setInterval(()=>{const els=document.querySelectorAll(".crono b");if(els.length){const t=mmss(tempoJogo());els.forEach(e=>e.textContent=t)}},1000);
 function novoJogo(equipa,turma,modo,familia=false){
   J={equipa,turma,modo,familia,pontos:0,atual:0,inicio:Date.now(),reg:[],
      pecas:Object.fromEntries(PECAS.map(p=>[p.id,{recolhida:false,respondida:false,certa:false,colocada:false,rot:p.roda===false?0:[90,180,270][Math.floor(Math.random()*3)]}]))};
@@ -671,7 +705,7 @@ const app=document.getElementById("app");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const norm=d=>((d%360)+540)%360-180;
 const contar=k=>PECAS.filter(p=>J.pecas[p.id][k]).length;
-function toast(msg,ms=2200){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;app.appendChild(t);setTimeout(()=>t.remove(),ms)}
+function toast(msg,ms=2200){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;(document.querySelector(".xr-ov")||app).appendChild(t);setTimeout(()=>t.remove(),ms)}
 let actx=null;
 function som(tipo){
   if(!DEF.som)return;
@@ -691,6 +725,21 @@ function falar(texto,fim){
   speechSynthesis.speak(u);
 }
 const pararVoz=()=>{try{speechSynthesis.cancel()}catch(e){}};
+/* Dicas ditas em voz alta durante a procura (com a câmara o jogador olha para o mundo, não para o texto).
+   Só fala quando a dica muda e, no mínimo, com 3 s de intervalo, para não atropelar. */
+let dicaDita="", dicaQuando=0;
+function dizerDica(t,urgente=false){
+  if(!DEF.voz)return;
+  const limpo=t.replace(/[←→…]/g,"").replace(/\s*·\s*/g,", ").replace(/(\d+),(\d) m\b/,"$1 vírgula $2 metros").replace(/(\d+) m\b/,"$1 metros").trim();
+  const base=limpo.replace(/[\d,]+ (metros|passos?)/,"#");
+  const agora=Date.now();
+  if(!urgente&&(base===dicaDita&&agora-dicaQuando<12000||agora-dicaQuando<3000))return;
+  dicaDita=base;dicaQuando=agora;falar(limpo);
+}
+// botão de voz nos ecrãs de procura: liga/desliga as dicas faladas
+const botaoVoz=id=>`<button class="xvoz" id="${id}" aria-pressed="${DEF.voz}" aria-label="Dicas faladas">${I(DEF.voz?"som":"parar")}<span>${DEF.voz?"Voz":"Sem voz"}</span></button>`;
+function ligarBotaoVoz(b){b.onclick=()=>{DEF.voz=!DEF.voz;aplicarDef();b.setAttribute("aria-pressed",DEF.voz);b.innerHTML=I(DEF.voz?"som":"parar")+`<span>${DEF.voz?"Voz":"Sem voz"}</span>`;
+  if(DEF.voz){dicaDita="";falar("Voz ligada. Se não ouvires, sobe o volume do telemóvel.")}else pararVoz()}}
 
 /* ---------------- Equipa e papéis (R4 / desencontro D3) ---------------- */
 const PAPEIS={conta:{n:"Conta",ic:"livro",d:"conta a história aos netos"},aponta:{n:"Aponta",ic:"radar",d:"procura as peças com a câmara"},responde:{n:"Responde",ic:"mensagem",d:"ouve a curiosidade e responde"},monta:{n:"Monta",ic:"grelha",d:"encaixa as peças no tabuleiro"}};
@@ -719,7 +768,7 @@ const emCurso=()=>!!(J&&contar("colocada")<PECAS.length);
 
 /* Ecrã título: uma acção principal (Jogar); conta à esquerda; definições na engrenagem à direita */
 function inicio(){
-  pararCamara();pararVoz();fecharFolha();
+  pararCamara();pararVoz();fecharFolha();pausarTempo();
   if(!conta()&&!CONVIDADO)return escolherConta();
   const c=conta(), ec=emCurso();
   app.innerHTML=`<main class="titulo">
@@ -767,7 +816,7 @@ function niveis(){
       <div class="mini"><img src="modelos/${nv.id}/img/miniatura.png" alt=""></div>
       <div class="info"><p class="sub" style="margin:0">Nível ${i+1} · ${nv.cidade}</p><h2>${nv.nome}</h2>
       ${ec?`<div class="barra-prog" aria-hidden="true"><i style="width:${Math.round((pec+mont)/(2*nv.pecas.length)*100)}%"></i></div><p class="nota" style="margin:0">${pec}/${nv.pecas.length} peças encontradas · ${mont}/${nv.pecas.length} montadas</p>`
-        :feito?`<p style="margin:.2rem 0">${estrelas(info?info.estrelas:1)}</p><p class="nota" style="margin:0">Concluído${info?` · melhor: ${info.melhor} pontos`:""}</p>`
+        :feito?`<p style="margin:.2rem 0">${estrelas(info?info.estrelas:1)}</p><p class="nota" style="margin:0">Concluído${info?` · ${info.melhor} pontos`:""}${info&&info.melhorTempo?` · melhor tempo ${mmss(info.melhorTempo)}`:""}</p>`
         :`<p class="nota" style="margin:0">${i===0||feito?"Ainda não começaste.":"Desbloqueado! Pronto a jogar."}</p>`}</div>
       <div class="acoes">
         ${ec?`<button class="prim larga" ${id("cont")} data-nv="${nv.id}" data-acao="cont">${I("play")}Continuar onde parei</button><button class="larga" ${id("reini")} data-nv="${nv.id}" data-acao="reini">${I("reiniciar")}Reiniciar o nível</button>`
@@ -931,6 +980,7 @@ function meuProgresso(){
   dois(document.getElementById("apagar"),()=>{delete CONTAS.lista[CONTAS.ativa];CONTAS.ativa=null;gravarContas();J=null;toast("Conta apagada.");escolherConta()},"Apaga a conta. Toca outra vez para confirmar");
 }
 function retomar(){
+  continuarTempo();
   const falta=PECAS.find(p=>J.pecas[p.id].recolhida&&!J.pecas[p.id].respondida);
   if(falta)return passar(J.familia?"conta":"responde",()=>curiosidade(falta));
   if(contar("recolhida")===PECAS.length)return passar("monta",montar);
@@ -952,8 +1002,9 @@ function configurar(){
       :[...Array(n)].map((_,i)=>campo(i,"Ex.: "+["Kiki","Tchico","Nany"][i],n>1?`Jogador ${i+1} · ${["Aponta","Responde","Monta"][i]}${n===2&&i===0?" e Monta":""}`:"A tua alcunha")).join("")}
       <h3>Como queres procurar?</h3>
       <div class="cartoes" role="group">
-        <button class="cartao" data-m="ra" aria-pressed="${modo==="ra"}">${I("camara")}<b>Com a câmara</b><small>Anda pelo sítio: as peças aparecem quando chegas perto.</small></button>
-        <button class="cartao" data-m="semra" aria-pressed="${modo==="semra"}">${I("pino")}<b>Sem câmara</b><small>Imagens dos sítios. Gasta menos bateria.</small></button></div>
+        <button class="cartao" data-m="ra" aria-pressed="${modo==="ra"}">${I("camara")}<span><b>Realidade aumentada</b><small>Anda pelo sítio de verdade: as peças aparecem na câmara quando chegas perto.</small></span></button>
+        <button class="cartao" data-m="pers" aria-pressed="${modo==="pers"}">${I("utilizador")}<span><b>Com personagem</b><small>Guia a Kiala pelo monumento em 3D com o dedo. Para a sala ou para casa.</small></span></button>
+        <button class="cartao" data-m="semra" aria-pressed="${modo==="semra"}">${I("pino")}<span><b>Sem câmara</b><small>Imagens dos sítios onde estão as peças. Gasta menos bateria.</small></span></button></div>
       ${modo==="ra"&&n!=="f"?`<h3>Onde vão jogar?</h3>
       <div class="seg" role="group">
         <button data-e="grande" aria-pressed="${espaco==="grande"}">Pátio</button>
@@ -1011,7 +1062,7 @@ function instrucoes(soVer){
   carrossel(document.getElementById("car"),document.getElementById("pts"),0);
   if(soVer){document.getElementById("volta").onclick=()=>J&&emCurso()&&document.getElementById("volta").dataset.jogo?menuJogo():inicio();return}
   document.getElementById("volta").onclick=()=>{J=null;guardar();configurar()};
-  document.getElementById("ok").onclick=()=>passar("aponta",()=>J.modo==="ra"?procurar():semRA());
+  document.getElementById("ok").onclick=()=>passar("aponta",procurar);
 }
 
 /* ---------------- Ecrã 1 e 2: procurar e encontrar (RA por orientação) ---------------- */
@@ -1023,12 +1074,15 @@ function pararCamara(){
   if(cam.ouvinte)window.removeEventListener("deviceorientation",cam.ouvinte);
   if(cam.movimento)window.removeEventListener("devicemotion",cam.movimento);
   if(cam.teclas)window.removeEventListener("keydown",cam.teclas);
+  if(cam.teclasSolta)window.removeEventListener("keyup",cam.teclasSolta);
+  if(cam.mundo)cam.mundo.parar();
   if(cam.stream)cam.stream.getTracks().forEach(t=>t.stop()); // D2: câmara só enquanto se procura
   cam={stream:null,raf:0,tick:0,ouvinte:null};
   try{navigator.vibrate&&navigator.vibrate(0)}catch(e){}
 }
 function procurar(){
   if(J.modo==="semra")return semRA();
+  if(J.modo==="pers")return procurarPersonagem();
   pararCamara();
   const faltam=PECAS.filter(p=>!J.pecas[p.id].recolhida);
   if(!faltam.length)return passar("monta",montar);
@@ -1048,13 +1102,14 @@ function procurar(){
     <div id="tres" style="position:absolute;inset:0;pointer-events:none"></div>
     <div id="mundo">${faltam.map(p=>`<div class="peca-ra" data-id="${p.id}" role="button" aria-label="${esc(p.nome)}">${svgPeca(p.id)}<span class="mao" aria-hidden="true">${I("mao")}</span></div>`).join("")}</div>
     <div class="info-topo">
-      <span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>
+      <span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>${crono()}
       ${sentado?"":`<span class="pill" id="npassos">${I("pe")}<span>0 passos</span></span>`}
       ${etiquetaPapel("aponta")}
       <div class="calor" aria-hidden="true"><i id="calor"></i></div>
     </div>
     <div class="radar" aria-hidden="true"><div class="eu"></div><div class="alvo" id="alvo"></div></div>
     <div class="aviso-cam" id="aviso" hidden></div>
+    ${botaoVoz("cvoz")}
     <button class="rodar esq" id="re" aria-label="Rodar para a esquerda" hidden>${I("voltar")}</button>
     <button class="rodar dir" id="rd" aria-label="Rodar para a direita" hidden>${I("seta")}</button>
     <button class="rodar andar" id="ra" aria-label="Dar um passo em frente" hidden>${I("pe")}</button>
@@ -1108,6 +1163,8 @@ function procurar(){
   // Sem sensores (computador, para testar): ◀ ▶ para rodar e o botão das pegadas (ou ↑) para andar
   setTimeout(()=>{if(!$("cam"))return;if(!giroscopio){$("re").hidden=$("rd").hidden=false}
     if(!movimento&&!sentado){$("ra").hidden=false}},1200);
+  ligarBotaoVoz($("cvoz"));
+  if(DEF.voz&&!sentado)setTimeout(()=>{if($("cam")&&!document.querySelector(".demo-ov"))toast("Sobe o volume para ouvires as dicas.",3000)},700);
   $("re").onclick=()=>alvoRumo-=20; $("rd").onclick=()=>alvoRumo+=20; $("ra").onclick=passo;
   cam.teclas=e=>{if(e.key==="ArrowLeft")alvoRumo-=10;if(e.key==="ArrowRight")alvoRumo+=10;if(e.key==="ArrowUp"){e.preventDefault();passo()}};
   window.addEventListener("keydown",cam.teclas);
@@ -1186,7 +1243,7 @@ function procurar(){
       dir=md<20?"frente":melhor.d>0?"dir":"esq";
     }
     sinais($("pegadas"),$("seta"),dir);
-    if(t!==ultimaDica){dica.textContent=t;dica.className="dica "+cls;ultimaDica=t}
+    if(t!==ultimaDica){dica.textContent=t;dica.className="dica "+cls;ultimaDica=t;dizerDica(t,achou)}
     if(cam.cena3d)cam.cena3d.desenhar(rumo,encontrada,fixado,info);
   }
   quadro();
@@ -1198,6 +1255,90 @@ function procurar(){
     const periodo=perto>.85?300:perto>.6?650:perto>.35?1200:0;
     if(periodo&&conta>=periodo){conta=0;vibrar(35)}
   },100);
+}
+
+/* ---------------- Modo personagem: guiar a Kiala pelo monumento em 3D ---------------- */
+function procurarPersonagem(){
+  pararCamara();
+  const faltam=PECAS.filter(p=>!J.pecas[p.id].recolhida);
+  if(!faltam.length)return passar("monta",montar);
+  if(!window.RA3D){toast("Este aparelho não mostra 3D: a jogar sem câmara.");J.modo="semra";guardar();return semRA()}
+  const primeira=!J.viuPersonagem;
+  app.innerHTML=`<div class="cam pers" id="cam">
+    <div id="tres" style="position:absolute;inset:0"></div>
+    <div class="info-topo">
+      <span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>${crono()}
+      ${etiquetaPapel("aponta")}
+      <div class="calor" aria-hidden="true"><i id="calor"></i></div>
+    </div>
+    <div class="radar" aria-hidden="true"><div class="eu"></div><div class="alvo" id="alvo"></div></div>
+    ${botaoVoz("cvoz")}
+    <div class="joy repouso" id="joy" aria-hidden="true"><i></i><span>Arrasta para andar</span></div>
+    <div class="dica" id="dica" role="status" aria-live="polite">A carregar o monumento…</div>
+    <div class="fundo-cam">
+      <button id="bmenu">${I("pausa")}Pausa</button>
+      <button id="bexemplo">${I("ajuda")}Ajuda</button>
+      <button id="bmontar">${I("grelha")}Montar (${contar("recolhida")-contar("colocada")})</button>
+    </div></div>`;
+  const $=id=>document.getElementById(id), dica=$("dica"), joy=$("joy");
+  ligarBotaoVoz($("cvoz"));
+  $("bmenu").onclick=()=>{guardarPos();menuJogo()};
+  $("bmontar").onclick=()=>{guardarPos();passar("monta",montar)};
+  $("bexemplo").onclick=()=>{reg("ajuda",{onde:"personagem"});ajudaPersonagem()};
+  function ajudaPersonagem(){
+    const d=document.createElement("div");d.className="demo-ov";d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");
+    d.innerHTML=`<div class="demo-cx"><h2 style="margin-top:0">Como se joga com a personagem</h2>
+      <div class="grupo">
+        <div class="item" style="cursor:default">${I("mao")}<span class="txt"><b>Arrasta o dedo</b> em qualquer sítio do ecrã para a Kiala andar (no computador: setas ou W A S D).</span></div>
+        <div class="item" style="cursor:default">${I("radar")}<span class="txt">Segue a <b>seta amarela</b> por cima da cabeça e o radar.</span></div>
+        <div class="item" style="cursor:default">${I("mochila")}<span class="txt">As peças têm um <b>feixe de luz</b>. Passa por cima delas para as apanhar.</span></div></div>
+      <button class="prim larga grande" id="demook">Percebi</button></div>`;
+    app.appendChild(d);d.querySelector("#demook").onclick=()=>d.remove();
+  }
+  if(primeira){J.viuPersonagem=true;guardar();setTimeout(()=>{if($("cam"))ajudaPersonagem()},300)}
+  const c=conta(), cor=c&&/^#/.test(c.avatar||"")?parseInt(c.avatar.slice(1),16):0x2a9d8f;
+  let api=null, ultimaDica="";
+  function guardarPos(){if(api){J.posPers=api.posicao();guardar()}}
+  RA3D.mundo($("tres"),faltam,{fundo:N.fundo,cor,inicio:J.posPers},{
+    estado(e){
+      const r=.5+1.8*Math.min(1,e.dist/25), a=e.az*Math.PI/180;
+      $("alvo").style.transform=`translate(${Math.sin(a)*r}rem,${-Math.cos(a)*r}rem)`;
+      $("calor").style.width=Math.max(0,1-e.dist/25)*100+"%";
+      const n=Math.max(1,Math.round(e.dist));
+      const lado=e.az<22.5||e.az>=337.5?"em frente":e.az<67.5?"em frente, à direita":e.az<112.5?"à direita":e.az<157.5?"atrás, à direita":e.az<202.5?"para trás":e.az<247.5?"atrás, à esquerda":e.az<292.5?"à esquerda":"em frente, à esquerda";
+      const t=e.dist<4?"Está mesmo aqui! Passa por cima da peça":`Peça ${lado} · ${n} m`;
+      if(t!==ultimaDica){dica.textContent=t;dica.className="dica"+(e.dist<8?" quente":"");ultimaDica=t;dizerDica(t.replace(/ m$/," metros"))}
+    },
+    apanhar(id){som("encontrar");vibrar([90,50,90]);J.posPers=api.posicao();guardar();recolher(id)},
+  }).then(a=>{api=a;cam.mundo=a;window.__mundo=a;if(!$("cam"))return a.parar();dica.textContent="Arrasta o dedo para andar"}).catch(()=>{toast("Não foi possível abrir o 3D: a jogar sem câmara.");J.modo="semra";guardar();semRA()});
+
+  // joystick: aparece onde se toca (funciona com o polegar em qualquer sítio)
+  let toque=null;
+  const R=48;
+  const mover=(x,y)=>{if(api)api.entrada(x,y)};
+  $("cam").addEventListener("pointerdown",e=>{
+    if(e.target.closest("button,.demo-ov"))return;
+    toque={id:e.pointerId,x:e.clientX,y:e.clientY};
+    const b=$("cam").getBoundingClientRect();
+    joy.classList.remove("repouso");joy.classList.add("on");joy.style.left=(e.clientX-b.left)+"px";joy.style.top=(e.clientY-b.top)+"px";joy.firstElementChild.style.transform="";
+    try{$("cam").setPointerCapture(e.pointerId)}catch(x){}
+  });
+  $("cam").addEventListener("pointermove",e=>{
+    if(!toque||e.pointerId!==toque.id)return;
+    let dx=e.clientX-toque.x, dy=e.clientY-toque.y; const d=Math.hypot(dx,dy);
+    if(d>R){dx*=R/d;dy*=R/d}
+    joy.firstElementChild.style.transform=`translate(${dx}px,${dy}px)`;
+    mover(dx/R,dy/R);
+  });
+  const largar=e=>{if(!toque||e.pointerId!==toque.id)return;toque=null;joy.classList.remove("on");mover(0,0)};
+  $("cam").addEventListener("pointerup",largar);$("cam").addEventListener("pointercancel",largar);
+  // teclado (computador)
+  const teclas=new Set();
+  const aplicar=()=>{let x=0,y=0;if(teclas.has("ArrowLeft")||teclas.has("a"))x-=1;if(teclas.has("ArrowRight")||teclas.has("d"))x+=1;if(teclas.has("ArrowUp")||teclas.has("w"))y-=1;if(teclas.has("ArrowDown")||teclas.has("s"))y+=1;
+    if(x||y){const m=Math.hypot(x,y);mover(x/m,y/m);joy.classList.remove("repouso")}else mover(0,0)};
+  cam.teclas=e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;if(!/^(Arrow(Up|Down|Left|Right)|[wasd])$/.test(k))return;e.preventDefault();teclas.add(k);aplicar()};
+  cam.teclasSolta=e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;teclas.delete(k);aplicar()};
+  window.addEventListener("keydown",cam.teclas);window.addEventListener("keyup",cam.teclasSolta);
 }
 
 const PEGADAS=`<span>${I("pe")}</span><span>${I("pe")}</span><span>${I("pe")}</span>`;
@@ -1226,38 +1367,54 @@ function sinais(peg,seta,dir){
 }
 
 /* ---------------- RA no chão (WebXR + hit-test) ---------------- */
+let XR_SAIR=null; // para o botão "voltar" do Android fechar a RA
 function iniciarXR(){
   pararCamara();reg("xr");
   const faltam=PECAS.filter(p=>!J.pecas[p.id].recolhida);
   app.innerHTML=`<main class="passa"><div class="ic-grande">${I("cubo")}</div><h2>A abrir a RA…</h2></main>`;
   const ov=document.createElement("div");ov.className="xr-ov";
-  ov.innerHTML=`<div class="info-topo"><span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>${etiquetaPapel("aponta")}
+  ov.innerHTML=`<div class="info-topo"><span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>${crono()}${etiquetaPapel("aponta")}
       <div class="calor" aria-hidden="true"><i id="xcalor"></i></div></div>
     <div class="radar" aria-hidden="true" id="xradar" hidden><div class="eu"></div><div class="alvo" id="xalvo"></div></div>
     <div class="seta-lado oculta" id="xseta" aria-hidden="true">${I("seta2")}</div>
     <div class="pegadas oculta" id="xpeg" aria-hidden="true">${PEGADAS}</div>
-    <div class="dica" id="xdica" role="status" aria-live="polite">Aponta para o chão e move o telemóvel devagar…</div>
+    <div class="dica" id="xdica" role="status" aria-live="polite">Aponta para o chão e move o telemóvel devagar</div>
+    <div class="ajuda-chao" id="xajuda" hidden><b>Não encontro o chão.</b><br>Aponta para um chão com desenho ou textura, com boa luz, a 1–2 m de ti.
+      <button id="xnormal">Jogar sem a RA no chão</button></div>
+    <button class="xfechar" id="xfx" aria-label="Sair da RA">${I("fechar")}</button>
+    ${botaoVoz("xvoz")}
     <div class="fundo-cam"><button id="xsair">${I("fechar")}Sair da RA</button></div>`;
   document.body.appendChild(ov);
   // os toques nos botões não contam como "toque no ecrã" da RA
   ov.querySelectorAll("button").forEach(b=>b.addEventListener("beforexrselect",e=>e.preventDefault()));
   const $=id=>ov.querySelector("#"+id);
-  let sessao=null, achada=null, ultima="", ultimaEnc=null, ultimaVib=0;
-  $("xsair").onclick=()=>{sessao&&sessao.terminar()};
-  const dica=(t,cls="")=>{if(t!==ultima){const d=$("xdica");d.textContent=t;d.className="dica "+cls;ultima=t}};
+  let sessao=null, achada=null, ultima="", ultimaEnc=null, ultimaVib=0, semChao=performance.now(), saiu=false;
+  // sair: termina a sessão; se ela ainda não abriu (ou não responde), sai na mesma
+  const sairRA=()=>{if(sessao)sessao.terminar();setTimeout(()=>{if(!saiu){saiu=true;ov.remove();XR_SAIR=null;J.xr=false;guardar();procurar()}},1500)};
+  XR_SAIR=sairRA;
+  $("xsair").onclick=sairRA;$("xfx").onclick=sairRA;$("xnormal").onclick=sairRA;
+  // se a RA não abrir (ex.: autorização da câmara recusada), não fica preso no ecrã "A abrir a RA…"
+  setTimeout(()=>{if(!sessao&&!saiu&&document.querySelector(".passa h2")){app.querySelector(".passa").insertAdjacentHTML("beforeend",`<button class="larga" id="xvolta">Voltar</button>`);document.getElementById("xvolta").onclick=sairRA}},8000);
+  const dica=(t,cls="")=>{if(t!==ultima){const d=$("xdica");d.textContent=t;d.className="dica "+cls;ultima=t;dizerDica(t,cls==="quente"&&/Encontraste|Toca/.test(t))}};
+  ligarBotaoVoz($("xvoz"));
+  if(DEF.voz){dicaDita="";setTimeout(()=>{toast("Sobe o volume para ouvires as dicas.",3500);falar("Sobe o volume para ouvires as dicas. Aponta para o chão e move o telemóvel devagar.");dicaQuando=Date.now();dicaDita="Aponta para o chão e move o telemóvel devagar"},900)}
   RA3D.sessaoXR(faltam,ov,{
     estado(s){
-      if(s.fase==="chao"){dica(s.chao?"Toca no ecrã para pousar as peças aqui":"Aponta para o chão e move o telemóvel devagar…",s.chao?"quente":"");return}
-      $("xradar").hidden=false;
+      if(s.fase==="chao"){
+        if(s.chao)semChao=performance.now();
+        $("xajuda").hidden=performance.now()-semChao<12000;   // 12 s sem chão: explica e oferece alternativa
+        dica(s.chao?"Toca no ecrã para pousar as peças aqui":"Aponta para o chão e move o telemóvel devagar",s.chao?"quente":"");return}
+      $("xajuda").hidden=true;$("xradar").hidden=false;
       const r=2.3,a=s.diff*Math.PI/180;
       $("xalvo").style.transform=`translate(${Math.sin(a)*r}rem,${-Math.cos(a)*r}rem)`;
       $("xcalor").style.width=(s.perto*100)+"%";
       if(s.encontrada&&s.encontrada!==ultimaEnc){som("encontrar");vibrar([90,50,90])}
       ultimaEnc=s.encontrada;
-      const m=s.dist!=null?` · ${s.dist.toFixed(1).replace(".",",")} m`:"";
+      // distância arredondada a meio metro (o texto não fica a mudar a cada instante)
+      const m=s.dist!=null?` · ${(Math.round(s.dist*2)/2).toFixed(1).replace(".",",")} m`:"";
       sinais($("xpeg"),$("xseta"),s.encontrada?null:Math.abs(s.diff)<20?"frente":s.diff>0?"dir":"esq");
       if(s.encontrada)dica("Encontraste! Toca no ecrã","quente");
-      else if(Math.abs(s.diff)<20&&s.dist>s.alcance)dica("Anda em frente, segue as pegadas"+m,"quente");
+      else if(Math.abs(s.diff)<20&&s.dist>s.alcance)dica("Anda em frente"+m,"quente");
       else if(Math.abs(s.diff)<35&&s.dist<=s.alcance)dica("Estás perto! Olha para a peça","quente");
       else if(Math.abs(s.diff)<30)dica("Mais perto!"+m,"quente");
       else if(Math.abs(s.diff)<70)dica(s.diff>0?"Mais perto! Vira à direita →":"← Mais perto! Vira à esquerda");
@@ -1268,11 +1425,13 @@ function iniciarXR(){
     },
     encontrar(id){achada=id},
     sair(motivo){
+      if(saiu)return;saiu=true;XR_SAIR=null;
       ov.remove();
       if(motivo!=="encontrou"){J.xr=false;guardar()} // saiu: volta ao modo por orientação
       if(achada)recolher(achada);else procurar();
     },
   },{escala:J.espaco==="pequeno"?.5:1}).then(s=>{sessao=s}).catch(()=>{
+    if(saiu)return;saiu=true;XR_SAIR=null;
     ov.remove();J.xr=false;guardar();
     toast("Não foi possível abrir a RA no chão. A usar o modo normal.");
     procurar();
@@ -1293,7 +1452,7 @@ function semRA(){
   const faltam=PECAS.filter(p=>!J.pecas[p.id].recolhida);
   if(!faltam.length)return passar("monta",montar);
   app.innerHTML=`<main class="ecra">
-    <div class="barra-topo"><span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>${etiquetaPapel("aponta")}</div>
+    <div class="barra-topo"><span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>${crono()}${etiquetaPapel("aponta")}</div>
     <h2>Onde estão as peças?</h2>
     <p class="nota" style="margin-top:0">Vai até ao sítio da imagem e toca em <b>Estou aqui</b>.</p>
     <div class="locais">${faltam.map(p=>`<div class="local"><div class="foto">${svgPeca(p.id)}</div>
@@ -1342,7 +1501,7 @@ function curiosidade(p){
 }
 function pergunta(p){
   app.innerHTML=`<main class="ecra">
-    <div class="barra-topo"><span class="pill" style="color:var(--ouro)">${I("estrela")}<span style="color:var(--fg)">${J.pontos} pontos</span></span>${etiquetaPapel("responde")}</div>
+    <div class="barra-topo"><span class="pill" style="color:var(--ouro)">${I("estrela")}<span style="color:var(--fg)">${J.pontos} pontos</span></span>${crono()}${etiquetaPapel("responde")}</div>
     <div class="q-zona"><p class="sub" style="margin:0">Pergunta</p><h2>${esc(p.q)}</h2></div>
     <div class="rodape"><div class="opcoes">${p.o.map((o,i)=>`<button data-i="${i}"><span class="letra">${"ABC"[i]}</span>${esc(o)}</button>`).join("")}</div></div>
     <div id="retro" role="status" aria-live="assertive"></div></main>`;
@@ -1373,7 +1532,7 @@ function montar(){
   const naMochila=PECAS.filter(p=>J.pecas[p.id].recolhida&&!J.pecas[p.id].colocada);
   const faltam=PECAS.length-contar("recolhida");
   app.innerHTML=`<main class="ecra">
-    <div class="barra-topo"><span class="pill">${I("grelha")}${contar("colocada")}/${PECAS.length} no lugar</span>${etiquetaPapel("monta")}</div>
+    <div class="barra-topo"><span class="pill">${I("grelha")}${contar("colocada")}/${PECAS.length} no lugar</span>${crono()}${etiquetaPapel("monta")}</div>
     <h2 style="margin:.2rem 0 .1rem">${N.monta}</h2>
     <p class="nota" style="margin:0 0 .6rem">${N.notaTab} Arrasta para o lugar; toca para rodar.</p>
     <div class="tabuleiro" id="tab">${fundoTab()}
@@ -1502,12 +1661,14 @@ function resumoSessao(){
 function guardarSessao(ses){const l=ler(CHAVE_SES,[]).filter(x=>x.id!==ses.id);l.push(ses);gravar(CHAVE_SES,l)}
 function fim(){
   pararVoz();som("fim");vibrar([100,60,100,60,200]);
-  if(!(J.reg||[]).some(e=>e.tipo==="fim"))reg("fim");
+  if(!(J.reg||[]).some(e=>e.tipo==="fim")){continuarTempo();J.tempoFinal=tempoJogo();reg("fim")}
+  const tf=J.tempoFinal||tempoJogo();
   guardarSessao(Object.assign(resumoSessao(),{sus:(ler(CHAVE_SES,[]).find(x=>x.id===J.inicio)||{}).sus??null}));
   const cc=conta();
   if(cc&&!J.contado){
     const nv=nivelDe(cc), certasF=contar("certa"), est=certasF===PECAS.length?3:certasF>=4?2:1;
     nv.concluido=true;nv.vezes++;nv.melhor=Math.max(nv.melhor,J.pontos);nv.estrelas=Math.max(nv.estrelas,est);
+    J.recorde=!nv.melhorTempo||tf<nv.melhorTempo;if(J.recorde)nv.melhorTempo=tf;
     (cc.historico=cc.historico||[]).push({data:new Date().toLocaleString("pt-PT"),certas:certasF,perguntas:PECAS.length,pontos:J.pontos,min:Math.round((Date.now()-J.inicio)/60000)});
     J.contado=true;guardar();
   }
@@ -1520,7 +1681,7 @@ function fim(){
     <h1 style="text-align:center">${N.feito}</h1>
     <p style="text-align:center;font-size:2.2rem;margin:0 0 .6rem">${estrelas(certas===PECAS.length?3:certas>=4?2:1)}</p>
     <div class="tabuleiro vista3d" id="v3d" style="border-radius:1.5rem">${fundoTab()}${PECAS.map(p=>`<div class="slot" style="${posSlot(p.slot,p.z)}">${svgPeca(p.id,"cima")}</div>`).join("")}</div>
-    <div class="estat"><span><b>${certas}/${PECAS.length}</b>certas</span><span><b>${J.pontos}</b>pontos</span><span><b>${Math.max(1,Math.round((Date.now()-J.inicio)/60000))}</b>minutos</span></div>
+    <div class="estat"><span><b>${certas}/${PECAS.length}</b>certas</span><span><b>${J.pontos}</b>pontos</span><span><b>${mmss(tf)}</b>${J.recorde&&conta()?"novo recorde!":"tempo"}</span></div>
     <h3>Três coisas para lembrar</h3>
     <section class="caixa" style="margin-top:0"><ol style="font-size:1.08rem;margin:0;padding-left:1.3rem">${N.lembrar.map(l=>`<li>${l}</li>`).join("")}</ol></section>
     <div class="grupo">
@@ -1583,12 +1744,13 @@ function partilhar(texto){
 
 /* ---------------- Menu durante o jogo ---------------- */
 function menuJogo(){
-  pararCamara();pararVoz();
+  pararCamara();pararVoz();pausarTempo();
   app.innerHTML=`<main class="passa"><div class="ic-grande">${I("pausa")}</div><h2>Em pausa</h2>
-    <p class="nota">${contar("recolhida")}/${PECAS.length} peças · ${contar("colocada")}/${PECAS.length} montadas · ${J.pontos} pontos</p></main>`;
+    <p class="nota">${contar("recolhida")}/${PECAS.length} peças · ${contar("colocada")}/${PECAS.length} montadas · ${J.pontos} pontos · ${mmss(tempoJogo())}</p></main>`;
   abrirFolha(`<div class="appbar"><h2 id="ftit">Pausa</h2></div>
     <button class="prim larga grande" id="cont">${I("play")}Continuar</button>
-    <button class="item" id="modo">${I(J.modo==="ra"?"telemovel":"camara")}<span class="txt">${J.modo==="ra"?"Jogar sem câmara":"Jogar com a câmara"}</span><span class="dir">${J.modo==="ra"?"poupa bateria":""}</span></button>
+    ${[["ra","camara","Jogar com realidade aumentada"],["pers","utilizador","Jogar com a personagem"],["semra","pino","Jogar sem câmara"]].filter(m=>m[0]!==J.modo)
+      .map(([m,ic,t])=>`<button class="item" data-modo="${m}">${I(ic)}<span class="txt">${t}</span>${m==="semra"?`<span class="dir">poupa bateria</span>`:""}</button>`).join("")}
     <button class="item" id="ajuda">${I("ajuda")}<span class="txt">Como se joga</span>${I("seta")}</button>
     <button class="item" id="fdef">${I("definicoes")}<span class="txt">Definições</span>${I("seta")}</button>
     <div class="sep"></div>
@@ -1596,7 +1758,7 @@ function menuJogo(){
   v=>{
     const $=id=>v.querySelector("#"+id);
     $("cont").onclick=()=>{fecharFolha();retomar()};
-    $("modo").onclick=()=>{fecharFolha();J.modo=J.modo==="ra"?"semra":"ra";guardar();retomar()};
+    v.querySelectorAll("[data-modo]").forEach(b=>b.onclick=()=>{fecharFolha();J.modo=b.dataset.modo;if(J.modo!=="ra")J.xr=false;else J.xr=!!(window.RA3D&&RA3D.xr);guardar();retomar()});
     $("ajuda").onclick=()=>{fecharFolha();reg("ajuda");instrucoes(true);const b=document.getElementById("volta");b.dataset.jogo=1};
     $("fdef").onclick=definicoes;
     $("sair").onclick=()=>{fecharFolha();inicio()};
@@ -1789,6 +1951,7 @@ let avisoSair=0;
 try{history.replaceState({ch:0},"");history.pushState({ch:1},"")}catch(e){}
 window.addEventListener("popstate",()=>{
   const fica=()=>{try{history.pushState({ch:1},"")}catch(e){}};
+  if(XR_SAIR){XR_SAIR();return fica()}
   const veu=document.querySelector(".veu");
   if(veu){veu.dispatchEvent(new MouseEvent("click",{bubbles:true}));return fica()}
   const demo=document.querySelector(".demo-ov");if(demo){const b=demo.querySelector("button");b?b.click():demo.remove();return fica()}

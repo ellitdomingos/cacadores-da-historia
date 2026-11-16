@@ -198,6 +198,179 @@ async function visualizador(contentor, ids, { montado = false } = {}) {
 }
 
 /* ------------------------------------------------------------------
+   Modo PERSONAGEM (sem RA): o monumento incompleto ao centro, as peças
+   espalhadas à volta (cada uma com um feixe de luz) e a Kiala, que o
+   jogador guia com o dedo (joystick) ou com o teclado. A câmara segue
+   a personagem por trás e de cima, sempre virada para norte (para cima
+   no ecrã = em frente), para o joystick ser fácil de perceber.
+   ------------------------------------------------------------------ */
+const rnd = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+
+function criarPersonagem(cor) {
+  const g = new THREE.Group();
+  const mat = c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.8, flatShading: true });
+  const pele = mat(0x7b4a2a), calca = mat(0x24324a), camisa = mat(cor), escuro = mat(0x1b1b1b);
+  const perna = x => {
+    const p = new THREE.Group(); p.position.set(x, 0.78, 0);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.68, 0.2), calca); m.position.y = -0.34; p.add(m);
+    const s = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.32), escuro); s.position.set(0, -0.72, 0.05); p.add(s);
+    g.add(p); return p;
+  };
+  const braco = x => {
+    const b = new THREE.Group(); b.position.set(x, 1.34, 0);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.52, 0.15), camisa); m.position.y = -0.2; b.add(m);
+    const mao = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.13, 0.13), pele); mao.position.y = -0.5; b.add(mao);
+    g.add(b); return b;
+  };
+  const pe = perna(-0.12), pd = perna(0.12);
+  const tronco = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.28), camisa); tronco.position.y = 1.08; g.add(tronco);
+  const be = braco(-0.32), bd = braco(0.32);
+  const cabeca = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 10), pele); cabeca.position.y = 1.6; g.add(cabeca);
+  const cabelo = new THREE.Mesh(new THREE.SphereGeometry(0.228, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2.2), escuro); cabelo.position.y = 1.62; g.add(cabelo);
+  for (const x of [-0.08, 0.08]) { const o = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 6), escuro); o.position.set(x, 1.63, 0.2); g.add(o); }
+  const bone = new THREE.Mesh(new THREE.CylinderGeometry(0.235, 0.235, 0.09, 16), mat(0xffc93c)); bone.position.y = 1.78; g.add(bone);
+  const pala = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.03, 0.2), mat(0xffc93c)); pala.position.set(0, 1.75, 0.27); g.add(pala);
+  const mochila = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.45, 0.18), mat(0xc0392b)); mochila.position.set(0, 1.1, -0.23); g.add(mochila);
+  const sombra = new THREE.Mesh(new THREE.CircleGeometry(0.4, 20), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.25, depthWrite: false }));
+  sombra.rotation.x = -Math.PI / 2; sombra.position.y = 0.02; g.add(sombra);
+  return { g, pe, pd, be, bd };
+}
+
+async function mundo(contentor, pecas, op = {}, cb = {}) {
+  const r = novoRenderer(contentor);
+  const CEU = 0x9fd3f5;
+  const cena = new THREE.Scene();
+  cena.background = new THREE.Color(CEU);
+  cena.fog = new THREE.Fog(CEU, 30, 70);
+  cena.add(new THREE.HemisphereLight(0xffffff, 0x7a5a3a, 2.0));
+  const sol = new THREE.DirectionalLight(0xffffff, 2.3); sol.position.set(8, 14, 6); cena.add(sol);
+  const tema = { morro: { chao: 0xd2b07a, fora: 0x1f5fa8 }, terra: { chao: 0xa8623a, fora: 0x6e8b3d }, rua: { chao: 0xa4a9ae, fora: 0x7f9a4a } }[op.fundo] || { chao: 0xd2b07a, fora: 0x6e8b3d };
+  const MUNDO = 30;
+  const plano = (geo, cor, y) => { const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: cor, roughness: 1 })); m.rotation.x = -Math.PI / 2; m.position.y = y; cena.add(m); return m; };
+  plano(new THREE.CircleGeometry(MUNDO + 3, 56), tema.chao, 0);
+  plano(new THREE.RingGeometry(MUNDO + 3, 160, 56), tema.fora, -0.05);
+
+  // o monumento, ainda sem as peças que faltam
+  const mon = normalizar(await modelo("base"), op.tamanho || 14);
+  let cx = new THREE.Box3().setFromObject(mon); mon.position.y -= cx.min.y; cena.add(mon);
+  cx = new THREE.Box3().setFromObject(mon);
+  const RM = Math.max(cx.max.x, -cx.min.x, cx.max.z, -cx.min.z) * 0.9 + 0.5;  // raio de "parede"
+
+  // árvores e pedras à volta (sempre no mesmo sítio)
+  const tronco = new THREE.MeshStandardMaterial({ color: 0x6b4a2a, flatShading: true }), folha = new THREE.MeshStandardMaterial({ color: 0x3f7a35, flatShading: true });
+  for (let i = 0; i < 22; i++) {
+    const a = rnd(i) * Math.PI * 2, d = RM + 9 + rnd(i + 50) * (MUNDO - RM - 9);
+    const t = new THREE.Group();
+    const h = 1.6 + rnd(i + 9) * 1.6;
+    const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.22, h, 6), tronco); tr.position.y = h / 2; t.add(tr);
+    const co = new THREE.Mesh(new THREE.IcosahedronGeometry(0.9 + rnd(i + 3) * 0.6, 0), folha); co.position.y = h + 0.5; t.add(co);
+    t.position.set(Math.sin(a) * d, 0, Math.cos(a) * d); cena.add(t);
+  }
+
+  // as peças, espalhadas à volta, com um anel e um feixe de luz para se verem de longe
+  const objs = [];
+  const feixeMat = new THREE.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0.28, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
+  for (const p of pecas) {
+    const k = pecas.indexOf(p), a = THREE.MathUtils.degToRad(p.az + (rnd(k + 7) - 0.5) * 20);
+    const R = Math.min(MUNDO - 3, RM + 3 + ((k * 7) % 4) * 3 + rnd(k) * 2);
+    const o = new THREE.Group();
+    o.position.set(Math.sin(a) * R, 0, -Math.cos(a) * R);
+    const m = normalizar(await modelo(p.id), 1.3); m.position.y = 1; o.add(m);
+    const anel = new THREE.Mesh(new THREE.RingGeometry(0.75, 0.95, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0.9 }));
+    anel.position.y = 0.03; o.add(anel);
+    const feixe = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 9, 20, 1, true), feixeMat); feixe.position.y = 4.5; o.add(feixe);
+    o.userData = { id: p.id, m, anel };
+    cena.add(o); objs.push(o);
+  }
+
+  // a personagem
+  const P = criarPersonagem(op.cor || 0x2a9d8f);
+  const ini = op.inicio || { x: 0, z: RM + 5, rot: Math.PI };
+  P.g.position.set(ini.x, 0, ini.z); P.g.rotation.y = ini.rot;
+  P.g.scale.setScalar(1.35);   // um pouco maior que o real, para se ver bem no telemóvel
+  cena.add(P.g);
+  // seta por cima da cabeça, a apontar para a peça mais perto
+  const seta = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.55, 12).rotateX(Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffc93c }));
+  cena.add(seta);
+
+  const cam = new THREE.PerspectiveCamera(58, 1, 0.1, 200);
+  const OFF = new THREE.Vector3(0, 13, 10);
+  cam.position.copy(P.g.position).add(OFF);
+  const ajustar = () => { const w = contentor.clientWidth || 1, h = contentor.clientHeight || 1; r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); };
+  ajustar(); window.addEventListener("resize", ajustar);
+
+  let entrada = { x: 0, y: 0 }, fase = 0, apanhar = null, raf = 0, ultimo = performance.now(), parado = false;
+  const alvoCam = new THREE.Vector3();
+  const ciclo = agora => {
+    if (parado) return;
+    if (!contentor.isConnected) return api.parar();
+    raf = requestAnimationFrame(ciclo);
+    const dt = Math.min(0.05, (agora - ultimo) / 1000); ultimo = agora;
+    const t = agora / 1000;
+    // andar
+    const mag = Math.min(1, Math.hypot(entrada.x, entrada.y));
+    if (!apanhar && mag > 0.08) {
+      const vx = entrada.x / Math.max(mag, 1e-6) * mag, vz = entrada.y / Math.max(mag, 1e-6) * mag;
+      const pos = P.g.position;
+      pos.x += vx * 4.5 * dt; pos.z += vz * 4.5 * dt;
+      // não atravessa o monumento nem sai do mundo
+      const d = Math.hypot(pos.x, pos.z);
+      if (d < RM) { pos.x *= RM / d; pos.z *= RM / d; }
+      if (d > MUNDO) { pos.x *= MUNDO / d; pos.z *= MUNDO / d; }
+      const rot = Math.atan2(vx, vz);
+      P.g.rotation.y += Math.atan2(Math.sin(rot - P.g.rotation.y), Math.cos(rot - P.g.rotation.y)) * Math.min(1, dt * 12);
+      fase += dt * 9 * mag;
+    } else fase *= 0.9;
+    const bal = Math.sin(fase) * 0.6 * (mag > 0.08 && !apanhar ? 1 : 0);
+    P.pe.rotation.x = bal; P.pd.rotation.x = -bal; P.be.rotation.x = -bal * 0.8; P.bd.rotation.x = bal * 0.8;
+    P.g.position.y = Math.abs(Math.sin(fase)) * 0.06;
+
+    // peças: flutuam e rodam; a mais perto guia a seta
+    let melhor = null;
+    for (const o of objs) {
+      if (o.userData.apanhada) continue;
+      o.userData.m.rotation.y = t * 0.8;
+      o.userData.m.position.y = 1 + Math.sin(t * 2 + o.id) * 0.12;
+      const dx = o.position.x - P.g.position.x, dz = o.position.z - P.g.position.z, dist = Math.hypot(dx, dz);
+      if (!melhor || dist < melhor.dist) melhor = { o, dx, dz, dist };
+    }
+    if (apanhar) {
+      // a peça salta para a mochila
+      const k = Math.min(1, (agora - apanhar.t0) / 650), o = apanhar.o;
+      o.position.lerpVectors(apanhar.de, P.g.position, k);
+      o.position.y = Math.sin(k * Math.PI) * 1.5;
+      o.scale.setScalar(1 - k * 0.9);
+      if (k >= 1 && !apanhar.feito) { apanhar.feito = true; o.visible = false; cb.apanhar && cb.apanhar(o.userData.id); }
+    } else if (melhor && melhor.dist < 1.5) {
+      apanhar = { o: melhor.o, t0: agora, de: melhor.o.position.clone() };
+      melhor.o.userData.apanhada = true; melhor.o.children.forEach(c => { if (c !== melhor.o.userData.m) c.visible = false; });
+    }
+    if (melhor && !apanhar) {
+      seta.visible = melhor.dist > 2.5;
+      seta.position.set(P.g.position.x, 2.35 + Math.sin(t * 4) * 0.08, P.g.position.z);
+      seta.rotation.y = Math.atan2(melhor.dx, melhor.dz);
+      const az = (THREE.MathUtils.radToDeg(Math.atan2(melhor.dx, -melhor.dz)) + 360) % 360; // 0 = para cima no ecrã
+      cb.estado && cb.estado({ dist: melhor.dist, az, id: melhor.o.userData.id, andar: mag > 0.08 });
+    } else seta.visible = false;
+
+    // câmara: segue a personagem, suavemente
+    alvoCam.copy(P.g.position).add(OFF);
+    cam.position.lerp(alvoCam, Math.min(1, dt * 5));
+    cam.lookAt(P.g.position.x, 0, P.g.position.z - 3);   // a personagem fica abaixo do meio: vê-se mais à frente
+    r.render(cena, cam);
+  };
+  raf = requestAnimationFrame(ciclo);
+  const api = {
+    entrada(x, y) { entrada = { x, y }; },
+    posicao() { return { x: P.g.position.x, z: P.g.position.z, rot: P.g.rotation.y }; },
+    // para os testes automáticos: onde está a personagem e cada peça
+    teste() { return { eu: { x: P.g.position.x, z: P.g.position.z }, pecas: objs.filter(o => !o.userData.apanhada).map(o => ({ id: o.userData.id, x: o.position.x, z: o.position.z })) }; },
+    parar() { if (parado) return; parado = true; cancelAnimationFrame(raf); window.removeEventListener("resize", ajustar); libertar(r, cena); },
+  };
+  return api;
+}
+
+/* ------------------------------------------------------------------
    WebXR (immersive-ar + hit-test): as peças ficam assentes no chão real.
    Android com ARCore (Chrome). No iPhone o Safari não suporta: o jogo
    continua no modo por orientação.
@@ -372,7 +545,7 @@ async function montarXR(sessao, pecas, cb, escala) {
 }
 
 if (webglOK()) {
-  window.RA3D = { procura, visualizador, modelo, xrSuportado, sessaoXR, precarregar };
+  window.RA3D = { procura, visualizador, modelo, xrSuportado, sessaoXR, precarregar, mundo };
   xrSuportado().then(ok => { window.RA3D.xr = ok; window.dispatchEvent(new Event("ra3d-xr")); });
   // pré-carregar os modelos (são poucos KB) para não haver espera no local
   if (window.NIVEL_PASTA && window.NIVEIS) precarregar((window.NIVEIS.find(n => `modelos/${n.id}/` === window.NIVEL_PASTA) || { pecas: [] }).pecas.map(p => p.id));

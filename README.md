@@ -1,4 +1,4 @@
-# Caçadores da História: Fortaleza de São Miguel
+# Caçadores da História
 
 Protótipo jogável do projecto de exemplo de IHC (FEUAN 2026/27), baseado nos guiões
 PL 3–8 (`IHC/pl/guioes`). HTML/CSS/JS sem build; three.js r160 guardado em `vendor/`.
@@ -8,16 +8,30 @@ PL 3–8 (`IHC/pl/guioes`). HTML/CSS/JS sem build; three.js r160 guardado em `ve
 |---|---|
 | `index.html` | O jogo (ecrãs, regras, equipa, professora) |
 | `ra3d.js` | Camada 3D (three.js): peças por cima da câmara, peça a rodar na curiosidade, fortaleza montada no fim |
-| `ferramentas/gerar_pecas.py` | Script do Blender que cria as 6 peças low-poly |
-| `modelos/*.glb`, `modelos/pecas.json` | Peças e base exportadas, e a posição de cada uma na fortaleza montada |
-| `modelos/img/`, `modelos/tabuleiro.js` | Renderizações (planta e três quartos) e o lugar de cada peça no tabuleiro |
+| `ferramentas/gerar_pecas.py` | Blender: nível 1, Fortaleza de São Miguel |
+| `ferramentas/gerar_niveis.py` | Blender: níveis 2–4 (Palácio de Ferro, Mbanza Kongo, Museu Nacional da Escravatura) |
+| `modelos/<nível>/` | Peças e base (.glb), posições (`pecas.json`) e renderizações (`img/`) de cada nível |
+| `modelos/tabuleiros.js` | O lugar de cada peça no tabuleiro de cada nível (gerado) |
 | `sw.js`, `manifest.webmanifest` | Funcionar offline / instalar no ecrã inicial |
 
 ## Modelos 3D (Blender)
 ```bash
-blender --background --python ferramentas/gerar_pecas.py   # modelos .glb + renderizações
-python3 ferramentas/recortar_tabuleiro.py                   # recorta as peças e escreve modelos/tabuleiro.js
+blender --background --python ferramentas/gerar_pecas.py    # nível 1 (fortaleza)
+blender --background --python ferramentas/gerar_niveis.py   # níveis 2 a 4 (ou: -- pf mbk mne)
+python3 ferramentas/recortar_tabuleiro.py                    # recorta as peças e escreve modelos/tabuleiros.js
 ```
+
+## Níveis
+| # | Monumento | Tabuleiro | Peças |
+|---|---|---|---|
+| 1 | Fortaleza de São Miguel (Luanda) | planta em estrela | baluartes, portão, canhão, casamata dos azulejos, estátua |
+| 2 | Palácio de Ferro (Luanda) | vista de frente | colunas, andar de cima, varanda, telhado, porta, escadaria |
+| 3 | Mbanza Kongo, ruínas da Kulumbimbi (Zaire) | planta | fachada, paredes, cabeceira, árvore Yala Nkuwu, túmulos dos reis |
+| 4 | Museu Nacional da Escravatura, Capela da Casa Grande (Luanda) | vista de frente | fachada, telhado, porta, frontão, cruz, pia baptismal |
+
+Ciclo de jogo: concluir um nível desbloqueia o seguinte ("Próximo nível"). O QR da professora leva
+`?turma=…&nivel=…` e abre o monumento da visita, mesmo bloqueado. Os textos de cada nível estão em
+`NIVEIS` no `index.html` e **devem ser revistos por um professor de História**; as formas 3D são aproximadas.
 A fortaleza segue a planta real em **estrela de quatro pontas** (sistema abaluartado): baluartes com
 guaritas e parapeitos com canhoneiras, cortinas, pátio, casa do governador, casamata dos azulejos e
 estátuas no pátio. As proporções e as cores são aproximadas e devem ser afinadas com fotografias do local.

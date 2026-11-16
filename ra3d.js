@@ -5,7 +5,8 @@ import { GLTFLoader } from "./vendor/jsm/loaders/GLTFLoader.js";
 
 const carregador = new GLTFLoader();
 const cache = {};
-let posicoes = null;
+const posicoes = {};
+const pasta = () => window.NIVEL_PASTA || "modelos/fsm/";   // pasta do nível actual
 
 function webglOK() {
   try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); }
@@ -13,13 +14,17 @@ function webglOK() {
 }
 
 async function modelo(id) {
-  if (!cache[id]) cache[id] = carregador.loadAsync(`modelos/${id}.glb`).then(g => g.scene);
-  return (await cache[id]).clone(true);
+  const url = `${pasta()}${id}.glb`;
+  if (!cache[url]) cache[url] = carregador.loadAsync(url).then(g => g.scene);
+  return (await cache[url]).clone(true);
 }
 async function lerPosicoes() {
-  if (!posicoes) posicoes = await fetch("modelos/pecas.json").then(r => r.json());
-  return posicoes;
+  const p = pasta();
+  if (!posicoes[p]) posicoes[p] = await fetch(`${p}pecas.json`).then(r => r.json());
+  return posicoes[p];
 }
+// pré-carregar os modelos do nível (são poucos KB) para não haver espera no local
+function precarregar(ids) { ["base", ...ids].forEach(id => modelo(id).catch(() => {})); }
 
 // Centra o modelo e ajusta-o a um tamanho máximo (em metros).
 function normalizar(obj, tamanho) {
@@ -123,7 +128,7 @@ async function visualizador(contentor, ids, { montado = false } = {}) {
   r.domElement.style.touchAction = "pan-y";
   const cena = new THREE.Scene();
   luzes(cena);
-  let raiz;
+  let raiz, alt = 2;
   if (montado) {
     // fortaleza montada: cada peça no seu lugar (modelos/pecas.json), assente no morro
     const pos = await lerPosicoes();
@@ -134,8 +139,12 @@ async function visualizador(contentor, ids, { montado = false } = {}) {
       forte.add(m);
     }
     const caixa = new THREE.Box3().setFromObject(forte);
-    const c = caixa.getCenter(new THREE.Vector3());
+    const c = caixa.getCenter(new THREE.Vector3()), dim = caixa.getSize(new THREE.Vector3());
     forte.position.set(-c.x, -caixa.min.y, -c.z);
+    // enquadrar monumentos de tamanhos diferentes: o maior lado passa a medir ~7 m
+    forte.scale.setScalar(6.8 / Math.max(dim.x, dim.z, dim.y * 1.3));
+    forte.position.multiplyScalar(forte.scale.x);
+    alt = dim.y * forte.scale.x;
     raiz = new THREE.Group();
     raiz.add(forte);
     const chao = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.8, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0x6b4a2a, roughness: 1, flatShading: true }));
@@ -150,8 +159,9 @@ async function visualizador(contentor, ids, { montado = false } = {}) {
   }
   cena.add(raiz);
   const cam = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-  cam.position.set(0, montado ? 3.6 : 1.1, montado ? 9.5 : 4.4);
-  cam.lookAt(0, montado ? 1.1 : 0, 0);
+  // a câmara acompanha a altura do monumento, para nada ficar cortado
+  cam.position.set(0, montado ? 2.2 + alt * 0.55 : 1.1, montado ? 10.5 + alt * 0.4 : 4.4);
+  cam.lookAt(0, montado ? alt * 0.42 : 0, 0);
   const ajustar = () => {
     const w = contentor.clientWidth || 1, h = contentor.clientHeight || 1;
     r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix();
@@ -353,9 +363,9 @@ async function montarXR(sessao, pecas, cb, escala) {
 }
 
 if (webglOK()) {
-  window.RA3D = { procura, visualizador, modelo, xrSuportado, sessaoXR };
+  window.RA3D = { procura, visualizador, modelo, xrSuportado, sessaoXR, precarregar };
   xrSuportado().then(ok => { window.RA3D.xr = ok; window.dispatchEvent(new Event("ra3d-xr")); });
   // pré-carregar os modelos (são poucos KB) para não haver espera no local
-  ["muralha", "portao", "canhao", "azulejos", "baluarte", "estatua", "base"].forEach(id => modelo(id).catch(() => {}));
+  if (window.NIVEL_PASTA && window.NIVEIS) precarregar((window.NIVEIS.find(n => `modelos/${n.id}/` === window.NIVEL_PASTA) || { pecas: [] }).pecas.map(p => p.id));
   window.dispatchEvent(new Event("ra3d-pronto"));
 }

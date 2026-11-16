@@ -28,7 +28,7 @@ import os
 from mathutils import Matrix, Vector
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SAIDA = os.path.join(RAIZ, "modelos")
+SAIDA = os.path.join(RAIZ, "modelos", "fsm")
 IMG = os.path.join(SAIDA, "img")
 os.makedirs(IMG, exist_ok=True)
 

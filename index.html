@@ -263,7 +263,7 @@ th{background:var(--sup2);color:var(--fg2);font-weight:700}
 </head>
 <body>
 <div id="app"></div>
-<script src="modelos/tabuleiro.js"></script>
+<script src="modelos/tabuleiros.js"></script>
 <script src="vendor/qrcode.js"></script>
 <script>
 "use strict";
@@ -313,14 +313,16 @@ function avatar(c,g=false){const cor=/^#/.test(c.avatar||"")?c.avatar:CORES[[...
   return `<span class="avatar${g?" g":""}" style="background:${cor}" aria-hidden="true">${esc([...c.alcunha.trim()][0]||"?").toUpperCase()}</span>`}
 const barraApp=(titulo,id="volta")=>`<div class="appbar"><button class="icbtn" id="${id}" aria-label="Voltar">${I("voltar")}</button><h2>${titulo}</h2></div>`;
 
-/* ---------------- Dados do monumento ---------------- */
-const MONUMENTO = { nome:"Fortaleza de São Miguel", cidade:"Luanda" };
-
-// az = direcção (graus) em relação ao sítio para onde o jogador estava virado ao começar.
-// slot = lugar no tabuleiro (unidades de um tabuleiro 600 × 400).
-// O lugar de cada peça no tabuleiro (slot) vem de modelos/tabuleiro.js, gerado a partir das
-// renderizações do Blender (ferramentas/). Tabuleiro: planta vista de cima, 600 × 600.
-const PECAS = [
+/* ---------------- Níveis (monumentos) ----------------
+   Cada nível tem 6 peças, cada uma com uma curiosidade e uma pergunta.
+   Os modelos e as imagens estão em modelos/<id>/ (gerados no Blender, ver ferramentas/).
+   Os textos devem ser revistos por um professor de História. */
+const AZ=[25,95,160,215,275,330]; // direcção de cada peça à volta do jogador (graus)
+const NIVEIS=[
+ { id:"fsm", nome:"Fortaleza de São Miguel", cidade:"Luanda", vista:"cima", fundo:"morro",
+   feito:"Fortaleza reconstruída!", monta:"Monta a fortaleza", notaTab:"Vista de cima, a fortaleza é uma <b>estrela</b>. Leva cada peça até à forma igual.",
+   lembrar:["A fortaleza começou a ser construída em <b>1576</b>, quando Luanda foi fundada.","Os <b>holandeses</b> ocuparam-na entre <b>1641 e 1648</b>.","Hoje é o <b>Museu Nacional de História Militar</b>."],
+   pecas:[
   { id:"muralha", nome:"Baluarte da frente", az:25, onde:"No baluarte do lado esquerdo do portão",
     curio:"Vista de cima, a fortaleza tem a forma de uma estrela de quatro pontas: cada ponta é um baluarte. Começou a ser construída em 1576, quando Paulo Dias de Novais fundou Luanda. As primeiras muralhas eram de barro e taipa; mais tarde foram refeitas em pedra e cal.",
     q:"Em que ano começou a ser construída a Fortaleza de São Miguel?",
@@ -331,7 +333,7 @@ const PECAS = [
     q:"Porque é que a fortaleza foi construída no alto do morro?",
     o:["Para vigiar a baía e os navios","Para ficar perto do rio Kwanza","Para se esconder dos navios"], a:0,
     explica:"Do alto do morro via-se toda a baía: quem lá estava via os navios muito antes de chegarem." },
-  { id:"canhao", nome:"Canhão", az:160, onde:"Em cima do baluarte virado para a baía",
+  { id:"canhao", nome:"Canhão", z:2, az:160, onde:"Em cima do baluarte virado para a baía",
     curio:"As muralhas tinham muitas canhoneiras, aberturas por onde saíam os canhões: em 1846 contaram-se 131. Mesmo assim, entre 1641 e 1648 os holandeses ocuparam Luanda e a fortaleza, a que chamaram Forte Aardenburgh. Em 1648 uma armada vinda do Brasil, comandada por Salvador Correia de Sá, voltou a tomá-la.",
     q:"Que povo ocupou Luanda e a fortaleza entre 1641 e 1648?",
     o:["Os ingleses","Os espanhóis","Os holandeses"], a:2,
@@ -346,53 +348,159 @@ const PECAS = [
     q:"Para onde ia a maioria das pessoas escravizadas embarcadas em Luanda?",
     o:["Para o Brasil","Para Portugal","Para a Índia"], a:0,
     explica:"A maioria foi levada para o Brasil, do outro lado do Atlântico." },
-  { id:"estatua", nome:"Estátua do pátio", az:330, onde:"No pátio, junto às estátuas", roda:false,
+  { id:"estatua", nome:"Estátua do pátio", z:2, az:330, onde:"No pátio, junto às estátuas", roda:false,
     curio:"Hoje a fortaleza é o Museu Nacional de História Militar, inaugurado a 4 de Abril de 2013. No pátio estão estátuas de figuras portuguesas, como Diogo Cão e Vasco da Gama, que foram retiradas das praças de Luanda depois da independência.",
     q:"O que funciona hoje na Fortaleza de São Miguel?",
     o:["Uma escola","Um museu de história militar","Um hospital"], a:1,
     explica:"É o Museu Nacional de História Militar." },
+]},
+ { id:"pf", nome:"Palácio de Ferro", cidade:"Luanda", vista:"frente", fundo:"rua",
+   feito:"Palácio reconstruído!", monta:"Monta o palácio", notaTab:"Vista de frente. Monta o palácio de baixo para cima.",
+   lembrar:["A estrutura é de <b>ferro forjado</b> e terá sido feita em França, no fim do século XIX.","Conta-se que ia de navio para <b>Madagáscar</b> e acabou em Luanda.","O restauro terminou em <b>2009</b>."],
+   pecas:[
+  { id:"colunas", nome:"Colunas do rés-do-chão", onde:"Junto às colunas da entrada",
+    curio:"O Palácio de Ferro é feito de ferro forjado. Acredita-se que foi fabricado em França, nas décadas de 1880 ou 1890, e que chegou a Luanda desmontado, em peças.",
+    q:"De que material é feita a estrutura do Palácio de Ferro?", o:["Madeira","Ferro","Betão"], a:1,
+    explica:"É de ferro forjado, como diz o nome." },
+  { id:"andar", nome:"Andar de cima", onde:"Debaixo das janelas do primeiro andar",
+    curio:"Costuma dizer-se que o projecto é de Gustave Eiffel, o engenheiro da Torre Eiffel, em Paris. Mas não há provas seguras: é uma atribuição, não um facto confirmado.",
+    q:"A que engenheiro francês se costuma atribuir o palácio, sem certeza?", o:["Gustave Eiffel","Louis Pasteur","Victor Hugo"], a:0,
+    explica:"A Gustave Eiffel. Mas atenção: não há provas seguras." },
+  { id:"varanda", nome:"Varanda de ferro", onde:"Na varanda que dá a volta ao edifício",
+    curio:"O edifício tem uma varanda que dá a volta à casa toda, decorada com ferro trabalhado como se fosse renda: chama-se filigrana metálica.",
+    q:"O que dá a volta a todo o edifício?", o:["Um fosso com água","Uma varanda","Uma muralha"], a:1,
+    explica:"Uma varanda decorada com filigrana metálica." },
+  { id:"telhado", nome:"Telhado", onde:"Olhando para o telhado, do outro lado da rua",
+    curio:"Conta-se que o palácio seguia de navio para Madagáscar e que o navio foi arrastado pela corrente de Benguela até à costa de Angola. É uma história antiga, difícil de provar.",
+    q:"Segundo a história que se conta, para onde ia o palácio?", o:["Brasil","Madagáscar","Portugal"], a:1,
+    explica:"Para Madagáscar, do outro lado de África." },
+  { id:"porta", nome:"Porta principal", onde:"Junto à porta principal",
+    curio:"Outra versão diz que o edifício foi desembarcado em Luanda, vendido em leilão e comprado pela Companhia Comercial de Angola.",
+    q:"Segundo uma das versões, como foi parar às mãos de uma empresa?", o:["Foi oferecido por um rei","Foi vendido em leilão","Foi trocado por café"], a:1,
+    explica:"Foi vendido em leilão, a que antigamente se chamava hasta pública." },
+  { id:"escadaria", nome:"Escadaria", onde:"Na escadaria da entrada",
+    curio:"Depois de muitos anos abandonado, o palácio foi todo restaurado. O restauro terminou em 2009 e o edifício foi entregue ao Ministério da Cultura.",
+    q:"Em que ano terminou o restauro do Palácio de Ferro?", o:["1975","2009","2017"], a:1,
+    explica:"Em 2009." }]},
+ { id:"mbk", nome:"Mbanza Kongo", cidade:"Zaire", vista:"cima", fundo:"terra",
+   feito:"Ruínas reconstruídas!", monta:"Monta as ruínas", notaTab:"Vista de cima: a igreja Kulumbimbi, a árvore Yala Nkuwu e o cemitério dos reis.",
+   lembrar:["Mbanza Kongo foi a capital do <b>Reino do Kongo</b>.","A igreja Kulumbimbi passou a <b>catedral em 1596</b>.","O centro histórico é <b>Património Mundial</b> desde <b>2017</b>."],
+   pecas:[
+  { id:"fachada", nome:"Fachada da Kulumbimbi", onde:"Em frente à entrada das ruínas",
+    curio:"Estas são as ruínas da Kulumbimbi, uma das igrejas mais antigas da África Central. Em 1596, quando foi criada a diocese de Angola e Congo, passou a ser catedral.",
+    q:"Em que ano a Kulumbimbi passou a ser catedral?", o:["1482","1596","1975"], a:1,
+    explica:"Em 1596, com a criação da diocese de Angola e Congo." },
+  { id:"parede_esq", nome:"Parede com contrafortes", onde:"Ao longo da parede da esquerda",
+    curio:"Segundo a tradição oral, a igreja foi construída por anjos, durante uma só noite.",
+    q:"O que conta a tradição oral sobre a construção da igreja?", o:["Foi construída por anjos numa só noite","Foi trazida de barco","Foi feita por um único rei"], a:0,
+    explica:"Conta-se que foi construída por anjos, numa só noite." },
+  { id:"parede_dir", nome:"Parede com porta lateral", onde:"Junto à porta lateral, à direita",
+    curio:"Em 1992, o Papa João Paulo II visitou as ruínas da Kulumbimbi durante a sua viagem a Angola.",
+    q:"Que Papa visitou as ruínas em 1992?", o:["João Paulo II","Francisco","Bento XVI"], a:0,
+    explica:"Foi João Paulo II." },
+  { id:"cabeceira", nome:"Cabeceira da igreja", onde:"Na parte de trás das ruínas",
+    curio:"Em 2017, o centro histórico de Mbanza Kongo, antiga capital do Reino do Kongo, foi declarado Património Mundial pela UNESCO.",
+    q:"Em que ano Mbanza Kongo foi declarada Património Mundial?", o:["1992","2002","2017"], a:2,
+    explica:"Em 2017." },
+  { id:"arvore", nome:"Árvore Yala Nkuwu", onde:"Debaixo da grande árvore",
+    curio:"No centro da cidade há uma árvore antiga, a Yala Nkuwu. Era debaixo dela que o rei do Kongo, o manicongo, fazia os julgamentos.",
+    q:"Para que servia a árvore Yala Nkuwu?", o:["Era o mercado","O rei fazia ali os julgamentos","Marcava a fronteira do reino"], a:1,
+    explica:"O rei do Kongo fazia ali os julgamentos." },
+  { id:"tumulos", nome:"Túmulos dos reis", onde:"No cemitério dos reis, ao lado das ruínas", roda:false,
+    curio:"Ao lado da Kulumbimbi fica o Cemitério dos Reis do Kongo. No tempo colonial, a cidade chamou-se São Salvador do Congo.",
+    q:"Que nome teve a cidade no tempo colonial?", o:["Nova Lisboa","São Salvador do Congo","Sá da Bandeira"], a:1,
+    explica:"São Salvador do Congo. Nova Lisboa era o Huambo, e Sá da Bandeira, o Lubango." }]},
+ { id:"mne", nome:"Museu Nacional da Escravatura", cidade:"Luanda", vista:"frente", fundo:"rua",
+   feito:"Capela reconstruída!", monta:"Monta a capela", notaTab:"Vista de frente: a Capela da Casa Grande, onde fica o museu.",
+   lembrar:["O museu fica na <b>Capela da Casa Grande</b>, no Morro da Cruz, em Luanda.","Ali, pessoas escravizadas eram <b>baptizadas</b> antes de serem embarcadas nos navios.","Em <b>1836</b>, um decreto proibiu as colónias portuguesas de exportar escravos."],
+   pecas:[
+  { id:"fachada", nome:"Fachada da capela", onde:"Em frente à capela",
+    curio:"O Museu Nacional da Escravatura fica no Morro da Cruz, em Luanda, junto ao mar. Guarda a memória do tráfico de pessoas escravizadas.",
+    q:"Onde fica o Museu Nacional da Escravatura?", o:["No Morro da Cruz, em Luanda","Na Ilha do Mussulo","No Huambo"], a:0,
+    explica:"No Morro da Cruz, em Luanda." },
+  { id:"telhado", nome:"Telhado", onde:"Olhando para o telhado da capela",
+    curio:"O museu está instalado na Capela da Casa Grande, uma pequena igreja do século XVII.",
+    q:"De que século é a Capela da Casa Grande?", o:["Século XVII","Século XIX","Século XX"], a:0,
+    explica:"Do século XVII, ou seja, dos anos 1600." },
+  { id:"porta", nome:"Porta", onde:"Junto à porta da capela",
+    curio:"Estas terras pertenceram ao capitão Álvaro de Carvalho Matoso. Os herdeiros continuaram o tráfico até 1836, quando um decreto da rainha D. Maria II proibiu as colónias portuguesas de exportar escravos.",
+    q:"Em que ano um decreto proibiu as colónias portuguesas de exportar escravos?", o:["1576","1836","1961"], a:1,
+    explica:"Em 1836." },
+  { id:"frontao", nome:"Frontão", onde:"Por baixo do frontão, à frente da capela",
+    curio:"O museu reúne centenas de objectos usados no tráfico de pessoas escravizadas, para que esta história nunca seja esquecida.",
+    q:"O que se pode ver no museu?", o:["Objectos usados no tráfico de escravos","Carros antigos","Pinturas modernas"], a:0,
+    explica:"Objectos usados no tráfico, para que esta história não se esqueça." },
+  { id:"cruz", nome:"Cruz", onde:"Olhando para a cruz, no alto da capela",
+    curio:"O museu foi criado pelo Instituto Nacional do Património Cultural. A maioria das fontes indica o ano de 1977.",
+    q:"Que instituição criou o museu?", o:["O Instituto Nacional do Património Cultural","Uma companhia de navegação","A UNESCO"], a:0,
+    explica:"O Instituto Nacional do Património Cultural." },
+  { id:"pia", nome:"Pia baptismal", onde:"No adro, à esquerda da capela", roda:false,
+    curio:"Na capela, as pessoas escravizadas eram baptizadas antes de serem embarcadas nos navios negreiros que atravessavam o Atlântico.",
+    q:"O que acontecia na capela antes do embarque?", o:["Eram libertadas","Eram baptizadas","Aprendiam a ler"], a:1,
+    explica:"Eram baptizadas, antes de serem levadas nos navios negreiros." }]},
 ];
-const TAB = window.TABULEIRO;  // {w,h,slots:{id:{x,y,w,h}}}
-PECAS.forEach(p=>p.slot=TAB.slots[p.id]);
+NIVEIS.forEach(n=>n.pecas.forEach((p,i)=>{if(p.az==null)p.az=AZ[i%AZ.length]}));
+window.NIVEIS=NIVEIS;
+let N, NIVEL, MONUMENTO, PECAS, TAB;
+function usarNivel(id){
+  N=NIVEIS.find(n=>n.id===id)||NIVEIS[0];
+  NIVEL=N.id; MONUMENTO={nome:N.nome,cidade:N.cidade}; PECAS=N.pecas; TAB=window.TABULEIROS[NIVEL];
+  PECAS.forEach(p=>p.slot=TAB.slots[p.id]);
+  window.NIVEL_PASTA=`modelos/${NIVEL}/`;
+  if(window.RA3D&&RA3D.precarregar)RA3D.precarregar(PECAS.map(p=>p.id));
+}
+const NIVEL_URL=(()=>{try{const v=new URLSearchParams(location.search).get("nivel");return NIVEIS.some(n=>n.id===v)?v:null}catch(e){return null}})();
+usarNivel(NIVEL_URL||(()=>{try{return localStorage.getItem("ch-nivel-atual")}catch(e){return null}})()||"fsm");
 const PONTOS_CERTA = 100;
 
 /* ---------------- Imagens das peças (renderizadas no Blender a partir dos modelos 3D) ---------------- */
 // vista "cima": recorte da planta (tabuleiro, mochila); vista "3q": três quartos (fotografias, curiosidade)
 function svgPeca(id,vista="3q"){
-  const src=vista==="cima"?`modelos/img/${id}_peca.png`:`modelos/img/${id}_3q.png`;
+  const src=vista==="cima"?`modelos/${NIVEL}/img/${id}_peca.png`:`modelos/${NIVEL}/img/${id}_3q.png`;
   return `<img src="${src}" alt="" draggable="false">`;
 }
 const pct=(v,t)=>(v/t*100)+"%";
-const posSlot=s=>`left:${pct(s.x,TAB.w)};top:${pct(s.y,TAB.h)};width:${pct(s.w,TAB.w)};height:${pct(s.h,TAB.h)}`;
-const SVG_FUNDO = `<svg class="fundo" viewBox="0 0 600 600" preserveAspectRatio="none" aria-hidden="true">
-  <rect width="600" height="600" fill="#1f5fa8"/>
-  <path d="M0 0 H600 V120 Q450 160 300 140 T0 170 Z" fill="#c9b48c"/>
-  <circle cx="300" cy="300" r="292" fill="#8a6a43"/>
-  <text x="300" y="590" text-anchor="middle" font-size="20" font-weight="800" fill="#fff" stroke="#000" stroke-width="4" paint-order="stroke">Morro de São Miguel · vista de cima</text></svg>
-  <img class="fundo" src="modelos/img/base_cima.png" alt="" draggable="false">`;
+const posSlot=(s,z)=>`left:${pct(s.x,TAB.w)};top:${pct(s.y,TAB.h)};width:${pct(s.w,TAB.w)};height:${pct(s.h,TAB.h)};z-index:${z||1}`;
+// fundo do tabuleiro, conforme o nível (vista de cima ou de frente)
+function fundoTab(){
+  const t=(txt)=>`<text x="300" y="590" text-anchor="middle" font-size="20" font-weight="800" fill="#fff" stroke="#000" stroke-width="4" paint-order="stroke">${txt}</text>`;
+  const svg={
+    morro:`<rect width="600" height="600" fill="#1f5fa8"/><path d="M0 0 H600 V120 Q450 160 300 140 T0 170 Z" fill="#c9b48c"/><circle cx="300" cy="300" r="292" fill="#8a6a43"/>${t(MONUMENTO.nome+" · vista de cima")}`,
+    terra:`<rect width="600" height="600" fill="#7FA35B"/><rect x="40" y="40" width="520" height="520" rx="40" fill="#A8865E"/>${t(MONUMENTO.nome+" · vista de cima")}`,
+    rua:`<defs><linearGradient id="ceu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4E9BDB"/><stop offset="1" stop-color="#BFE2FA"/></linearGradient></defs><rect width="600" height="600" fill="url(#ceu)"/><rect y="470" width="600" height="130" fill="#8F8A80"/>${t(MONUMENTO.nome+" · vista de frente")}`,
+  }[N.fundo];
+  return `<svg class="fundo" viewBox="0 0 600 600" preserveAspectRatio="none" aria-hidden="true">${svg}</svg>
+  <img class="fundo" src="modelos/${NIVEL}/img/base_cima.png" alt="" draggable="false">`;
+}
 
 /* ---------------- Estado (guardado no aparelho) ---------------- */
 // R6: guardamos só alcunhas e pontuação — nunca nome completo nem localização.
-const CHAVE="ch-fsm-v2", CHAVE_DEF="ch-def-v1", CHAVE_RES="ch-resultados-v1";
+const CHAVE_DEF="ch-def-v1", CHAVE_RES="ch-resultados-v1";
+const chaveJogo=()=>`ch-${NIVEL}-v2`;   // jogo sem conta, por nível
 const ler=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(e){return d}};
 const gravar=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 let DEF = Object.assign({letra:1,som:true,vib:true,voz:true}, ler(CHAVE_DEF,{}));
 /* Contas simples, guardadas só neste telemóvel (sem servidor; R6: só alcunha e avatar).
    Cada conta tem o seu jogo em curso e o progresso de cada nível (monumento). */
-const CHAVE_CONTAS="ch-contas-v1", NIVEL="fsm";
+const CHAVE_CONTAS="ch-contas-v1";
 let CONTAS=ler(CHAVE_CONTAS,{ativa:null,lista:{}});
 let CONVIDADO=false; // "jogar sem conta" nesta visita
 const conta=()=>CONTAS.lista[CONTAS.ativa]||null;
 const gravarContas=()=>gravar(CHAVE_CONTAS,CONTAS);
 function nivelDe(c){c.niveis=c.niveis||{};return c.niveis[NIVEL]=c.niveis[NIVEL]||{jogo:null,concluido:false,melhor:0,estrelas:0,vezes:0}}
-let J = conta()?nivelDe(conta()).jogo:ler(CHAVE,null); // jogo em curso
+const lerJogo=()=>conta()?nivelDe(conta()).jogo:ler(chaveJogo(),null);
+let J = lerJogo(); // jogo em curso (do nível actual)
+// mudar de nível: carrega os dados e o jogo guardado desse nível
+function irNivel(id){usarNivel(id);try{localStorage.setItem("ch-nivel-atual",id)}catch(e){}J=lerJogo()}
+const concluido=id=>{const c=conta();return c?!!(c.niveis&&c.niveis[id]&&c.niveis[id].concluido):ler("ch-concluidos",[]).includes(id)};
+const desbloqueado=i=>i===0||concluido(NIVEIS[i-1].id)||NIVEIS[i].id===NIVEL_URL||ler("ch-todos-niveis",false);
 function novoJogo(equipa,turma,modo,familia=false){
   J={equipa,turma,modo,familia,pontos:0,atual:0,inicio:Date.now(),reg:[],
      pecas:Object.fromEntries(PECAS.map(p=>[p.id,{recolhida:false,respondida:false,certa:false,colocada:false,rot:p.roda===false?0:[90,180,270][Math.floor(Math.random()*3)]}]))};
   guardar();
   reg("inicio",{modo,jogadores:equipa.length,familia});
 }
-const guardar=()=>{const c=conta();if(c){nivelDe(c).jogo=J;gravarContas()}else gravar(CHAVE,J)};
+const guardar=()=>{const c=conta();if(c){nivelDe(c).jogo=J;gravarContas()}else gravar(chaveJogo(),J)};
 /* Registo para os testes de usabilidade (PL 14): só tempos e contagens, sem dados pessoais. */
 function reg(tipo,dados={}){if(!J)return;(J.reg=J.reg||[]).push({t:Date.now()-J.inicio,tipo,...dados});guardar()}
 const CHAVE_SES="ch-sessoes-v1";
@@ -461,9 +569,9 @@ function inicio(){
       <button class="chip-conta" id="trocar" aria-label="${c?`Conta: ${esc(c.alcunha)}. Trocar de conta`:"Sem conta. Criar conta"}">${c?avatar(c):`<span class="avatar" style="background:#3A4A5C;color:#fff">${I("utilizador")}</span>`}<span>${c?esc(c.alcunha):"Sem conta"}</span></button>
       <button class="icbtn" id="def" aria-label="Definições">${I("definicoes")}</button>
     </div>
-    <div class="heroi" id="heroi"><img src="modelos/img/portao_3q.png" alt=""></div>
+    <div class="heroi" id="heroi"><img src="modelos/${NIVEL}/img/miniatura.png" alt=""></div>
     <div class="marca">
-      <p class="sub">${MONUMENTO.nome} · ${MONUMENTO.cidade}</p>
+      <p class="sub">Nível ${NIVEIS.indexOf(N)+1} · ${MONUMENTO.nome}</p>
       <h1>Caçadores da História</h1>
       <p>Encontra as peças, responde e reconstrói o monumento.</p>
     </div>
@@ -483,31 +591,46 @@ function inicio(){
 
 function niveis(){
   pararCamara();pararVoz();
-  const c=conta(), nv=c?nivelDe(c):null, ec=emCurso();
-  const est=ec?`<div class="barra-prog" aria-hidden="true"><i style="width:${Math.round((contar("recolhida")+contar("colocada"))/(2*PECAS.length)*100)}%"></i></div>
-      <p class="nota" style="margin:0">${contar("recolhida")}/${PECAS.length} peças encontradas · ${contar("colocada")}/${PECAS.length} montadas</p>`
-    :nv&&nv.concluido?`<p style="margin:.2rem 0">${estrelas(nv.estrelas)}</p><p class="nota" style="margin:0">Concluído · melhor: ${nv.melhor} pontos</p>`
-    :`<p class="nota" style="margin:0">Ainda não começaste.</p>`;
+  const c=conta();
+  const cartao=(nv,i)=>{
+    const livre=desbloqueado(i), atual=nv.id===NIVEL;
+    if(!livre)return `<section class="nivel bloq" aria-label="${nv.nome}: bloqueado">
+      <div class="mini">${I("cadeado")}</div><div><p class="sub" style="margin:0;color:var(--fg2)">Nível ${i+1} · ${nv.cidade}</p><h2>${nv.nome}</h2>
+      <p class="nota" style="margin:0">Conclui o nível ${i} para desbloquear.</p></div></section>`;
+    // estado guardado deste nível
+    const jogo=c?(c.niveis&&c.niveis[nv.id]&&c.niveis[nv.id].jogo):ler(`ch-${nv.id}-v2`,null);
+    const info=c&&c.niveis&&c.niveis[nv.id];
+    const pec=jogo?nv.pecas.filter(p=>jogo.pecas[p.id]&&jogo.pecas[p.id].recolhida).length:0, mont=jogo?nv.pecas.filter(p=>jogo.pecas[p.id]&&jogo.pecas[p.id].colocada).length:0;
+    const ec=!!jogo&&mont<nv.pecas.length, feito=concluido(nv.id);
+    const id=k=>atual?`id="${k}"`:"";
+    return `<section class="nivel${atual?" ativo":""}">
+      <div class="mini"><img src="modelos/${nv.id}/img/miniatura.png" alt=""></div>
+      <div><p class="sub" style="margin:0">Nível ${i+1} · ${nv.cidade}</p><h2>${nv.nome}</h2>
+      ${ec?`<div class="barra-prog" aria-hidden="true"><i style="width:${Math.round((pec+mont)/(2*nv.pecas.length)*100)}%"></i></div><p class="nota" style="margin:0">${pec}/${nv.pecas.length} peças encontradas · ${mont}/${nv.pecas.length} montadas</p>`
+        :feito?`<p style="margin:.2rem 0">${estrelas(info?info.estrelas:1)}</p><p class="nota" style="margin:0">Concluído${info?` · melhor: ${info.melhor} pontos`:""}</p>`
+        :`<p class="nota" style="margin:0">${i===0||feito?"Ainda não começaste.":"Desbloqueado! Pronto a jogar."}</p>`}</div>
+      <div class="acoes">
+        ${ec?`<button class="prim larga" ${id("cont")} data-nv="${nv.id}" data-acao="cont">${I("play")}Continuar onde parei</button><button class="larga" ${id("reini")} data-nv="${nv.id}" data-acao="reini">${I("reiniciar")}Reiniciar o nível</button>`
+            :`<button class="prim larga" ${id("novo")} data-nv="${nv.id}" data-acao="novo">${I("play")}${feito?"Jogar outra vez":"Começar"}</button>`}
+      </div></section>`;
+  };
   app.innerHTML=`<main class="ecra">
     ${barraApp("Níveis")}
-    <section class="nivel ativo">
-      <div class="mini"><img src="modelos/img/base_cima.png" alt=""></div>
-      <div><p class="sub" style="margin:0">Nível 1 · ${MONUMENTO.cidade}</p><h2>${MONUMENTO.nome}</h2>${est}</div>
-      <div class="acoes">
-        ${ec?`<button class="prim larga" id="cont">${I("play")}Continuar onde parei</button><button class="larga" id="reini">${I("reiniciar")}Reiniciar o nível</button>`
-            :`<button class="prim larga" id="novo">${I("play")}${nv&&nv.concluido?"Jogar outra vez":"Começar"}</button>`}
-      </div>
-    </section>
-    ${OUTROS_NIVEIS.map(([n,cid],i)=>`<section class="nivel bloq" aria-label="${n}: em breve">
-      <div class="mini">${I("cadeado")}</div><div><p class="sub" style="margin:0;color:var(--fg2)">Nível ${i+2} · ${cid}</p><h2>${n}</h2><p class="nota" style="margin:0">Em breve</p></div></section>`).join("")}
-    ${c?`<button class="larga" id="prog">O meu progresso</button>`:`<p class="nota">Sem conta, o progresso fica só neste telemóvel até alguém começar outro jogo. Cria uma conta para o guardar.</p>`}
+    <p class="nota">${NIVEIS.filter(n=>concluido(n.id)).length} de ${NIVEIS.length} monumentos reconstruídos.</p>
+    ${NIVEIS.map(cartao).join("")}
+    ${c?`<button class="larga" id="prog">O meu progresso</button>`:`<p class="nota">Sem conta, o progresso fica só neste telemóvel. Cria uma conta para o guardar.</p>`}
   </main>`;
-  const $=id=>document.getElementById(id);
-  $("volta").onclick=inicio;
-  if(ec){$("cont").onclick=retomar;
-    const r=$("reini");r.onclick=()=>{if(r.dataset.c){J=null;guardar();toast("Nível reiniciado.");niveis()}else{r.dataset.c=1;r.textContent="Perdes as peças deste jogo. Toca outra vez para confirmar"}};}
-  else $("novo").onclick=()=>{J=null;guardar();configurar()};
-  if(c)$("prog").onclick=meuProgresso;
+  document.getElementById("volta").onclick=inicio;
+  document.querySelectorAll("[data-acao]").forEach(b=>b.onclick=()=>{
+    const acao=b.dataset.acao;
+    if(acao==="reini"&&!b.dataset.c){b.dataset.c=1;b.textContent="Perdes as peças deste jogo. Toca outra vez para confirmar";return}
+    irNivel(b.dataset.nv);
+    if(acao==="cont")return retomar();
+    J=null;guardar();
+    if(acao==="reini"){toast("Nível reiniciado.");return niveis()}
+    configurar();
+  });
+  if(c)document.getElementById("prog").onclick=meuProgresso;
 }
 
 /* Definições num painel que abre pela engrenagem */
@@ -561,7 +684,7 @@ function escolherConta(){
     <p class="nota">As contas ficam só neste telemóvel. Guardamos a alcunha e o progresso, nunca o nome completo.</p></main>`;
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>entrar(b.dataset.c));
   document.getElementById("criar").onclick=criarConta;
-  document.getElementById("conv").onclick=()=>{CONVIDADO=true;CONTAS.ativa=null;gravarContas();J=ler(CHAVE,null);inicio()};
+  document.getElementById("conv").onclick=()=>{CONVIDADO=true;CONTAS.ativa=null;gravarContas();J=lerJogo();inicio()};
 }
 function entrar(id,pinOk){
   const c=CONTAS.lista[id];
@@ -1012,7 +1135,7 @@ function pergunta(p){
     const txt=certa?`Certo! ${p.o[p.a]}. Mais ${PONTOS_CERTA} pontos.`:`Não foi desta. A resposta certa é: ${p.o[p.a]}.`;
     document.getElementById("retro").innerHTML=`<p class="retro" style="color:${certa?"var(--ok)":"var(--erro)"}">${esc(txt)}</p>
       <p class="legenda">${esc(p.explica)}</p>
-      <button class="prim larga grande" id="cont">${contar("recolhida")<PECAS.length?"Procurar a próxima peça":"Montar a fortaleza"}</button>`;
+      <button class="prim larga grande" id="cont">${contar("recolhida")<PECAS.length?"Procurar a próxima peça":N.monta}</button>`;
     falar(txt+" "+p.explica);
     document.getElementById("cont").onclick=()=>{pararVoz();contar("recolhida")<PECAS.length?passar("aponta",procurar):passar("monta",montar)};
   });
@@ -1025,11 +1148,11 @@ function montar(){
   const faltam=PECAS.length-contar("recolhida");
   app.innerHTML=`<main class="ecra">
     <div class="barra-topo"><span class="pill">${I("grelha")}${contar("colocada")}/${PECAS.length} no lugar</span>${etiquetaPapel("monta")}</div>
-    <h2>Monta a fortaleza</h2>
-    <p class="nota">Vista de cima, a fortaleza é uma <b>estrela</b>. Leva cada peça até à forma igual.</p>
+    <h2>${N.monta}</h2>
+    <p class="nota">${N.notaTab}</p>
     <div class="legenda-ic" aria-hidden="true"><span>Arrasta para o lugar</span><span>Toca para rodar</span><span style="border-color:var(--ok);color:var(--ok)">Verde = pronta</span></div>
-    <div class="tabuleiro" id="tab">${SVG_FUNDO}
-      ${PECAS.map(p=>{const c=J.pecas[p.id].colocada;return `<div class="slot ${c?"":"vazio"}" data-slot="${p.id}" style="${posSlot(p.slot)}">${svgPeca(p.id,"cima")}</div>`}).join("")}
+    <div class="tabuleiro" id="tab">${fundoTab()}
+      ${PECAS.map(p=>{const c=J.pecas[p.id].colocada;return `<div class="slot ${c?"":"vazio"}" data-slot="${p.id}" style="${posSlot(p.slot,p.z)}">${svgPeca(p.id,"cima")}</div>`}).join("")}
     </div>
     <h3 style="display:flex;align-items:center;gap:.4rem">${I("mochila")}Mochila</h3>
     <div class="mochila">
@@ -1136,13 +1259,13 @@ function demoMontar(){
 /* ---------------- Fim e resultado ---------------- */
 function linhaResultado(){
   const certas=contar("certa"), min=Math.round((Date.now()-J.inicio)/60000);
-  return `CH1;${J.turma||"-"};${J.equipa.join("+")};${contar("recolhida")};${certas};${PECAS.length};${contar("colocada")===PECAS.length?1:0};${min}`;
+  return `CH1;${J.turma||"-"};${J.equipa.join("+")};${contar("recolhida")};${certas};${PECAS.length};${contar("colocada")===PECAS.length?1:0};${min};${NIVEL}`;
 }
 function resumoSessao(){
   const r=J.reg||[], seg=ms=>ms==null?null:Math.round(ms/100)/10;
   const peca1=r.find(e=>e.tipo==="peca"), pecas=r.filter(e=>e.tipo==="peca"), fimE=r.find(e=>e.tipo==="fim");
   const resp=r.filter(e=>e.tipo==="resposta");
-  return {id:J.inicio, data:new Date(J.inicio).toLocaleString("pt-PT"), turma:J.turma||"-", equipa:J.equipa.join("+"),
+  return {id:J.inicio, nivel:NIVEL, data:new Date(J.inicio).toLocaleString("pt-PT"), turma:J.turma||"-", equipa:J.equipa.join("+"),
     jogadores:J.equipa.length, familia:!!J.familia, modo:J.modo, xr:r.some(e=>e.tipo==="xr"),
     t_primeira_peca:seg(peca1&&peca1.t), t_total:seg(fimE&&fimE.t),
     t_montar:seg(fimE&&pecas.length?fimE.t-pecas[pecas.length-1].t:null),
@@ -1163,19 +1286,20 @@ function fim(){
     J.contado=true;guardar();
   }
   const certas=contar("certa"), linha=linhaResultado();
+  if(!conta()){const l=ler("ch-concluidos",[]);if(!l.includes(NIVEL)){l.push(NIVEL);gravar("ch-concluidos",l)}}
+  const PROX=NIVEIS[NIVEIS.indexOf(N)+1]||null;
   const res=ler(CHAVE_RES,[]); if(!res.includes(linha)){res.push(linha);gravar(CHAVE_RES,res)}
   app.innerHTML=`<main class="ecra">
-    <p class="sub" style="text-align:center;margin-top:1rem">Nível 1 concluído</p>
-    <h1 style="text-align:center">Fortaleza reconstruída!</h1>
+    <p class="sub" style="text-align:center;margin-top:1rem">Nível ${NIVEIS.indexOf(N)+1} concluído</p>
+    <h1 style="text-align:center">${N.feito}</h1>
     <p style="text-align:center;font-size:2rem;margin:.2rem 0 .8rem">${estrelas(certas===PECAS.length?3:certas>=4?2:1)}</p>
-    <div class="tabuleiro vista3d" id="v3d">${SVG_FUNDO}${PECAS.map(p=>`<div class="slot" style="${posSlot(p.slot)}">${svgPeca(p.id,"cima")}</div>`).join("")}</div>
+    <div class="tabuleiro vista3d" id="v3d">${fundoTab()}${PECAS.map(p=>`<div class="slot" style="${posSlot(p.slot,p.z)}">${svgPeca(p.id,"cima")}</div>`).join("")}</div>
     <p class="destaque" style="margin-top:1rem;text-align:center">${certas} de ${PECAS.length} respostas certas · ${J.pontos} pontos</p>
     <section class="caixa amarela"><h3 style="margin-top:0">Três coisas para lembrar</h3>
-      <ol style="font-size:1.1rem;margin:0;padding-left:1.3rem">
-        <li>A fortaleza começou a ser construída em <b>1576</b>, quando Luanda foi fundada.</li>
-        <li>Os <b>holandeses</b> ocuparam-na entre <b>1641 e 1648</b>.</li>
-        <li>Hoje é o <b>Museu Nacional de História Militar</b>.</li></ol></section>
-    <button class="prim larga grande" id="ini">${I("casa")}Continuar</button>
+      <ol style="font-size:1.1rem;margin:0;padding-left:1.3rem">${N.lembrar.map(l=>`<li>${l}</li>`).join("")}</ol></section>
+    ${PROX?`<button class="prim larga grande" id="prox">${I("play")}Próximo nível: ${PROX.nome}</button>
+      <button class="larga" id="ini">${I("casa")}Início</button>`
+      :`<button class="prim larga grande" id="ini">${I("casa")}Continuar</button>`}
     <button class="larga" id="prof">${I("partilhar")}Enviar o resultado à professora</button>
     <button class="larga" id="sus">${I("formulario")}Responder ao questionário (2 min)</button>
     <div class="linha"><button id="part">${I("partilhar")}Partilhar</button><button id="novo">${I("reiniciar")}Jogar outra vez</button></div></main>`;
@@ -1185,8 +1309,9 @@ function fim(){
   document.getElementById("prof").onclick=()=>partilhar(`Caçadores da História — ${MONUMENTO.nome}\n${J.equipa.join(", ")}: ${certas}/${PECAS.length} certas.\nCódigo do resultado (colar no resumo da turma):\n${linha}`);
   document.getElementById("part").onclick=()=>partilhar(`Reconstruímos a ${MONUMENTO.nome} no jogo Caçadores da História! ${certas}/${PECAS.length} respostas certas.`);
   document.getElementById("sus").onclick=questionarioSUS;
+  if(PROX)document.getElementById("prox").onclick=()=>{irNivel(PROX.id);toast(`Nível ${NIVEIS.indexOf(PROX)+1} desbloqueado: ${PROX.nome}`);J?retomar():configurar()};
   document.getElementById("novo").onclick=()=>{J=null;guardar();configurar()};
-  document.getElementById("ini").onclick=()=>{J=null;guardar();inicio()};
+  document.getElementById("ini").onclick=()=>{J=null;guardar();if(PROX)irNivel(PROX.id);inicio()};
 }
 
 /* ---------------- Questionário SUS (System Usability Scale), para a meta "SUS ≥ 70" ---------------- */
@@ -1257,6 +1382,9 @@ function professora(){
   const turmas=ler("ch-turmas-v1",[]);
   app.innerHTML=`<main class="ecra">
     ${barraApp("Área da professora")}
+    <section class="caixa"><h3 style="margin-top:0;color:var(--fg)">Monumento da visita</h3>
+      <div class="escolha">${NIVEIS.map(n=>`<button data-pn="${n.id}" aria-pressed="${n.id===NIVEL}">${n.nome}</button>`).join("")}</div>
+      <p class="nota">O QR da turma abre o jogo directamente neste monumento, mesmo que o nível ainda esteja bloqueado.</p></section>
     <section class="caixa"><h3 style="margin-top:0">1. Preparar a visita</h3>
       <p>Crie um código e mostre o <b>QR</b> à turma (ou envie-o no grupo do WhatsApp). Ao ler o QR, o jogo abre já com o código da turma.</p>
       <button class="prim larga" id="criar">${I("mais")}Criar código da turma</button>
@@ -1273,12 +1401,13 @@ function professora(){
       <button class="larga" id="dados">${I("grafico")}Ver dados dos testes</button></section></main>`;
   document.getElementById("volta").onclick=inicio;
   document.getElementById("criar").onclick=()=>{
-    const cod="FSM-"+String(Math.floor(1000+Math.random()*9000));
+    const cod=NIVEL.toUpperCase()+"-"+String(Math.floor(1000+Math.random()*9000));
     turmas.push(cod);gravar("ch-turmas-v1",turmas);
     mostrarTurma(cod);
   };
   document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{document.getElementById("cod").value=b.dataset.t;mostrarTurma(b.dataset.t)});
   document.getElementById("dados").onclick=dadosTestes;
+  document.querySelectorAll("[data-pn]").forEach(b=>b.onclick=()=>{irNivel(b.dataset.pn);professora()});
   document.getElementById("ver").onclick=()=>{
     const cod=document.getElementById("cod").value.trim().toUpperCase();
     const linhas=[...ler(CHAVE_RES,[]),...document.getElementById("colar").value.split(/\s+/)]
@@ -1298,7 +1427,7 @@ function professora(){
   };
 }
 
-function linkTurma(cod){return location.origin+location.pathname+"?turma="+encodeURIComponent(cod)}
+function linkTurma(cod){return location.origin+location.pathname+"?turma="+encodeURIComponent(cod)+"&nivel="+NIVEL}
 function mostrarTurma(cod){
   let qr="";
   try{const q=qrcode(0,"M");q.addData(linkTurma(cod));q.make();qr=q.createSvgTag({cellSize:6,margin:2,scalable:true})}catch(e){}
@@ -1336,7 +1465,7 @@ function dadosTestes(){
     <button class="larga" id="apagar" ${L.length?"":"disabled"}>${I("lixo")}Apagar os dados dos testes</button></main>`;
   document.getElementById("volta").onclick=professora;
   document.getElementById("csv").onclick=()=>{
-    const cols=["data","turma","equipa","jogadores","familia","modo","xr","t_primeira_peca","t_montar","t_total","certas","perguntas","t_resposta_medio","ajudas","encaixes_falhados","sus"];
+    const cols=["nivel","data","turma","equipa","jogadores","familia","modo","xr","t_primeira_peca","t_montar","t_total","certas","perguntas","t_resposta_medio","ajudas","encaixes_falhados","sus"];
     const csv=[cols.join(";"),...L.map(s=>cols.map(c=>{const v=s[c]??"";return /[;"\n]/.test(String(v))?`"${String(v).replace(/"/g,'""')}"`:String(v).replace(".",",")}).join(";"))].join("\n");
     const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));
     a.download="cacadores_testes_pl14.csv";document.body.appendChild(a);a.click();a.remove();

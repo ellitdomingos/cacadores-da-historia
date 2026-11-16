@@ -46,10 +46,10 @@ button,.btn{font:inherit;font-weight:800;min-height:var(--alvo);min-width:var(--
   border:2px solid var(--linha);background:var(--sup);color:var(--fg);cursor:pointer;touch-action:manipulation;
   display:inline-flex;align-items:center;justify-content:center;gap:.55rem;transition:transform .08s,background .15s,border-color .15s}
 button:active:not(:disabled){transform:scale(.97)}
-button:hover:not(:disabled){border-color:#4A6178}
+@media (hover:hover){button:hover:not(:disabled){border-color:#4A6178}}
 button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--ouro);outline-offset:3px}
 .prim{background:var(--ouro);color:var(--tinta);border-color:var(--ouro);box-shadow:0 .3rem 0 #B8860B}
-.prim:hover:not(:disabled){background:var(--ouro2);border-color:var(--ouro2)}
+@media (hover:hover){.prim:hover:not(:disabled){background:var(--ouro2);border-color:var(--ouro2)}}
 .larga{width:100%;margin:.55rem 0}
 .grande{min-height:3.8rem;font-size:1.2rem;border-radius:1.1rem}
 .btn-volta,.icbtn{background:transparent;border-color:transparent;padding:.5rem .6rem;color:var(--fg)}
@@ -96,7 +96,7 @@ input[type=text]:focus,textarea:focus{border-color:var(--ouro)}
 @keyframes sobe{from{transform:translateY(100%)}}
 .folha .pega{width:2.6rem;height:.3rem;border-radius:999px;background:var(--linha);margin:.2rem auto .6rem}
 .item{display:flex;align-items:center;gap:.8rem;width:100%;justify-content:flex-start;text-align:left;background:transparent;border:0;border-radius:.8rem;padding:.8rem .5rem;font-weight:700}
-.item:hover{background:var(--sup)}
+@media (hover:hover){.item:hover{background:var(--sup)}}
 .item .txt{flex:1}.item .dir{color:var(--fg2);font-weight:600}
 .sep{height:1px;background:var(--linha);margin:.4rem 0}
 .interruptor{position:relative;width:3.2rem;height:1.9rem;border-radius:999px;background:#3A4A5C;flex:none;transition:background .15s}
@@ -139,6 +139,7 @@ input[type=text]:focus,textarea:focus{border-color:var(--ouro)}
 .calor i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--azul),var(--ouro),#ff6a3d)}
 .rodar{position:absolute;top:50%;transform:translateY(-50%);background:rgba(11,16,22,.82);border-color:rgba(255,255,255,.3);border-radius:50%;width:3.4rem;height:3.4rem;padding:0}
 .rodar.esq{left:.5rem}.rodar.dir{right:.5rem}
+.rodar.andar{right:.5rem;top:calc(50% + 4.4rem);border-color:var(--ouro);color:var(--ouro)}
 .fundo-cam{position:absolute;left:0;right:0;bottom:0;padding:.5rem .5rem calc(.5rem + env(safe-area-inset-bottom));display:flex;gap:.35rem;background:linear-gradient(transparent,rgba(11,16,22,.95) 35%)}
 .fundo-cam button{flex:1;flex-direction:column;gap:.15rem;padding:.4rem .2rem;font-size:.8rem;background:rgba(24,34,45,.92);border-color:rgba(255,255,255,.15);border-radius:.9rem;min-height:3.6rem}
 .fundo-cam button .i{width:1.5rem;height:1.5rem}
@@ -204,7 +205,7 @@ th{background:var(--sup2);color:var(--fg2);font-weight:700}
 .estado.s{background:var(--ok);color:var(--tinta)}.estado.n{background:var(--erro);color:var(--tinta)}.estado.a{background:var(--sup2);color:var(--fg)}
 
 /* ---------- Passar o telemóvel ---------- */
-.passa{min-height:100vh;display:flex;flex-direction:column;justify-content:center;text-align:center;max-width:30rem;margin:0 auto;padding:1.5rem}
+.passa{min-height:100vh;display:flex;flex-direction:column;justify-content:center;gap:.2rem;text-align:center;max-width:30rem;margin:0 auto;padding:1.5rem}
 .ic-grande{width:6rem;height:6rem;border-radius:50%;background:var(--sup);border:2px solid var(--ouro);color:var(--ouro);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
 .ic-grande .i{width:3rem;height:3rem}
 
@@ -257,7 +258,140 @@ th{background:var(--sup2);color:var(--fg2);font-weight:700}
 @keyframes passo2{0%,44%{opacity:.4;background:none}48%,60%{opacity:1;background:var(--sup2)}64%,100%{opacity:.4;background:none}}
 @keyframes passo3{0%,60%{opacity:.4;background:none}64%,95%{opacity:1;background:var(--sup2)}100%{opacity:.4}}
 
-.toast{position:fixed;left:50%;top:max(1rem,env(safe-area-inset-top));transform:translateX(-50%);z-index:100;background:var(--fg);color:var(--tinta);font-weight:800;padding:.7rem 1.2rem;border-radius:999px;box-shadow:var(--sombra);max-width:90vw;text-align:center;animation:entra .2s}
+.toast{position:fixed;left:50%;top:max(1rem,env(safe-area-inset-top));transform:translateX(-50%);z-index:100;background:var(--fg);color:var(--tinta);font-weight:800;padding:.7rem 1.2rem;border-radius:999px;box-shadow:var(--sombra);max-width:90vw;text-align:center;animation:cai .25s ease-out}
+@keyframes cai{from{opacity:0;translate:0 -1rem}}
+
+/* =====================================================================
+   Camada "app" para telemóvel: ecrãs com a altura do ecrã, barra de topo fixa,
+   acções principais em baixo (zona do polegar), cartões que se deslizam,
+   letra arredondada de jogo, sem selecção de texto nem menus de imagem.
+   ===================================================================== */
+@font-face{font-family:"Fredoka";src:url(vendor/fredoka.woff2) format("woff2");font-weight:300 700;font-display:swap}
+:root{--fd:"Fredoka",system-ui,sans-serif;--vidro:rgba(11,16,22,.82)}
+body{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+input,textarea{user-select:text;-webkit-user-select:text;font-size:max(1rem,16px)}
+img{-webkit-user-drag:none;-webkit-touch-callout:none}
+h1,h2,button,.btn,.pill,.papel,.sub,.destaque,.retro,.codigo,.toast,.dica{font-family:var(--fd)}
+h1,h2{font-weight:600;letter-spacing:0}
+button,.btn{font-weight:600;letter-spacing:.01em;border-radius:1.1rem}
+.icbtn{border-radius:50%}
+.sub{font-weight:600;letter-spacing:.08em}
+button:active:not(:disabled){transform:scale(.96)}
+.prim:active:not(:disabled){transform:translateY(.2rem);box-shadow:0 .1rem 0 #B8860B}
+#app,.passa,.titulo{min-height:100vh;min-height:100dvh}
+.ecra{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:0 1rem;animation:entra .28s cubic-bezier(.2,.8,.2,1)}
+.ecra:not(:has(>.rodape)){padding-bottom:calc(2rem + env(safe-area-inset-bottom))}
+.ecra>:first-child:not(.appbar):not(.barra-topo):not(.peca-grande){margin-top:calc(1rem + env(safe-area-inset-top))}
+@keyframes entra{from{opacity:0;transform:translateX(1.2rem)}}
+.titulo,.passa{padding-top:calc(1rem + env(safe-area-inset-top))}
+.passa{padding-bottom:calc(1.5rem + env(safe-area-inset-bottom))}
+/* barra de topo fixa, com vidro */
+.appbar,.barra-topo{position:sticky;top:0;z-index:7;margin:0 -1rem .5rem;padding:calc(.45rem + env(safe-area-inset-top)) .6rem .45rem;
+  background:var(--vidro);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);min-height:3.6rem}
+.barra-topo{padding-left:1rem;padding-right:1rem;margin-bottom:.3rem}
+.appbar h2{font-size:1.3rem}
+.folha .appbar{position:static;margin:-.2rem -.4rem .4rem;padding:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;min-height:3.2rem}
+/* acções principais em baixo, sempre à mão */
+.rodape{position:sticky;bottom:0;z-index:6;margin:auto -1rem 0;padding:1.4rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  background:linear-gradient(rgba(11,16,22,0),var(--bg) 1.3rem);display:flex;flex-direction:column;gap:.55rem}
+.rodape .larga,.rodape .linha,.rodape p{margin:0}
+.rodape .nota{text-align:center;font-size:.85rem}
+.centro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1rem 0}
+/* secções e campos */
+h3{font-family:var(--fd);font-size:.82rem;text-transform:uppercase;letter-spacing:.09em;font-weight:600;color:var(--fg2);margin:1.3rem 0 .55rem}
+label{font-size:.9rem;margin:.8rem 0 .3rem}
+input[type=text],textarea{min-height:3.4rem;border-radius:1rem;padding:.8rem 1rem;background:var(--sup)}
+.campo{display:flex;align-items:center;gap:.6rem}
+.campo .avatar{width:3rem;height:3rem}
+.campo input{flex:1}
+/* controlo segmentado (escolha única curta) */
+.seg{display:flex;background:var(--bg2);border:1px solid var(--linha);border-radius:999px;padding:.25rem;gap:.2rem}
+.seg button{flex:1;min-width:0;border:0;background:transparent;border-radius:999px;padding:.5rem .3rem;color:var(--fg2);font-size:1rem}
+.seg button[aria-pressed=true]{background:var(--ouro);color:var(--tinta);box-shadow:0 .15rem .6rem rgba(0,0,0,.35)}
+/* cartões de escolha (escolha com explicação) */
+.cartoes{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.cartao{position:relative;flex-direction:column;align-items:flex-start;justify-content:flex-start;text-align:left;gap:.35rem;padding:.9rem;background:var(--sup);min-height:7.4rem;border-radius:1.2rem}
+.cartao .i{width:2rem;height:2rem;color:var(--ouro)}
+.cartao b{font-size:1.08rem;font-weight:600}
+.cartao small{font-family:system-ui,sans-serif;font-weight:500;color:var(--fg2);font-size:.85rem;line-height:1.3}
+.cartao[aria-pressed=true]{border-color:var(--ouro);background:#2B2715}
+.cartao[aria-pressed=true]::after{content:"✓";position:absolute;top:.6rem;right:.6rem;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--ouro);color:var(--tinta);display:grid;place-items:center;font-weight:900;font-size:.85rem}
+/* listas agrupadas (como as definições do telemóvel) */
+.grupo{background:var(--sup);border-radius:1.2rem;padding:.15rem .5rem;margin:.5rem 0}
+.grupo>.item{border-radius:0;font-family:system-ui,sans-serif}
+.grupo>.item+.item{border-top:1px solid var(--linha)}
+.grupo>.item .i{color:var(--ouro)}
+/* cartões que se deslizam para o lado (níveis, instruções) */
+.carrossel{display:flex;gap:.8rem;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -1rem;padding:.4rem 1rem .8rem;scrollbar-width:none;overscroll-behavior-x:contain;scroll-padding:0 1rem}
+.carrossel::-webkit-scrollbar{display:none}
+.carrossel>*{scroll-snap-align:center;flex:0 0 86%;margin:0}
+.pontos{display:flex;justify-content:center;gap:.45rem;margin:.1rem 0 .4rem}
+.pontos i{width:.5rem;height:.5rem;border-radius:999px;background:var(--linha);transition:width .2s,background .2s}
+.pontos i.on{width:1.5rem;background:var(--ouro)}
+/* níveis como cartões grandes */
+.nivel{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;border-radius:1.5rem;min-height:min(60vh,31rem)}
+.nivel .mini{aspect-ratio:auto;flex:1;min-height:11rem;border-radius:0;background:radial-gradient(90% 80% at 50% 100%,#5aa0dc,#1f5fa8 70%)}
+.nivel .mini img{width:auto;max-width:82%;max-height:13rem;filter:drop-shadow(0 .8rem 1rem rgba(0,0,0,.45))}
+.nivel.bloq .mini{background:var(--bg2)}
+.nivel.bloq .mini .i{width:3rem;height:3rem}
+.nivel .info{padding:.9rem 1rem .2rem}
+.nivel h2{font-size:1.4rem}
+.nivel .acoes{padding:.4rem 1rem 1rem;display:flex;flex-direction:column;gap:.45rem}
+.nivel .acoes .larga{margin:0}
+/* contas */
+.logo{width:4.5rem;height:4.5rem;border-radius:1.2rem;margin-bottom:.6rem;box-shadow:var(--sombra)}
+.contas{display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:.7rem;width:100%;margin-top:1.2rem}
+.conta-t{flex-direction:column;gap:.35rem;padding:1rem .5rem;background:var(--sup);border-radius:1.3rem;position:relative}
+.conta-t .avatar{width:3.8rem;height:3.8rem;font-size:1.6rem}
+.conta-t b{font-size:1.1rem;font-weight:600}
+.conta-t small{font-family:system-ui,sans-serif;font-weight:500;color:var(--fg2);font-size:.8rem}
+.conta-t>.i{position:absolute;top:.6rem;right:.6rem;width:1rem;height:1rem;color:var(--fg2)}
+.cores{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center}
+.cores button{width:2.9rem;height:2.9rem;min-width:0;padding:0;border-radius:50%;border:3px solid transparent}
+.cores button[aria-pressed=true]{border-color:#fff;box-shadow:0 0 0 3px var(--bg),0 0 0 5px #fff}
+/* instruções em cartões */
+.passo-c{background:var(--sup);border:1px solid var(--linha);border-radius:1.5rem;padding:1.6rem 1.2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:min(52vh,25rem)}
+.passo-c .ic{width:6rem;height:6rem;border-radius:50%;background:#2B2715;color:var(--ouro);display:grid;place-items:center;margin-bottom:1.1rem}
+.passo-c .ic .i{width:3.2rem;height:3.2rem}
+.passo-c b{font-family:var(--fd);font-weight:600;font-size:1.5rem;line-height:1.2;margin-bottom:.5rem}
+.passo-c p{font-size:1.1rem;color:var(--fg2);margin:0}
+.passo-c small{color:var(--fg2);margin-top:1rem;font-weight:700}
+/* barra de jogo em baixo (fora da câmara) */
+.barra-jogo{display:flex;gap:.4rem}
+.barra-jogo button{flex:1;flex-direction:column;gap:.15rem;padding:.4rem .2rem;font-size:.82rem;min-height:3.6rem;border-radius:1rem}
+.barra-jogo button .i{width:1.5rem;height:1.5rem}
+/* sem câmara: grelha de locais */
+.locais{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.local{display:flex;flex-direction:column;gap:.5rem;padding:.5rem;margin:0;border-radius:1.2rem}
+.local .foto{aspect-ratio:4/3;border-radius:.9rem}
+.local b{font-size:.92rem;line-height:1.25;flex:1;padding:0 .2rem}
+.local .larga{margin:0;min-height:2.9rem;font-size:.95rem;padding:.5rem}
+/* curiosidade: peça em grande, de ponta a ponta */
+.peca-grande{width:auto;margin:0 -1rem .6rem;height:min(36vh,16rem);border-radius:0 0 1.8rem 1.8rem}
+.legenda{font-size:1.12rem;border-radius:1rem}
+/* pergunta: a pergunta em cima, as respostas em baixo (polegar) */
+.q-zona{flex:1;display:flex;flex-direction:column;justify-content:center;padding:1rem 0}
+.q-zona h2{font-size:1.7rem;line-height:1.25}
+.opcoes{margin-top:0}
+.opcoes button{gap:.8rem;border-radius:1.2rem;min-height:4.2rem}
+.opcoes .letra{width:2.3rem;height:2.3rem;border-radius:.7rem;background:var(--sup2);display:grid;place-items:center;flex:none;font-size:1rem}
+.opcoes button.certa .letra,.opcoes button.errada .letra{background:rgba(11,16,22,.2)}
+.resultado{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:34rem;z-index:20;background:var(--bg2);border-radius:1.6rem 1.6rem 0 0;
+  padding:.4rem 1rem calc(1rem + env(safe-area-inset-bottom));border-top:5px solid var(--ok);box-shadow:0 -1rem 2rem rgba(0,0,0,.5);max-height:80vh;overflow:auto;animation:sobe .3s ease-out}
+.resultado.mal{border-top-color:var(--erro)}
+.resultado .retro{font-size:1.4rem;margin:.6rem 0 .4rem}
+.resultado .legenda{font-size:1.02rem;margin:.4rem 0 .8rem}
+/* montar: tabuleiro que cabe no ecrã e mochila em baixo */
+#tab{max-width:max(16rem,calc(100dvh - 21rem))}
+.rodape .mochila{grid-template-columns:repeat(6,1fr);gap:.4rem;margin:0}
+.rodape .mpeca{border-radius:.8rem;padding:.25rem}
+.rodape .mpeca.bloq{font-size:1.1rem}
+.rotulo-mochila{display:flex;align-items:center;gap:.4rem;font-family:var(--fd);font-weight:600;color:var(--fg2);font-size:.85rem;text-transform:uppercase;letter-spacing:.08em}
+/* fim */
+.estat{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin:.8rem 0}
+.estat span{background:var(--sup);border:1px solid var(--linha);border-radius:1rem;padding:.5rem .9rem;text-align:center;font-family:var(--fd);font-weight:600;color:var(--fg2);font-size:.85rem}
+.estat b{display:block;color:var(--ouro);font-size:1.5rem;line-height:1.1}
+@media (min-width:40rem){.carrossel>*{flex-basis:70%}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -547,7 +681,7 @@ function passar(papel,depois){
     <p class="sub">Passa o telemóvel a</p>
     <h1 style="font-size:2.4rem;color:var(--ouro)">${esc(J.equipa[i])}</h1>
     <p style="font-size:1.15rem"><span class="papel">${P.n}</span><br>${P.d[0].toUpperCase()+P.d.slice(1)}.</p>
-    <button class="prim larga grande" id="sou" style="margin-top:2rem">Sou eu, ${esc(J.equipa[i])}</button></main>`;
+    <button class="prim larga grande" id="sou" style="margin-top:auto">Sou eu, ${esc(J.equipa[i])}</button></main>`;
   document.getElementById("sou").onclick=()=>{J.atual=i;guardar();depois()};
 }
 const etiquetaPapel=papel=>J.equipa.length>1?`<span class="papel">${PAPEIS[papel].n}: ${esc(J.equipa[dono(papel)])}</span>`:"";
@@ -579,10 +713,12 @@ function inicio(){
       <p class="nota" style="text-align:center;margin:.2rem 0 .4rem">${contar("recolhida")} de ${PECAS.length} peças encontradas</p>`
        :`<button class="prim larga grande" id="novo">${I("play")}Jogar</button>`}
     <button class="larga" id="niveis">Níveis</button>
+    ${instalada()?"":`<button class="larga" id="binst" style="background:transparent;border-color:transparent;color:var(--fg2);min-height:2.6rem;margin:0" ${PEDIDO_INSTALAR||/Android/i.test(navigator.userAgent)?"":"hidden"}>${I("descarregar")}Instalar a app</button>`}
   </main>`;
   const $=id=>document.getElementById(id);
   if(ec)$("cont").onclick=retomar; else $("novo").onclick=()=>{J=null;guardar();configurar()};
   $("niveis").onclick=niveis;
+  if($("binst"))$("binst").onclick=instalar;
   $("trocar").onclick=()=>{if(c){CONTAS.ativa=null;gravarContas();CONVIDADO=false;escolherConta()}else criarConta()};
   $("def").onclick=definicoes;
   // a fortaleza montada em 3D a rodar, como imagem principal
@@ -595,8 +731,8 @@ function niveis(){
   const cartao=(nv,i)=>{
     const livre=desbloqueado(i), atual=nv.id===NIVEL;
     if(!livre)return `<section class="nivel bloq" aria-label="${nv.nome}: bloqueado">
-      <div class="mini">${I("cadeado")}</div><div><p class="sub" style="margin:0;color:var(--fg2)">Nível ${i+1} · ${nv.cidade}</p><h2>${nv.nome}</h2>
-      <p class="nota" style="margin:0">Conclui o nível ${i} para desbloquear.</p></div></section>`;
+      <div class="mini">${I("cadeado")}</div><div class="info"><p class="sub" style="margin:0;color:var(--fg2)">Nível ${i+1} · ${nv.cidade}</p><h2>${nv.nome}</h2>
+      <p class="nota" style="margin:0">Conclui o nível ${i} para desbloquear.</p></div><div class="acoes"></div></section>`;
     // estado guardado deste nível
     const jogo=c?(c.niveis&&c.niveis[nv.id]&&c.niveis[nv.id].jogo):ler(`ch-${nv.id}-v2`,null);
     const info=c&&c.niveis&&c.niveis[nv.id];
@@ -605,7 +741,7 @@ function niveis(){
     const id=k=>atual?`id="${k}"`:"";
     return `<section class="nivel${atual?" ativo":""}">
       <div class="mini"><img src="modelos/${nv.id}/img/miniatura.png" alt=""></div>
-      <div><p class="sub" style="margin:0">Nível ${i+1} · ${nv.cidade}</p><h2>${nv.nome}</h2>
+      <div class="info"><p class="sub" style="margin:0">Nível ${i+1} · ${nv.cidade}</p><h2>${nv.nome}</h2>
       ${ec?`<div class="barra-prog" aria-hidden="true"><i style="width:${Math.round((pec+mont)/(2*nv.pecas.length)*100)}%"></i></div><p class="nota" style="margin:0">${pec}/${nv.pecas.length} peças encontradas · ${mont}/${nv.pecas.length} montadas</p>`
         :feito?`<p style="margin:.2rem 0">${estrelas(info?info.estrelas:1)}</p><p class="nota" style="margin:0">Concluído${info?` · melhor: ${info.melhor} pontos`:""}</p>`
         :`<p class="nota" style="margin:0">${i===0||feito?"Ainda não começaste.":"Desbloqueado! Pronto a jogar."}</p>`}</div>
@@ -616,11 +752,13 @@ function niveis(){
   };
   app.innerHTML=`<main class="ecra">
     ${barraApp("Níveis")}
-    <p class="nota">${NIVEIS.filter(n=>concluido(n.id)).length} de ${NIVEIS.length} monumentos reconstruídos.</p>
-    ${NIVEIS.map(cartao).join("")}
-    ${c?`<button class="larga" id="prog">O meu progresso</button>`:`<p class="nota">Sem conta, o progresso fica só neste telemóvel. Cria uma conta para o guardar.</p>`}
+    <p class="nota" style="margin:0 0 .4rem">${NIVEIS.filter(n=>concluido(n.id)).length} de ${NIVEIS.length} monumentos reconstruídos</p>
+    <div class="carrossel" id="car">${NIVEIS.map(cartao).join("")}</div>
+    <div class="pontos" id="pts" aria-hidden="true">${NIVEIS.map(()=>"<i></i>").join("")}</div>
+    <div class="rodape">${c?`<button class="larga" id="prog">O meu progresso</button>`:`<p class="nota">Sem conta, o progresso fica só neste telemóvel.</p>`}</div>
   </main>`;
   document.getElementById("volta").onclick=inicio;
+  carrossel(document.getElementById("car"),document.getElementById("pts"),Math.max(0,NIVEIS.indexOf(N)));
   document.querySelectorAll("[data-acao]").forEach(b=>b.onclick=()=>{
     const acao=b.dataset.acao;
     if(acao==="reini"&&!b.dataset.c){b.dataset.c=1;b.textContent="Perdes as peças deste jogo. Toca outra vez para confirmar";return}
@@ -633,6 +771,15 @@ function niveis(){
   if(c)document.getElementById("prog").onclick=meuProgresso;
 }
 
+/* Cartões que se deslizam para o lado, com pontos a indicar onde se está */
+function carrossel(car,pts,inicial){
+  const filhos=[...car.children], ps=[...pts.children];
+  const marcar=()=>{const c=car.scrollLeft+car.clientWidth/2;let k=0,m=1e9;
+    filhos.forEach((f,i)=>{const d=Math.abs(f.offsetLeft+f.offsetWidth/2-c);if(d<m){m=d;k=i}});ps.forEach((p,i)=>p.classList.toggle("on",i===k))};
+  car.addEventListener("scroll",marcar,{passive:true});
+  const f=filhos[inicial];if(f)car.scrollLeft=f.offsetLeft-(car.clientWidth-f.offsetWidth)/2;
+  marcar();
+}
 /* Definições num painel que abre pela engrenagem */
 function fecharFolha(){document.querySelectorAll(".veu").forEach(v=>v.remove())}
 function abrirFolha(html,aoMontar){
@@ -647,14 +794,14 @@ function abrirFolha(html,aoMontar){
 function definicoes(){
   const sw=(id,txt,ic,on)=>`<button class="item" id="${id}" role="switch" aria-checked="${on}">${I(ic)}<span class="txt">${txt}</span><span class="interruptor" aria-hidden="true"></span></button>`;
   abrirFolha(`<div class="appbar"><h2 id="ftit">Definições</h2><button class="icbtn" id="fx" aria-label="Fechar">${I("fechar")}</button></div>
-    <div class="item" style="cursor:default">${I("texto")}<span class="txt">Tamanho da letra</span>
+    <div class="grupo"><div class="item" style="cursor:default">${I("texto")}<span class="txt">Tamanho da letra</span>
       <span class="passos-letra"><button class="icbtn" id="lm" aria-label="Letra mais pequena">A−</button><b id="lv">${Math.round(DEF.letra*100)}%</b><button class="icbtn" id="lM" aria-label="Letra maior">A+</button></span></div>
-    ${sw("tv","Voz (ler os textos)","som",DEF.voz)}${sw("ts","Sons","som",DEF.som)}${sw("tb","Vibração","vibrar",DEF.vib)}
-    <p class="nota" style="padding:0 .5rem">O que a voz diz aparece sempre escrito no ecrã.</p>
-    <div class="sep"></div>
-    <button class="item" id="fajuda">${I("ajuda")}<span class="txt">Como se joga</span>${I("seta")}</button>
+    ${sw("tv","Voz (ler os textos)","som",DEF.voz)}${sw("ts","Sons","som",DEF.som)}${sw("tb","Vibração","vibrar",DEF.vib)}</div>
+    <p class="nota" style="padding:0 .5rem;margin:.2rem 0 .8rem">O que a voz diz aparece sempre escrito no ecrã.</p>
+    <div class="grupo"><button class="item" id="fajuda">${I("ajuda")}<span class="txt">Como se joga</span>${I("seta")}</button>
+    ${instalada()?"":`<button class="item" id="finst">${I("descarregar")}<span class="txt">Instalar a app</span>${I("seta")}</button>`}
     <button class="item" id="diag">${I("telemovel")}<span class="txt">Verificar este telemóvel</span>${I("seta")}</button>
-    <button class="item" id="prof">${I("escola")}<span class="txt">Área da professora</span>${I("seta")}</button>`,
+    <button class="item" id="prof">${I("escola")}<span class="txt">Área da professora</span>${I("seta")}</button></div>`,
   v=>{
     const $=id=>v.querySelector("#"+id);
     $("fx").onclick=fecharFolha;
@@ -664,6 +811,7 @@ function definicoes(){
     tog("tv","voz");tog("ts","som");tog("tb","vib");
     $("fajuda").onclick=()=>{fecharFolha();instrucoes(true)};
     $("diag").onclick=()=>{fecharFolha();diagnostico()};
+    if($("finst"))$("finst").onclick=instalar;
     $("prof").onclick=()=>{fecharFolha();professora()};
   });
 }
@@ -672,16 +820,21 @@ function definicoes(){
 function escolherConta(){
   pararCamara();pararVoz();
   const L=Object.entries(CONTAS.lista).sort((a,b)=>(b[1].usada||0)-(a[1].usada||0));
-  app.innerHTML=`<main class="ecra" style="padding-top:2rem">
-    <p class="sub">Caçadores da História</p>
-    <h1>Quem vai jogar?</h1>
-    ${L.length?L.map(([id,c])=>{const nv=nivelDe(c);return `<button class="larga" data-c="${id}" style="justify-content:flex-start;text-align:left;padding:.7rem .9rem">
-      ${avatar(c)}<span style="flex:1"><b style="font-size:1.1rem">${esc(c.alcunha)}</b><br>
-      <span class="nota">${nv.concluido?"Fortaleza concluída":nv.jogo?`A meio: ${PECAS.filter(p=>nv.jogo.pecas[p.id].recolhida).length}/${PECAS.length} peças`:"Ainda não começou"}</span></span>${c.pin?I("cadeado"):""}</button>`}).join("")
-      :`<p class="nota">Ainda não há contas neste telemóvel.</p>`}
-    <button class="prim larga" id="criar">${I("mais")}Criar conta</button>
-    <button class="larga" id="conv">Jogar sem conta</button>
-    <p class="nota">As contas ficam só neste telemóvel. Guardamos a alcunha e o progresso, nunca o nome completo.</p></main>`;
+  const feitos=c=>NIVEIS.filter(n=>c.niveis&&c.niveis[n.id]&&c.niveis[n.id].concluido).length;
+  app.innerHTML=`<main class="ecra">
+    <div class="centro">
+      <img class="logo" src="icon-192.png" alt="">
+      <p class="sub" style="margin:0">Caçadores da História</p>
+      <h1>Quem vai jogar?</h1>
+      ${L.length?`<div class="contas">${L.map(([id,c])=>`<button class="conta-t" data-c="${id}" aria-label="${esc(c.alcunha)}${c.pin?", com PIN":""}">
+        ${avatar(c)}<b>${esc(c.alcunha)}</b><small>${feitos(c)} de ${NIVEIS.length} monumentos</small>${c.pin?I("cadeado"):""}</button>`).join("")}</div>`
+        :`<p class="nota">Ainda não há contas neste telemóvel.<br>Cria uma para guardar o teu progresso.</p>`}
+    </div>
+    <div class="rodape">
+      <button class="prim larga grande" id="criar">${I("mais")}Criar conta</button>
+      <button class="larga" id="conv">Jogar sem conta</button>
+      <p class="nota">As contas ficam só neste telemóvel. Só guardamos a alcunha.</p>
+    </div></main>`;
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>entrar(b.dataset.c));
   document.getElementById("criar").onclick=criarConta;
   document.getElementById("conv").onclick=()=>{CONVIDADO=true;CONTAS.ativa=null;gravarContas();J=lerJogo();inicio()};
@@ -689,9 +842,9 @@ function escolherConta(){
 function entrar(id,pinOk){
   const c=CONTAS.lista[id];
   if(c.pin&&!pinOk){
-    app.innerHTML=`<main class="ecra" style="text-align:center;padding-top:2rem">${barraApp("","vt")}${avatar(c,true)}<h2>${esc(c.alcunha)}</h2>
-      <label for="pin">PIN de 4 números</label><input type="text" id="pin" inputmode="numeric" maxlength="4" autocomplete="off" style="text-align:center;font-size:1.6rem;letter-spacing:.4em">
-      <button class="prim larga" id="ok">Entrar</button></main>`;
+    app.innerHTML=`<main class="ecra">${barraApp("","vt")}<div class="centro">${avatar(c,true)}<h2>${esc(c.alcunha)}</h2>
+      <label for="pin">PIN de 4 números</label><input type="text" id="pin" inputmode="numeric" maxlength="4" autocomplete="off" style="text-align:center;font-size:1.8rem;letter-spacing:.5em;max-width:14rem">
+      </div><div class="rodape"><button class="prim larga grande" id="ok">Entrar</button></div></main>`;
     const i=document.getElementById("pin");i.focus();
     const ok=async()=>{if(await hashPin(i.value)===c.pin)entrar(id,true);else{toast("PIN errado. Tenta outra vez.");i.value="";vibrar(150)}};
     document.getElementById("ok").onclick=ok;i.onkeydown=e=>{if(e.key==="Enter")ok()};
@@ -707,16 +860,15 @@ function criarConta(){
     const al=(document.getElementById("al")||{}).value||"", pin=(document.getElementById("pin")||{}).value||"";
     app.innerHTML=`<main class="ecra">
       ${barraApp("Criar conta","vt")}
-      <div style="text-align:center">${avatar({alcunha:al||"?",avatar:cor},true)}</div>
+      <div style="text-align:center;margin:.6rem 0 1rem">${avatar({alcunha:al||"?",avatar:cor},true)}</div>
+      <div class="cores" role="group" aria-label="Cor">${CORES.map(x=>`<button data-a="${x}" aria-pressed="${x===cor}" aria-label="Cor ${x}" style="background:${x}"></button>`).join("")}</div>
       <label for="al">Alcunha</label>
       <input type="text" id="al" maxlength="16" autocomplete="off" placeholder="Ex.: Kiki" value="${esc(al)}">
       <p class="nota">Não escrevas o nome completo.</p>
-      <label>Cor</label>
-      <div class="escolha" style="grid-template-columns:repeat(8,1fr)">${CORES.map(x=>`<button data-a="${x}" aria-pressed="${x===cor}" aria-label="Cor ${x}" style="background:${x};border-color:${x===cor?"#fff":x};min-width:0;padding:0;height:2.8rem"></button>`).join("")}</div>
       <label for="pin">PIN de 4 números (opcional)</label>
       <input type="text" id="pin" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="Para telemóveis partilhados" value="${esc(pin)}">
-      <p class="nota">O PIN só evita que um colega entre na tua conta por engano. Não uses o PIN do banco.</p>
-      <button class="prim larga grande" id="ok">Criar e jogar</button></main>`;
+      <p class="nota">Evita que um colega entre na tua conta por engano. Não uses o PIN do banco.</p>
+      <div class="rodape"><button class="prim larga grande" id="ok">Criar e jogar</button></div></main>`;
     document.getElementById("al").oninput=e=>{const a=document.querySelector(".avatar.g");if(a)a.textContent=([...e.target.value.trim()][0]||"?").toUpperCase()};
     document.getElementById("vt").onclick=()=>CONVIDADO?inicio():escolherConta();
     document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{cor=b.dataset.a;des()});
@@ -740,16 +892,17 @@ function meuProgresso(){
   app.innerHTML=`<main class="ecra">
     ${barraApp("O meu progresso","vt")}
     <div class="linha" style="flex-wrap:nowrap">${avatar(c,true)}<div><h2 style="margin:0">${esc(c.alcunha)}</h2><p class="nota" style="margin:0">Jogou ${nv.vezes} ${nv.vezes===1?"vez":"vezes"}</p></div></div>
-    <section class="caixa"><p class="sub" style="margin:0">Nível 1</p><h3 style="margin:.2rem 0;color:var(--fg)">${MONUMENTO.nome}</h3>
-      ${nv.concluido?`${estrelas(nv.estrelas)}<p class="nota">Melhor pontuação: <b>${nv.melhor}</b></p>`:`<p class="nota">Ainda não concluído.</p>`}</section>
+    <h3>Monumentos</h3>
+    <div class="grupo">${NIVEIS.map((n,i)=>{const x=c.niveis&&c.niveis[n.id];return `<div class="item" style="cursor:default"><span class="txt">${i+1}. ${n.nome}</span>
+      <span class="dir">${x&&x.concluido?`${estrelas(x.estrelas)}`:"—"}</span></div>`}).join("")}</div>
     <h3>Jogos terminados</h3>
     ${H.length?`<table><thead><tr><th>Data</th><th>Certas</th><th>Pontos</th><th>Min.</th></tr></thead><tbody>
       ${H.slice().reverse().map(h=>`<tr><td>${esc(h.data)}</td><td>${h.certas}/${h.perguntas}</td><td>${h.pontos}</td><td>${h.min}</td></tr>`).join("")}</tbody></table>`:`<p class="nota">Ainda não terminaste nenhum jogo.</p>`}
     <h3>Conta</h3>
-    <button class="larga" id="reset">${I("reiniciar")}Recomeçar tudo</button>
-    <button class="larga" id="apagar">${I("lixo")}Apagar a conta</button></main>`;
+    <div class="grupo"><button class="item" id="reset">${I("reiniciar")}<span class="txt">Recomeçar tudo</span></button>
+    <button class="item" id="apagar">${I("lixo")}<span class="txt">Apagar a conta</span></button></div></main>`;
   document.getElementById("vt").onclick=niveis;
-  const dois=(b,acao,txt)=>{b.onclick=()=>{if(b.dataset.c)acao();else{b.dataset.c=1;b.textContent=txt}}};
+  const dois=(b,acao,txt)=>{b.onclick=()=>{if(b.dataset.c)acao();else{b.dataset.c=1;b.querySelector(".txt").textContent=txt;b.style.color="var(--erro)"}}};
   dois(document.getElementById("reset"),()=>{c.niveis={};c.historico=[];gravarContas();J=null;toast("Progresso apagado.");inicio()},"Apaga todo o progresso. Toca outra vez para confirmar");
   dois(document.getElementById("apagar"),()=>{delete CONTAS.lista[CONTAS.ativa];CONTAS.ativa=null;gravarContas();J=null;toast("Conta apagada.");escolherConta()},"Apaga a conta. Toca outra vez para confirmar");
 }
@@ -763,30 +916,29 @@ function retomar(){
 function configurar(){
   let n=1, modo="ra", espaco="grande"; // n: 1, 2, 3 ou "f" (família)
   const desenhar=()=>{
+    const papelIc=(i)=>n==="f"?(i?"utilizador":"livro"):n===1?"utilizador":["radar","mensagem","grelha"][i];
+    const campo=(i,ph,lab)=>`<label for="al${i}">${lab}</label><div class="campo"><span class="avatar" style="background:var(--sup2);color:var(--ouro)">${I(papelIc(i))}</span>
+      <input type="text" id="al${i}" maxlength="16" autocomplete="off" placeholder="${ph}"></div>`;
     app.innerHTML=`<main class="ecra">
       ${barraApp("Novo jogo")}
-      <h3>Quem joga com este telemóvel?</h3>
-      <div class="escolha" role="group">${[1,2,3,"f"].map(k=>`<button data-n="${k}" aria-pressed="${n===k}">${k===1?"Sozinho":k===2?"2 jogadores":k===3?"3 jogadores":"Família"}</button>`).join("")}</div>
-      ${n==="f"?`<p class="caixa amarela">Modo família: quem é mais velho <b>conta a história</b> por palavras suas; os netos procuram, respondem e montam. Pode jogar-se sentado.</p>
-        <label for="al0">Alcunha de quem conta a história (avô, avó…)</label><input type="text" id="al0" maxlength="16" autocomplete="off" placeholder="Ex.: Vovô Mateus">
-        <label for="al1">Alcunha dos netos</label><input type="text" id="al1" maxlength="16" autocomplete="off" placeholder="Ex.: Os Netos">`
-      :[...Array(n)].map((_,i)=>`<label for="al${i}">Alcunha ${n>1?`do jogador ${i+1} (${["Aponta","Responde","Monta"][i]}${n===2&&i===0?" e Monta":""})`:""}</label>
-        <input type="text" id="al${i}" maxlength="16" autocomplete="off" placeholder="Ex.: ${["Kiki","Tchico","Nany"][i]}">`).join("")}
-      <p class="nota">Só guardamos a alcunha e a pontuação. Não escrevas o nome completo.</p>
-      <label for="turma">Código da turma (se a professora deu um)</label>
-      <input type="text" id="turma" maxlength="10" autocomplete="off" placeholder="Ex.: FSM-4821" style="text-transform:uppercase" value="${esc(TURMA_URL)}">
+      <h3 style="margin-top:.6rem">Quantos jogam com este telemóvel?</h3>
+      <div class="seg" role="group">${[1,2,3,"f"].map(k=>`<button data-n="${k}" aria-pressed="${n===k}">${k===1?"Sozinho":k===2?"Dois":k===3?"Três":"Família"}</button>`).join("")}</div>
+      ${n==="f"?`<p class="nota">Quem é mais velho <b>conta a história</b> por palavras suas; os netos procuram, respondem e montam. Joga-se sentado.</p>
+        ${campo(0,"Ex.: Vovô Mateus","Quem conta a história (avô, avó…)")}${campo(1,"Ex.: Os Netos","Os netos")}`
+      :[...Array(n)].map((_,i)=>campo(i,"Ex.: "+["Kiki","Tchico","Nany"][i],n>1?`Jogador ${i+1} · ${["Aponta","Responde","Monta"][i]}${n===2&&i===0?" e Monta":""}`:"A tua alcunha")).join("")}
       <h3>Como queres procurar?</h3>
-      <div class="escolha" role="group">
-        <button data-m="ra" aria-pressed="${modo==="ra"}">Com a câmara</button>
-        <button data-m="semra" aria-pressed="${modo==="semra"}">Sem câmara</button></div>
-      ${modo==="ra"?`<h3>Onde vão jogar?</h3>
-      <div class="escolha" role="group">
-        <button data-e="grande" aria-pressed="${espaco==="grande"}">Pátio ou espaço aberto</button>
+      <div class="cartoes" role="group">
+        <button class="cartao" data-m="ra" aria-pressed="${modo==="ra"}">${I("camara")}<b>Com a câmara</b><small>Anda pelo sítio: as peças aparecem quando chegas perto.</small></button>
+        <button class="cartao" data-m="semra" aria-pressed="${modo==="semra"}">${I("pino")}<b>Sem câmara</b><small>Imagens dos sítios. Gasta menos bateria.</small></button></div>
+      ${modo==="ra"&&n!=="f"?`<h3>Onde vão jogar?</h3>
+      <div class="seg" role="group">
+        <button data-e="grande" aria-pressed="${espaco==="grande"}">Pátio</button>
         <button data-e="pequeno" aria-pressed="${espaco==="pequeno"}">Sala pequena</button></div>
-      <p class="nota">Joga-se <b>de pé, a andar</b>: as peças ficam escondidas à volta, a alguns metros. Segue as pegadas e chega perto para as apanhar.</p>`
-      :`<p class="nota">Sem câmara, cada peça tem uma imagem do sítio onde está: vai até lá e toca em <b>Estou aqui</b>. Gasta menos bateria.</p>`}
-      <p class="nota">Não podes andar? Escolhe <b>Sem câmara</b> ou o modo <b>Família</b>; também dá para rodar no lugar.</p>
-      <button class="prim larga grande" id="comecar" style="margin-top:1rem">${I("play")}Começar</button></main>`;
+      <p class="nota">${espaco==="grande"?"Peças a 4–10 metros: precisas de um espaço livre para andar.":"Peças a 2–7 metros, para uma sala ou um corredor."}</p>`:""}
+      <label for="turma">Código da turma <span style="font-weight:500">(se a professora deu um)</span></label>
+      <input type="text" id="turma" maxlength="10" autocomplete="off" placeholder="Ex.: FSM-4821" style="text-transform:uppercase" value="${esc(TURMA_URL)}">
+      <p class="nota">Só guardamos a alcunha e a pontuação. Não podes andar? Escolhe <b>Sem câmara</b> ou <b>Família</b>.</p>
+      <div class="rodape"><button class="prim larga grande" id="comecar">${I("play")}Começar</button></div></main>`;
     document.getElementById("volta").onclick=inicio;
     document.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{guardaCampos();n=b.dataset.n==="f"?"f":+b.dataset.n;desenhar();repoeCampos()});
     document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{guardaCampos();modo=b.dataset.m;desenhar();repoeCampos()});
@@ -797,6 +949,7 @@ function configurar(){
       const turma=document.getElementById("turma").value.trim().toUpperCase();
       // iOS: pedir acesso ao giroscópio tem de ser feito dentro do toque
       if(modo==="ra"&&window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==="function"){try{await DeviceOrientationEvent.requestPermission()}catch(e){}}
+      if(modo==="ra"&&window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==="function"){try{await DeviceMotionEvent.requestPermission()}catch(e){}}
       try{actx=actx||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}
       novoJogo(nomes,turma,modo,n==="f");
       // modo principal: andar com as peças pousadas no chão real (WebXR), se o telemóvel o suportar
@@ -813,7 +966,7 @@ function configurar(){
 
 // Os mesmos símbolos são usados no ecrã de jogo (consistência, H4)
 const PASSOS=[
-  ["pe","Anda e segue as pegadas","Joga-se de pé. As pegadas mostram para onde ir; as setas amarelas, para onde virar."],
+  ["pe","Anda e segue as pegadas","Joga-se de pé, a andar. As peças estão a alguns metros: o telemóvel conta os teus passos e a peça só aparece quando chegas perto."],
   ["radar","Olha o radar","O ponto amarelo é a peça mais próxima. Vira-te até ele ficar em cima e anda."],
   ["vibrar","Sente a vibração","O telemóvel vibra mais depressa quando estás perto."],
   ["mao","Chega perto e toca","Quando chegas perto, a peça ganha uma moldura e aparece a mão: toca para a apanhar."],
@@ -823,14 +976,17 @@ const PASSOS=[
   ["dica","Pede uma dica","Os botões Ajuda e Dica mostram como se faz."],
 ];
 function instrucoes(soVer){
+  const L=PASSOS.slice();
+  if(!soVer&&J&&J.familia)L.unshift(["livro","Quem conta, quem joga",`${esc(J.equipa[0])} conta a história de cada peça; ${esc(J.equipa[1])} procuram, respondem e montam. O jogo avisa quando é para passar o telemóvel.`]);
+  else if(!soVer&&J&&J.equipa.length>1)L.unshift(["utilizador","Cada um tem um papel","Aponta, Responde e Monta. O jogo avisa quando é para passar o telemóvel."]);
   app.innerHTML=`<main class="ecra">
-    ${soVer?barraApp("Como se joga"):`<h2>Como se joga</h2>`}
-    <p class="nota">Estes sinais aparecem durante o jogo.</p>
-    ${PASSOS.map(([ic,t,d])=>`<div class="passo-ic"><div class="ic">${I(ic)}</div><div><b>${t}</b>${d}</div></div>`).join("")}
-    ${!soVer&&J&&J.familia?`<p class="caixa amarela"><b>${esc(J.equipa[0])}</b> conta a história de cada peça aos netos; <b>${esc(J.equipa[1])}</b> procuram, respondem e montam. O jogo avisa quando é para passar o telemóvel.</p>`:""}
-    ${!soVer&&J&&!J.familia&&J.equipa.length>1?`<p class="caixa amarela">Em equipa, cada um tem um papel. O jogo avisa quando é para passar o telemóvel.</p>`:""}
-    ${soVer?"":`<button class="prim larga grande" id="ok">Vamos procurar</button>`}</main>`;
+    ${barraApp("Como se joga",soVer?"volta":"volta")}
+    <div class="carrossel" id="car" style="flex:1;align-items:stretch">${L.map(([ic,t,d],i)=>`<div class="passo-c"><div class="ic">${I(ic)}</div><b>${t}</b><p>${d}</p><small>${i+1} de ${L.length}${i===0?" · desliza →":""}</small></div>`).join("")}</div>
+    <div class="pontos" id="pts" aria-hidden="true">${L.map(()=>"<i></i>").join("")}</div>
+    ${soVer?"":`<div class="rodape"><button class="prim larga grande" id="ok">Vamos procurar</button></div>`}</main>`;
+  carrossel(document.getElementById("car"),document.getElementById("pts"),0);
   if(soVer){document.getElementById("volta").onclick=()=>J&&emCurso()&&document.getElementById("volta").dataset.jogo?menuJogo():inicio();return}
+  document.getElementById("volta").onclick=()=>{J=null;guardar();configurar()};
   document.getElementById("ok").onclick=()=>passar("aponta",()=>J.modo==="ra"?procurar():semRA());
 }
 
@@ -841,6 +997,7 @@ function pararCamara(){
   document.querySelectorAll(".demo-ov").forEach(e=>e.remove());
   if(cam.cena3d)cam.cena3d.parar();
   if(cam.ouvinte)window.removeEventListener("deviceorientation",cam.ouvinte);
+  if(cam.movimento)window.removeEventListener("devicemotion",cam.movimento);
   if(cam.teclas)window.removeEventListener("keydown",cam.teclas);
   if(cam.stream)cam.stream.getTracks().forEach(t=>t.stop()); // D2: câmara só enquanto se procura
   cam={stream:null,raf:0,tick:0,ouvinte:null};
@@ -853,6 +1010,14 @@ function procurar(){
   if(!faltam.length)return passar("monta",montar);
   if(J.xr&&window.RA3D&&RA3D.xr)return iniciarXR(); // RA no chão (WebXR), se foi escolhida
   const FOV=60;
+  // Joga-se A ANDAR: cada peça está a alguns metros, numa direcção. O telemóvel conta os passos
+  // (acelerómetro) e a peça só aparece quando se chega perto. No modo família joga-se sentado:
+  // as peças ficam à volta, a rodar no lugar (R14, D5).
+  const sentado=!!J.familia, PASSO=0.7, VER=4, APANHA=1.6;
+  const DIST=[6,9,12,7.5,14,10.5].map(d=>d*(J.espaco==="pequeno"?.5:1));
+  const mundo={}; // posição de cada peça (m), em relação ao sítio e à direcção em que se começa
+  faltam.forEach(p=>{const k=PECAS.indexOf(p),a=p.az*Math.PI/180,d=sentado?3:DIST[k%DIST.length];mundo[p.id]={x:Math.sin(a)*d,y:Math.cos(a)*d}});
+  const eu={x:0,y:0};
   app.innerHTML=`<div class="cam" id="cam">
     <div class="pano" id="pano"></div>
     <video id="vid" playsinline muted autoplay></video>
@@ -860,6 +1025,7 @@ function procurar(){
     <div id="mundo">${faltam.map(p=>`<div class="peca-ra" data-id="${p.id}" role="button" aria-label="${esc(p.nome)}">${svgPeca(p.id)}<span class="mao" aria-hidden="true">${I("mao")}</span></div>`).join("")}</div>
     <div class="info-topo">
       <span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>
+      ${sentado?"":`<span class="pill" id="npassos">${I("pe")}<span>0 passos</span></span>`}
       ${etiquetaPapel("aponta")}
       <div class="calor" aria-hidden="true"><i id="calor"></i></div>
     </div>
@@ -867,9 +1033,10 @@ function procurar(){
     <div class="aviso-cam" id="aviso" hidden></div>
     <button class="rodar esq" id="re" aria-label="Rodar para a esquerda" hidden>${I("voltar")}</button>
     <button class="rodar dir" id="rd" aria-label="Rodar para a direita" hidden>${I("seta")}</button>
+    <button class="rodar andar" id="ra" aria-label="Dar um passo em frente" hidden>${I("pe")}</button>
     <div class="seta-lado oculta" id="seta" aria-hidden="true">${I("seta2")}</div>
     <div class="pegadas oculta" id="pegadas" aria-hidden="true">${PEGADAS}</div>
-    <div class="dica" id="dica" role="status" aria-live="polite">Roda devagar…</div>
+    <div class="dica" id="dica" role="status" aria-live="polite">${sentado?"Roda devagar…":"Anda e segue as pegadas"}</div>
     <div class="fundo-cam">
       <button id="bmenu">${I("pausa")}Pausa</button>
       <button id="bexemplo">${I("ajuda")}Ajuda</button>
@@ -879,7 +1046,7 @@ function procurar(){
     </div></div>`;
   const $=id=>document.getElementById(id);
   const vid=$("vid"),pano=$("pano"),dica=$("dica"),alvo=$("alvo"),calor=$("calor");
-  let rumo=0, alvoRumo=0, base=null, giroscopio=false, fixado=null, perto=0, encontrada=null, ultimaDica="";
+  let rumo=0, alvoRumo=0, base=null, giroscopio=false, movimento=false, passos=0, fixado=null, perto=0, encontrada=null, ultimaDica="";
 
   // Câmara traseira (se houver). Sem câmara → fundo desenhado.
   if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
@@ -898,15 +1065,33 @@ function procurar(){
     alvoRumo=norm(h-base);
   };
   window.addEventListener("deviceorientation",cam.ouvinte);
-  // Sem giroscópio (computador): setas, arrastar ou teclado
-  setTimeout(()=>{if(!giroscopio){$("re").hidden=$("rd").hidden=false}},900);
-  $("re").onclick=()=>alvoRumo-=20; $("rd").onclick=()=>alvoRumo+=20;
-  cam.teclas=e=>{if(e.key==="ArrowLeft")alvoRumo-=10;if(e.key==="ArrowRight")alvoRumo+=10};
+  // Passos: picos da aceleração (com a gravidade), no máximo ~3 por segundo
+  function passo(){
+    if(sentado)return;
+    const a=rumo*Math.PI/180;eu.x+=Math.sin(a)*PASSO;eu.y+=Math.cos(a)*PASSO;passos++;
+    const n=$("npassos");if(n)n.lastElementChild.textContent=passos+(passos===1?" passo":" passos");
+  }
+  let filtro=9.8, emCima=false, ultimo=0;
+  cam.movimento=e=>{
+    const g=e.accelerationIncludingGravity;if(!g||g.x==null)return;
+    if(!movimento){movimento=true;$("ra").hidden=true}
+    filtro=filtro*.75+Math.hypot(g.x,g.y,g.z)*.25;
+    const t=performance.now();
+    if(!emCima&&filtro>11.2&&t-ultimo>300){emCima=true;ultimo=t;passo()}
+    else if(emCima&&filtro<10.3)emCima=false;
+  };
+  window.addEventListener("devicemotion",cam.movimento);
+  // Sem sensores (computador, para testar): ◀ ▶ para rodar e o botão das pegadas (ou ↑) para andar
+  setTimeout(()=>{if(!$("cam"))return;if(!giroscopio){$("re").hidden=$("rd").hidden=false}
+    if(!movimento&&!sentado){$("ra").hidden=false}},1200);
+  $("re").onclick=()=>alvoRumo-=20; $("rd").onclick=()=>alvoRumo+=20; $("ra").onclick=passo;
+  cam.teclas=e=>{if(e.key==="ArrowLeft")alvoRumo-=10;if(e.key==="ArrowRight")alvoRumo+=10;if(e.key==="ArrowUp"){e.preventDefault();passo()}};
   window.addEventListener("keydown",cam.teclas);
   let arrasto=null;
   $("cam").addEventListener("pointerdown",e=>{if(!giroscopio&&!e.target.closest("button,.peca-ra"))arrasto=e.clientX});
   $("cam").addEventListener("pointermove",e=>{if(arrasto!=null){alvoRumo-=(e.clientX-arrasto)*.25;arrasto=e.clientX}});
   window.addEventListener("pointerup",()=>arrasto=null,{once:false});
+  if(!sentado&&!J.viuAndar){J.viuAndar=true;guardar();setTimeout(()=>{if($("cam"))aviso("As peças estão escondidas a alguns metros. Anda com o telemóvel à frente: ele conta os teus passos e a peça aparece quando chegares perto.")},400)}
 
   // Peças em 3D (modelos do Blender) por cima da câmara; se não houver WebGL ficam os desenhos 2D
   if(window.RA3D){const tres=$("tres");
@@ -933,36 +1118,52 @@ function procurar(){
     cam.raf=requestAnimationFrame(quadro);
     if(!fixado)rumo+=norm(alvoRumo-rumo)*.25;
     pano.style.backgroundPositionX=(-rumo*12)+"px";
-    let melhor=null,md=999;
+    // onde está cada peça em relação ao jogador: direcção (graus) e distância (m)
+    let melhor=null;
+    const info={};
     for(const el of els){
-      const p=PECAS.find(x=>x.id===el.dataset.id);
-      let d=norm(p.az-rumo);
+      const p=PECAS.find(x=>x.id===el.dataset.id), w=mundo[p.id];
+      const dx=w.x-eu.x, dy=w.y-eu.y, dist=Math.hypot(dx,dy), az=Math.atan2(dx,dy)*180/Math.PI;
+      let d=norm(az-rumo);
       if(fixado===p.id)d=0;
-      const visivel=Math.abs(d)<FOV/2+12;
+      const ve=sentado||dist<VER||fixado===p.id;  // longe demais: não se vê (tem de se andar)
+      const visivel=ve&&Math.abs(d)<FOV/2+12;
       el.style.display=visivel?"flex":"none";
       if(visivel)el.style.left=(50+d/FOV*100)+"%";
-      if(Math.abs(d)<md){md=Math.abs(d);melhor={p,d,el}}
+      if(ve)info[p.id]={az,dist};
+      if(!melhor||dist<melhor.dist||(sentado&&Math.abs(d)<Math.abs(melhor.d)))melhor={p,d,el,dist};
     }
     if(!melhor)return;
-    // radar: só a peça mais próxima
-    const r=2.3, ang=melhor.d*Math.PI/180;
+    const md=Math.abs(melhor.d), longe=!sentado&&melhor.dist>=VER;
+    // radar: a peça mais próxima (mais perto do centro quanto mais perto estiver)
+    const r=sentado?2.3:.5+1.8*Math.min(1,melhor.dist/14), ang=melhor.d*Math.PI/180;
     alvo.style.transform=`translate(${Math.sin(ang)*r}rem,${-Math.cos(ang)*r}rem)`;
-    perto=Math.max(0,1-md/120);
+    perto=sentado?Math.max(0,1-md/120):Math.max(0,1-Math.max(0,melhor.dist-APANHA)/12)*(md<45?1:.6);
     calor.style.width=(perto*100)+"%";
-    // encontrar: a peça fica no centro durante meio segundo (interacção 2)
-    if(md<9){ if(!desde)desde=performance.now(); }else desde=0;
+    // encontrar: perto dela e com ela no centro durante meio segundo (interacção 2)
+    if(md<9&&(sentado||melhor.dist<APANHA)){ if(!desde)desde=performance.now(); }else desde=0;
     const achou=desde&&performance.now()-desde>450 || fixado===melhor.p.id;
     els.forEach(el=>el.classList.toggle("encontrada",achou&&el===melhor.el));
     if(achou&&encontrada!==melhor.p.id){encontrada=melhor.p.id;som("encontrar");vibrar([90,50,90]);$("bfixar").hidden=false}
     if(!achou&&encontrada&&!fixado){encontrada=null;$("bfixar").hidden=true}
-    let t,cls="";
-    if(achou){t="Encontraste! Toca na peça";cls="quente"}
-    else if(md<30){t="Mais perto!";cls="quente"}
-    else if(md<70)t=melhor.d>0?"Mais perto! Vira à direita →":"← Mais perto! Vira à esquerda";
-    else t=melhor.d>0?"Vira à direita →":"← Vira à esquerda";
-    sinais($("pegadas"),$("seta"),achou?null:md<20?"frente":melhor.d>0?"dir":"esq");
+    let t,cls="",dir;
+    const vira=melhor.d>0?"Vira à direita →":"← Vira à esquerda";
+    if(achou){t="Encontraste! Toca na peça";cls="quente";dir=null}
+    else if(longe){
+      const n=Math.max(1,Math.ceil((melhor.dist-APANHA+.2)/PASSO));
+      if(md<25){t=`Anda em frente · ${n} ${n===1?"passo":"passos"}`;dir="frente"}else{t=vira;dir=melhor.d>0?"dir":"esq"}
+      if(melhor.dist<7&&md<25)cls="quente";
+    }
+    else if(!sentado&&melhor.dist>=APANHA){t=md<25?"Está perto! Mais um passo":vira;cls="quente";dir=md<25?"frente":melhor.d>0?"dir":"esq"}
+    else{
+      if(md<9)t="Segura assim…",cls="quente";
+      else if(md<30)t=melhor.d>0?"Quase! Um pouco à direita →":"← Quase! Um pouco à esquerda",cls="quente";
+      else t=melhor.d>0?"Mais perto! Vira à direita →":"← Mais perto! Vira à esquerda";
+      dir=md<20?"frente":melhor.d>0?"dir":"esq";
+    }
+    sinais($("pegadas"),$("seta"),dir);
     if(t!==ultimaDica){dica.textContent=t;dica.className="dica "+cls;ultimaDica=t}
-    if(cam.cena3d)cam.cena3d.desenhar(rumo,encontrada,fixado);
+    if(cam.cena3d)cam.cena3d.desenhar(rumo,encontrada,fixado,info);
   }
   quadro();
   // quente/frio: vibra mais vezes quando a peça está perto (C1)
@@ -1070,20 +1271,20 @@ function semRA(){
   app.innerHTML=`<main class="ecra">
     <div class="barra-topo"><span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>${etiquetaPapel("aponta")}</div>
     <h2>Onde estão as peças?</h2>
-    <p class="nota">Vai até ao sítio da imagem e toca em <b>Estou aqui</b>.</p>
-    ${faltam.map(p=>`<div class="local"><div class="foto">${svgPeca(p.id)}</div>
-      <div><b>${esc(p.onde)}</b><button class="prim larga" data-id="${p.id}">${I("pino")}Estou aqui</button></div></div>`).join("")}
-    <div class="linha"><button id="bmenu">${I("pausa")}Pausa</button><button id="bmontar">${I("grelha")}Montar (${contar("recolhida")-contar("colocada")})</button></div></main>`;
+    <p class="nota" style="margin-top:0">Vai até ao sítio da imagem e toca em <b>Estou aqui</b>.</p>
+    <div class="locais">${faltam.map(p=>`<div class="local"><div class="foto">${svgPeca(p.id)}</div>
+      <b>${esc(p.onde)}</b><button class="prim larga" data-id="${p.id}">${I("pino")}Estou aqui</button></div>`).join("")}</div>
+    <div class="rodape"><div class="barra-jogo"><button id="bmenu">${I("pausa")}Pausa</button><button id="bmontar">${I("grelha")}Montar (${contar("recolhida")-contar("colocada")})</button></div></div></main>`;
   document.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{
     const p=PECAS.find(x=>x.id===b.dataset.id);
     som("encontrar");vibrar([90,50,90]);
-    app.innerHTML=`<main class="ecra" style="text-align:center">
+    app.innerHTML=`<main class="ecra"><div class="centro">
       <h2>Encontraste uma peça!</h2>
       <div style="position:relative;width:14rem;margin:1rem auto">
         <button id="pg" aria-label="Recolher ${esc(p.nome)}" style="border:4px solid var(--ouro);background:var(--sup);padding:1rem;width:14rem;height:14rem;display:block;border-radius:1.2rem">${svgPeca(p.id)}</button>
         <span class="mao ver" aria-hidden="true">${I("mao")}</span></div>
-      <p class="destaque">${esc(p.nome)}</p><p>Toca na peça para a recolher.</p>
-      <button class="larga" id="vt">${I("voltar")}Voltar</button></main>`;
+      <p class="destaque">${esc(p.nome)}</p><p>Toca na peça para a recolher.</p></div>
+      <div class="rodape"><button class="larga" id="vt">${I("voltar")}Voltar</button></div></main>`;
     document.getElementById("pg").onclick=()=>recolher(p.id);
     document.getElementById("vt").onclick=semRA;
   });
@@ -1096,12 +1297,12 @@ function curiosidade(p){
   const fam=J.familia;
   app.innerHTML=`<main class="ecra">
     <div class="barra-topo"><span class="pill">${esc(p.nome)}</span>${etiquetaPapel(fam?"conta":"responde")}</div>
-    <div class="peca-grande" id="p3d">${svgPeca(p.id)}</div>
+    <div class="peca-grande" id="p3d" style="margin-top:-.3rem">${svgPeca(p.id)}</div>
     <h2>${fam?"Conta esta história aos netos":"Sabias que…"}</h2>
     ${fam?`<p class="nota">Leia ou oiça, e depois conte por palavras suas. Se souber mais alguma coisa sobre este lugar, conte também!</p>`:""}
     <p class="legenda" id="leg">${esc(p.curio)}</p>
     <div class="linha"><button id="ouvir">${I("som")}Ouvir de novo</button><button id="pausa">${I("parar")}Parar</button></div>
-    <button class="prim larga grande" id="seg" disabled style="margin-top:1rem">A carregar a pergunta…</button>
+    <div class="rodape"><button class="prim larga grande" id="seg" disabled>A carregar a pergunta…</button></div>
   </main>`;
   const seg=document.getElementById("seg");
   if(window.RA3D){const v=document.getElementById("p3d");RA3D.visualizador(v,[p.id]).then(()=>{const s=v.querySelector("img");if(s)s.style.display="none"}).catch(()=>{})}
@@ -1118,8 +1319,8 @@ function curiosidade(p){
 function pergunta(p){
   app.innerHTML=`<main class="ecra">
     <div class="barra-topo"><span class="pill" style="color:var(--ouro)">${I("estrela")}<span style="color:var(--fg)">${J.pontos} pontos</span></span>${etiquetaPapel("responde")}</div>
-    <h2>${esc(p.q)}</h2>
-    <div class="opcoes">${p.o.map((o,i)=>`<button data-i="${i}">${esc(o)}</button>`).join("")}</div>
+    <div class="q-zona"><p class="sub" style="margin:0">Pergunta</p><h2>${esc(p.q)}</h2></div>
+    <div class="rodape"><div class="opcoes">${p.o.map((o,i)=>`<button data-i="${i}"><span class="letra">${"ABC"[i]}</span>${esc(o)}</button>`).join("")}</div></div>
     <div id="retro" role="status" aria-live="assertive"></div></main>`;
   falar(p.q);
   const t0=Date.now();
@@ -1133,9 +1334,10 @@ function pergunta(p){
     const st=J.pecas[p.id];st.respondida=true;st.certa=certa;if(certa)J.pontos+=PONTOS_CERTA;guardar();
     som(certa?"certo":"errado");vibrar(certa?60:[200,80,200]);
     const txt=certa?`Certo! ${p.o[p.a]}. Mais ${PONTOS_CERTA} pontos.`:`Não foi desta. A resposta certa é: ${p.o[p.a]}.`;
-    document.getElementById("retro").innerHTML=`<p class="retro" style="color:${certa?"var(--ok)":"var(--erro)"}">${esc(txt)}</p>
+    document.getElementById("retro").innerHTML=`<div class="resultado${certa?"":" mal"}"><div class="pega" aria-hidden="true" style="width:2.6rem;height:.3rem;border-radius:999px;background:var(--linha);margin:.2rem auto 0"></div>
+      <p class="retro" style="color:${certa?"var(--ok)":"var(--erro)"}">${esc(txt)}</p>
       <p class="legenda">${esc(p.explica)}</p>
-      <button class="prim larga grande" id="cont">${contar("recolhida")<PECAS.length?"Procurar a próxima peça":N.monta}</button>`;
+      <button class="prim larga grande" id="cont">${contar("recolhida")<PECAS.length?"Procurar a próxima peça":N.monta}</button></div>`;
     falar(txt+" "+p.explica);
     document.getElementById("cont").onclick=()=>{pararVoz();contar("recolhida")<PECAS.length?passar("aponta",procurar):passar("monta",montar)};
   });
@@ -1148,23 +1350,23 @@ function montar(){
   const faltam=PECAS.length-contar("recolhida");
   app.innerHTML=`<main class="ecra">
     <div class="barra-topo"><span class="pill">${I("grelha")}${contar("colocada")}/${PECAS.length} no lugar</span>${etiquetaPapel("monta")}</div>
-    <h2>${N.monta}</h2>
-    <p class="nota">${N.notaTab}</p>
-    <div class="legenda-ic" aria-hidden="true"><span>Arrasta para o lugar</span><span>Toca para rodar</span><span style="border-color:var(--ok);color:var(--ok)">Verde = pronta</span></div>
+    <h2 style="margin:.2rem 0 .1rem">${N.monta}</h2>
+    <p class="nota" style="margin:0 0 .6rem">${N.notaTab} Arrasta para o lugar; toca para rodar.</p>
     <div class="tabuleiro" id="tab">${fundoTab()}
       ${PECAS.map(p=>{const c=J.pecas[p.id].colocada;return `<div class="slot ${c?"":"vazio"}" data-slot="${p.id}" style="${posSlot(p.slot,p.z)}">${svgPeca(p.id,"cima")}</div>`}).join("")}
     </div>
-    <h3 style="display:flex;align-items:center;gap:.4rem">${I("mochila")}Mochila</h3>
+    ${!naMochila.length&&faltam?`<p class="caixa amarela">A mochila está vazia. Ainda faltam <b>${faltam}</b> peças para encontrar.</p>`:""}
+    <div class="rodape">
+    <span class="rotulo-mochila">${I("mochila")}Mochila</span>
     <div class="mochila">
       ${naMochila.map(p=>`<div class="mpeca ${J.pecas[p.id].rot===0?"pronta":""}" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.nome)}. ${J.pecas[p.id].rot===0?"Pronta: arrasta para encaixar.":"Toca para rodar."}"><div style="width:100%;height:100%;transform:rotate(${J.pecas[p.id].rot}deg);transition:transform .2s">${svgPeca(p.id,"cima")}</div><small>${I(J.pecas[p.id].rot===0?"visto":"rodar")}</small></div>`).join("")}
       ${[...Array(faltam)].map(()=>`<div class="mpeca bloq" aria-label="Peça por encontrar">?</div>`).join("")}
     </div>
-    ${!naMochila.length&&faltam?`<p class="caixa amarela">A mochila está vazia. Ainda faltam <b>${faltam}</b> peças para encontrar.</p>`:""}
-    <div class="linha" style="margin-top:1rem">
+    <div class="barra-jogo">
       <button id="bmenu">${I("pausa")}Pausa</button>
       ${naMochila.length?`<button id="bdica">${I("dica")}Dica</button>`:""}
       ${faltam?`<button class="prim" id="bproc">${I("radar")}Procurar (${faltam})</button>`:""}
-    </div></main>`;
+    </div></div></main>`;
   document.getElementById("bmenu").onclick=menuJogo;
   J.falhas=J.falhas||{};
   if(naMochila.length){
@@ -1290,22 +1492,24 @@ function fim(){
   const PROX=NIVEIS[NIVEIS.indexOf(N)+1]||null;
   const res=ler(CHAVE_RES,[]); if(!res.includes(linha)){res.push(linha);gravar(CHAVE_RES,res)}
   app.innerHTML=`<main class="ecra">
-    <p class="sub" style="text-align:center;margin-top:1rem">Nível ${NIVEIS.indexOf(N)+1} concluído</p>
+    <p class="sub" style="text-align:center;margin-bottom:0">Nível ${NIVEIS.indexOf(N)+1} concluído</p>
     <h1 style="text-align:center">${N.feito}</h1>
-    <p style="text-align:center;font-size:2rem;margin:.2rem 0 .8rem">${estrelas(certas===PECAS.length?3:certas>=4?2:1)}</p>
-    <div class="tabuleiro vista3d" id="v3d">${fundoTab()}${PECAS.map(p=>`<div class="slot" style="${posSlot(p.slot,p.z)}">${svgPeca(p.id,"cima")}</div>`).join("")}</div>
-    <p class="destaque" style="margin-top:1rem;text-align:center">${certas} de ${PECAS.length} respostas certas · ${J.pontos} pontos</p>
-    <section class="caixa amarela"><h3 style="margin-top:0">Três coisas para lembrar</h3>
-      <ol style="font-size:1.1rem;margin:0;padding-left:1.3rem">${N.lembrar.map(l=>`<li>${l}</li>`).join("")}</ol></section>
-    ${PROX?`<button class="prim larga grande" id="prox">${I("play")}Próximo nível: ${PROX.nome}</button>
+    <p style="text-align:center;font-size:2.2rem;margin:0 0 .6rem">${estrelas(certas===PECAS.length?3:certas>=4?2:1)}</p>
+    <div class="tabuleiro vista3d" id="v3d" style="border-radius:1.5rem">${fundoTab()}${PECAS.map(p=>`<div class="slot" style="${posSlot(p.slot,p.z)}">${svgPeca(p.id,"cima")}</div>`).join("")}</div>
+    <div class="estat"><span><b>${certas}/${PECAS.length}</b>certas</span><span><b>${J.pontos}</b>pontos</span><span><b>${Math.max(1,Math.round((Date.now()-J.inicio)/60000))}</b>minutos</span></div>
+    <h3>Três coisas para lembrar</h3>
+    <section class="caixa" style="margin-top:0"><ol style="font-size:1.08rem;margin:0;padding-left:1.3rem">${N.lembrar.map(l=>`<li>${l}</li>`).join("")}</ol></section>
+    <div class="grupo">
+      <button class="item" id="prof">${I("partilhar")}<span class="txt">Enviar o resultado à professora</span>${I("seta")}</button>
+      <button class="item" id="sus">${I("formulario")}<span class="txt">Questionário (2 min)</span>${I("seta")}</button>
+      <button class="item" id="part">${I("partilhar")}<span class="txt">Partilhar</span>${I("seta")}</button>
+      <button class="item" id="novo">${I("reiniciar")}<span class="txt">Jogar outra vez</span>${I("seta")}</button></div>
+    <div class="rodape">${PROX?`<button class="prim larga grande" id="prox">${I("play")}Próximo: ${PROX.nome}</button>
       <button class="larga" id="ini">${I("casa")}Início</button>`
-      :`<button class="prim larga grande" id="ini">${I("casa")}Continuar</button>`}
-    <button class="larga" id="prof">${I("partilhar")}Enviar o resultado à professora</button>
-    <button class="larga" id="sus">${I("formulario")}Responder ao questionário (2 min)</button>
-    <div class="linha"><button id="part">${I("partilhar")}Partilhar</button><button id="novo">${I("reiniciar")}Jogar outra vez</button></div></main>`;
+      :`<button class="prim larga grande" id="ini">${I("casa")}Continuar</button>`}</div></main>`;
   if(window.RA3D){const v=document.getElementById("v3d");
     RA3D.visualizador(v,PECAS.map(p=>p.id),{montado:true}).then(()=>{v.querySelectorAll(".slot,.fundo").forEach(e=>e.remove());v.insertAdjacentHTML("beforeend",'<span class="dica3d">Arrasta para rodar</span>')}).catch(()=>{})}
-  falar(`Parabéns! Reconstruíram a Fortaleza de São Miguel. Acertaram ${certas} de ${PECAS.length} perguntas.`);
+  falar(`Parabéns! Reconstruíram ${MONUMENTO.nome}. Acertaram ${certas} de ${PECAS.length} perguntas.`);
   document.getElementById("prof").onclick=()=>partilhar(`Caçadores da História — ${MONUMENTO.nome}\n${J.equipa.join(", ")}: ${certas}/${PECAS.length} certas.\nCódigo do resultado (colar no resumo da turma):\n${linha}`);
   document.getElementById("part").onclick=()=>partilhar(`Reconstruímos a ${MONUMENTO.nome} no jogo Caçadores da História! ${certas}/${PECAS.length} respostas certas.`);
   document.getElementById("sus").onclick=questionarioSUS;
@@ -1323,20 +1527,20 @@ function questionarioSUS(){
   pararVoz();
   const resp=Array(10).fill(0);
   app.innerHTML=`<main class="ecra">
-    <h2>Questionário (2 minutos)</h2>
+    ${barraApp("Questionário (2 min)","vt0")}
     <p class="nota">1 = discordo totalmente · 5 = concordo totalmente. Não há respostas certas nem erradas.</p>
     ${SUS.map((q,i)=>`<div class="caixa"><p style="margin-top:0"><b>${i+1}.</b> ${esc(q)}</p>
       <div class="escala" role="group" aria-label="Resposta ${i+1}">${[1,2,3,4,5].map(v=>`<button data-q="${i}" data-v="${v}" aria-pressed="false">${v}</button>`).join("")}</div>
       <div class="linha nota" style="justify-content:space-between"><span>Discordo</span><span style="text-align:right">Concordo</span></div></div>`).join("")}
-    <button class="prim larga" id="env" disabled>Enviar</button>
-    <button class="larga" id="vt">Voltar sem responder</button></main>`;
+    <div class="rodape"><button class="prim larga grande" id="env" disabled>Enviar</button>
+    <button class="larga" id="vt">Voltar sem responder</button></div></main>`;
   const env=document.getElementById("env");
   document.querySelectorAll(".escala button").forEach(b=>b.onclick=()=>{
     const q=+b.dataset.q;resp[q]=+b.dataset.v;
     b.parentNode.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));
     env.disabled=resp.some(v=>!v);
   });
-  document.getElementById("vt").onclick=fim;
+  document.getElementById("vt").onclick=fim;document.getElementById("vt0").onclick=fim;
   env.onclick=()=>{
     // ímpares: resposta − 1; pares: 5 − resposta; soma × 2,5 → 0 a 100
     const nota=resp.reduce((s,v,i)=>s+(i%2===0?v-1:5-v),0)*2.5;
@@ -1526,10 +1730,58 @@ function diagnostico(){
   };
 }
 
+/* ---------------- Instalar ----------------
+   Android: a app (APK, abre o jogo no Chrome em ecrã inteiro) ou "Instalar aplicação" do Chrome.
+   iPhone: Safari → Partilhar → Adicionar ao ecrã principal. */
+const APK="instalar/cacadores-da-historia.apk";
+let PEDIDO_INSTALAR=null;
+const instalada=()=>{try{return matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches||navigator.standalone===true||document.referrer.startsWith("android-app://")}catch(e){return false}};
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();PEDIDO_INSTALAR=e;const b=document.getElementById("binst");if(b)b.hidden=false});
+window.addEventListener("appinstalled",()=>{PEDIDO_INSTALAR=null;toast("App instalada! Já a encontras no ecrã inicial.");const b=document.getElementById("binst");if(b)b.hidden=true});
+function instalar(){
+  const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent), android=/Android/i.test(navigator.userAgent);
+  abrirFolha(`<div class="appbar"><h2 id="ftit">Instalar a app</h2><button class="icbtn" id="fx" aria-label="Fechar">${I("fechar")}</button></div>
+    <p class="nota" style="margin-top:0">Fica um ícone no ecrã inicial e o jogo abre em ecrã inteiro, sem ter de usar o link. Depois da primeira vez, funciona sem internet.</p>
+    ${ios?`<div class="grupo"><div class="item" style="cursor:default"><span class="txt">1. No Safari, toca em <b>Partilhar</b> (o quadrado com a seta).</span></div>
+      <div class="item" style="cursor:default"><span class="txt">2. Escolhe <b>Adicionar ao ecrã principal</b>.</span></div></div>`
+    :`${PEDIDO_INSTALAR?`<button class="prim larga grande" id="ipwa">${I("descarregar")}Instalar agora</button>`:""}
+      <a class="btn larga ${PEDIDO_INSTALAR?"":"prim grande"}" id="iapk" href="${APK}" download style="text-decoration:none">${I("telemovel")}Descarregar a app Android (APK, 2 MB)</a>
+      <div class="grupo">
+        <div class="item" style="cursor:default"><span class="txt">1. Abre o ficheiro descarregado.</span></div>
+        <div class="item" style="cursor:default"><span class="txt">2. Se o telemóvel pedir, permite <b>instalar apps desta origem</b> (é só para esta app).</span></div>
+        <div class="item" style="cursor:default"><span class="txt">3. Toca em <b>Instalar</b> e depois em <b>Abrir</b>.</span></div></div>
+      ${android?"":`<p class="nota">Estás num computador: lê o código QR da Área da professora com o telemóvel, ou abre este link no telemóvel.</p>`}`}`,
+  v=>{v.querySelector("#fx").onclick=fecharFolha;
+    const b=v.querySelector("#ipwa");if(b)b.onclick=async()=>{const e=PEDIDO_INSTALAR;PEDIDO_INSTALAR=null;fecharFolha();try{e.prompt();await e.userChoice}catch(x){}};
+    const a=v.querySelector("#iapk");if(a)a.onclick=()=>setTimeout(()=>toast("A descarregar… abre o ficheiro quando acabar."),100);});
+}
+// ?instalar abre logo o painel de instalação (é para onde aponta o QR "instalar")
+const PEDIU_INSTALAR=(()=>{try{return new URLSearchParams(location.search).has("instalar")}catch(e){return false}})();
+
+/* ---------------- Comportamento de app ----------------
+   Botão "voltar" do Android: fecha o painel aberto ou volta ao ecrã anterior, em vez de sair
+   do jogo; no ecrã inicial é preciso tocar duas vezes para sair. */
+let avisoSair=0;
+try{history.replaceState({ch:0},"");history.pushState({ch:1},"")}catch(e){}
+window.addEventListener("popstate",()=>{
+  const fica=()=>{try{history.pushState({ch:1},"")}catch(e){}};
+  const veu=document.querySelector(".veu");
+  if(veu){veu.dispatchEvent(new MouseEvent("click",{bubbles:true}));return fica()}
+  const demo=document.querySelector(".demo-ov");if(demo){const b=demo.querySelector("button");b?b.click():demo.remove();return fica()}
+  const b=document.querySelector("#volta,#vt,#vt0,#bmenu");
+  if(b){b.click();return fica()}
+  if(J&&emCurso()&&!document.querySelector(".titulo")){menuJogo();return fica()}
+  if(Date.now()-avisoSair<2500){history.back();return}
+  avisoSair=Date.now();toast("Toca outra vez em voltar para sair.");fica();
+});
+// retroacção táctil leve em cada botão (como nas apps)
+document.addEventListener("pointerdown",e=>{if(e.target.closest&&e.target.closest("button:not(:disabled)"))vibrar(8)},{passive:true});
+
 /* ---------------- Arranque ---------------- */
 if("serviceWorker" in navigator&&location.protocol!=="file:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 if("speechSynthesis" in window)speechSynthesis.getVoices();
 inicio();
+if(PEDIU_INSTALAR&&!instalada())setTimeout(instalar,300);
 if(TURMA_URL)toast("Turma "+TURMA_URL+": toca em Jogar para começar.",4000);
 </script>
 </body>

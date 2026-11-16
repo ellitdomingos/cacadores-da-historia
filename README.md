@@ -13,6 +13,9 @@ PL 3–8 (`IHC/pl/guioes`). HTML/CSS/JS sem build; three.js r160 guardado em `ve
 | `modelos/<nível>/` | Peças e base (.glb), posições (`pecas.json`) e renderizações (`img/`) de cada nível |
 | `modelos/tabuleiros.js` | O lugar de cada peça no tabuleiro de cada nível (gerado) |
 | `sw.js`, `manifest.webmanifest` | Funcionar offline / instalar no ecrã inicial |
+| `instalar/cacadores-da-historia.apk` | A app Android (Trusted Web Activity: abre o jogo no Chrome em ecrã inteiro) |
+| `android/twa-manifest.json` | Configuração da app Android (Bubblewrap); o resto da pasta é gerado e não vai para o git |
+| `vendor/fredoka.woff2` | Letra Fredoka (títulos e botões), SIL OFL 1.1 |
 
 ## Modelos 3D (Blender)
 ```bash
@@ -40,6 +43,23 @@ Para mudar uma peça, editar a função dela no script (`baluarte_canto()`, `por
 Também se podem abrir os `.glb` no Blender, melhorá-los à mão e exportá-los de novo com o mesmo nome
 (origem no centro da base, Y para cima). Se não houver WebGL, o jogo usa os desenhos 2D.
 
+## Instalar no telemóvel
+- **Android:** https://ellitdomingos.github.io/cacadores-da-historia/instalar/cacadores-da-historia.apk
+  (ou, no jogo, Definições → Instalar a app). É preciso permitir "instalar apps desta origem".
+  A app é só uma janela do Chrome para o site, por isso as actualizações do jogo chegam sem reinstalar.
+- **iPhone:** Safari → Partilhar → Adicionar ao ecrã principal.
+- `?instalar` no fim do link abre logo o painel de instalação.
+
+Para gerar de novo o APK (Java 21 e SDK Android; a chave fica em `~/.android-chaves/`, **fora do repositório**):
+```bash
+cd android && bubblewrap update --skipVersionUpgrade
+BUBBLEWRAP_KEYSTORE_PASSWORD=$(cat ~/.android-chaves/senha.txt) BUBBLEWRAP_KEY_PASSWORD=$(cat ~/.android-chaves/senha.txt) bubblewrap build --skipPwaValidation
+cp app-release-signed.apk ../instalar/cacadores-da-historia.apk
+```
+Para a app abrir **sem barra de endereço**, o ficheiro `.well-known/assetlinks.json` (com a impressão digital
+SHA-256 da chave) tem de estar na raiz do domínio: `https://ellitdomingos.github.io/.well-known/assetlinks.json`,
+ou seja, num repositório `ellitdomingos.github.io` (com `.nojekyll`).
+
 ## Publicar no GitHub Pages
 1. Em https://github.com/new criar um repositório **público** chamado `cacadores-da-historia` (sem README).
 2. Nesta pasta:
@@ -58,7 +78,7 @@ os telemóveis apanham a versão nova da próxima vez que o abrirem com internet
 ```bash
 python3 -m http.server 8080      # ou: npx http-server
 ```
-- No computador: abrir http://localhost:8080 (rodar com ◀ ▶, arrastar ou com as setas do teclado).
+- No computador: abrir http://localhost:8080 (rodar com ◀ ▶ ou ← →, **andar com ↑** ou com o botão das pegadas).
 - No telemóvel: a câmara e o giroscópio exigem **https**. Por exemplo,
   `npx localtunnel --port 8080` ou `cloudflared tunnel --url http://localhost:8080`.
   Abrir o endereço uma vez com rede: depois funciona sem internet (service worker).
@@ -66,7 +86,7 @@ python3 -m http.server 8080      # ou: npx http-server
 ## O que está implementado (ligação ao dossier)
 | Dossier | No protótipo |
 |---|---|
-| Ecrã 1 Procurar: radar (A1), quente/frio (C1), "Mais perto!" (DC3) | RA por orientação: câmara traseira + giroscópio; as peças estão à volta do jogador (serve também de **modo sentado**, R14) |
+| Ecrã 1 Procurar: radar (A1), quente/frio (C1), "Mais perto!" (DC3) | RA por orientação: câmara traseira + giroscópio + **contador de passos** (acelerómetro). As peças estão a 4–14 m (sala: 2–7 m) e só aparecem a menos de 4 m; apanha-se a menos de 1,6 m. No modo família ficam à volta, a rodar no lugar (**modo sentado**, R14) |
 | Ecrã 2 Peça encontrada: contorno escuro, vibração + som (M2), **Fixar** | ✓ |
 | Ecrã 3 Pergunta: curiosidade em áudio + legenda (R8, R13), 3 respostas, certo/errado já com a resposta certa | Voz por `speechSynthesis`; a pergunta só abre depois da curiosidade (D1); só a resposta certa dá pontos |
 | Ecrã 4 Montar: tabuleiro 2D (D2), íman (DC1), rodar com um toque (DC2) | ✓ |

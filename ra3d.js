@@ -93,11 +93,20 @@ async function procura(contentor, pecas, fovH) {
   const t0 = performance.now();
   return {
     // rumo em graus; encontrada = id da peça encontrada (ou null); fixada = id fixado
-    desenhar(rumo, encontrada, fixada) {
+    // info (opcional) = {id: {az, dist}}: só se vêem as peças que lá estão, na direcção
+    // e à distância (em metros) a que estão do jogador; as outras ficam escondidas.
+    desenhar(rumo, encontrada, fixada, info) {
       if (!contentor.isConnected) return this.parar();
       cam.rotation.set(0, -THREE.MathUtils.degToRad(rumo), 0);
       const t = (performance.now() - t0) / 1000;
       for (const [id, g] of Object.entries(objs)) {
+        const inf = info ? info[id] : null;
+        g.visible = !info || !!inf || id === fixada;
+        if (!g.visible) continue;
+        if (inf) {
+          const a = THREE.MathUtils.degToRad(inf.az), rr = Math.max(1.5, Math.min(3.4, inf.dist));
+          g.position.x = Math.sin(a) * rr; g.position.z = -Math.cos(a) * rr; g.rotation.y = -a;
+        }
         const alvo = g.userData.base * (id === encontrada ? 1.5 : 1);
         g.scale.setScalar(g.scale.x + (alvo - g.scale.x) * 0.2);
         g.children[0].rotation.y = t * 0.6;               // roda devagar sobre si

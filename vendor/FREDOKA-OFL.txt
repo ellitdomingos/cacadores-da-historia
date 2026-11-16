@@ -1,0 +1,3 @@
+Fredoka (vendor/fredoka.woff2), Copyright 2016 The Fredoka Project Authors.
+Licenciada sob a SIL Open Font License 1.1: https://openfontlicense.org
+Fonte: Google Fonts (subconjunto latino, peso variável).

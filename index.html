@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0B1016">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -11,131 +11,253 @@
 <script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
 <script type="module" src="ra3d.js"></script>
 <style>
-/* R7: contraste ≥ 7:1 — preto, branco e amarelo; contornos escuros sobre a câmara.
-   R13: tudo em rem, para respeitar o tamanho de letra do sistema. */
+/* =====================================================================
+   Sistema de design — Caçadores da História
+   R7: contraste ≥ 7:1 (branco e dourado sobre fundo escuro; texto escuro sobre dourado)
+   R13: tudo em rem, para respeitar o tamanho de letra do sistema
+   Alvos de toque ≥ 48 px (3 rem). Um só destaque de cor: o dourado.
+   ===================================================================== */
 :root{
-  --bg:#000; --fg:#fff; --amarelo:#FFD400; --amarelo-esc:#7a6500;
-  --cinza:#1c1c1c; --linha:#ffffff; --ok:#7CFF9B; --erro:#FF8A8A; --azul:#9CD3FF;
-  --alvo:3rem; /* ≥ 48 px */
+  --bg:#0B1016; --bg2:#121A23; --sup:#18222D; --sup2:#223040; --linha:#2E3F52;
+  --fg:#FFFFFF; --fg2:#C9D4DF; --ouro:#FFC93C; --ouro2:#FFDE7A; --tinta:#0B1016;
+  --ok:#5BE38A; --erro:#FF8A80; --azul:#8CCBFF;
+  --r:1rem; --alvo:3rem; --sombra:0 .5rem 1.5rem rgba(0,0,0,.45);
+  --amarelo:var(--ouro);
 }
 *{box-sizing:border-box}
-html{font-size:100%}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--fg)}
-body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45;overscroll-behavior:none}
-#app{min-height:100%}
-.ecra{max-width:40rem;margin:0 auto;padding:1rem 1rem 6rem}
-h1{font-size:2rem;line-height:1.1;margin:.5rem 0}
-h2{font-size:1.5rem;margin:.5rem 0}
-h3{font-size:1.15rem;margin:.75rem 0 .25rem}
+html{font-size:100%;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;line-height:1.45;overscroll-behavior:none;
+  background:radial-gradient(120% 60% at 50% 0%,#1A2634 0%,var(--bg) 60%) fixed}
+#app{min-height:100vh}
+.ecra{max-width:34rem;margin:0 auto;padding:1rem 1rem 5rem;animation:entra .25s ease-out}
+@keyframes entra{from{opacity:0;transform:translateY(.4rem)}}
+h1{font-size:2rem;line-height:1.1;margin:.4rem 0 .6rem;letter-spacing:-.01em}
+h2{font-size:1.45rem;line-height:1.2;margin:.4rem 0 .6rem}
+h3{font-size:1.1rem;margin:1.2rem 0 .4rem;color:var(--fg2);font-weight:700}
 p{margin:.5rem 0}
-.sub{color:var(--amarelo);font-weight:700}
-.nota{font-size:.95rem;color:#ddd}
-button,.btn{font:inherit;font-weight:800;min-height:var(--alvo);min-width:var(--alvo);padding:.7rem 1.1rem;border-radius:.8rem;border:3px solid var(--fg);background:var(--bg);color:var(--fg);cursor:pointer;touch-action:manipulation}
-button:focus-visible,input:focus-visible{outline:4px solid var(--amarelo);outline-offset:3px}
-.prim{background:var(--amarelo);color:#000;border-color:var(--amarelo)}
-.larga{width:100%;display:block;margin:.6rem 0}
-button:disabled{opacity:.45;cursor:not-allowed}
+.sub{color:var(--ouro);font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:.8rem}
+.nota{font-size:.95rem;color:var(--fg2)}
+.i{width:1.3em;height:1.3em;flex:none;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.i.cheio{fill:currentColor;stroke:none}
+
+/* botões */
+button,.btn{font:inherit;font-weight:800;min-height:var(--alvo);min-width:var(--alvo);padding:.75rem 1.1rem;border-radius:.9rem;
+  border:2px solid var(--linha);background:var(--sup);color:var(--fg);cursor:pointer;touch-action:manipulation;
+  display:inline-flex;align-items:center;justify-content:center;gap:.55rem;transition:transform .08s,background .15s,border-color .15s}
+button:active:not(:disabled){transform:scale(.97)}
+button:hover:not(:disabled){border-color:#4A6178}
+button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--ouro);outline-offset:3px}
+.prim{background:var(--ouro);color:var(--tinta);border-color:var(--ouro);box-shadow:0 .3rem 0 #B8860B}
+.prim:hover:not(:disabled){background:var(--ouro2);border-color:var(--ouro2)}
+.larga{width:100%;margin:.55rem 0}
+.grande{min-height:3.8rem;font-size:1.2rem;border-radius:1.1rem}
+.btn-volta,.icbtn{background:transparent;border-color:transparent;padding:.5rem .6rem;color:var(--fg)}
+.icbtn{width:var(--alvo);height:var(--alvo);padding:0;border-radius:50%;background:rgba(255,255,255,.08)}
+button:disabled{opacity:.4;cursor:not-allowed}
 .linha{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
 .linha>*{flex:1 1 auto}
-.caixa{border:3px solid var(--fg);border-radius:1rem;padding:1rem;margin:1rem 0}
-.caixa.amarela{border-color:var(--amarelo)}
-label{display:block;font-weight:700;margin:.8rem 0 .3rem}
-input[type=text]{font:inherit;width:100%;min-height:var(--alvo);padding:.6rem .8rem;border-radius:.7rem;border:3px solid var(--fg);background:#000;color:#fff}
-.escolha{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:.5rem}
-.escolha button[aria-pressed=true]{background:var(--amarelo);color:#000;border-color:var(--amarelo)}
-.papel{display:inline-block;background:var(--amarelo);color:#000;font-weight:900;border-radius:999px;padding:.2rem .8rem}
-.barra-topo{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
-.pill{border:2px solid var(--fg);border-radius:999px;padding:.2rem .7rem;font-weight:800;white-space:nowrap}
 
-/* ---------- Ecrã 1: procurar com a câmara ---------- */
+/* superfícies */
+.caixa{background:var(--sup);border:1px solid var(--linha);border-radius:var(--r);padding:1rem;margin:.9rem 0}
+.caixa.amarela{border:2px solid var(--ouro)}
+.appbar{display:flex;align-items:center;gap:.4rem;min-height:3.2rem;margin:-.2rem -.4rem .4rem}
+.appbar h2{margin:0;font-size:1.2rem;flex:1}
+label{display:block;font-weight:700;margin:1rem 0 .35rem;color:var(--fg2)}
+input[type=text],textarea{font:inherit;width:100%;min-height:var(--alvo);padding:.7rem .9rem;border-radius:.8rem;border:2px solid var(--linha);background:var(--bg2);color:var(--fg)}
+input[type=text]:focus,textarea:focus{border-color:var(--ouro)}
+.escolha{display:grid;grid-template-columns:repeat(auto-fit,minmax(7.5rem,1fr));gap:.5rem}
+.escolha button{background:var(--bg2)}
+.escolha button[aria-pressed=true]{background:var(--ouro);color:var(--tinta);border-color:var(--ouro)}
+.papel{display:inline-flex;align-items:center;gap:.35rem;background:var(--ouro);color:var(--tinta);font-weight:900;border-radius:999px;padding:.25rem .8rem;font-size:.9rem}
+.barra-topo{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem}
+.pill{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--linha);background:var(--sup);border-radius:999px;padding:.3rem .8rem;font-weight:800;white-space:nowrap}
+.barra-prog{height:.6rem;border-radius:999px;background:var(--bg2);overflow:hidden;margin:.6rem 0}
+.barra-prog i{display:block;height:100%;background:var(--ouro);border-radius:999px}
+.estrelas{display:inline-flex;gap:.15rem;color:var(--ouro)}.estrelas .vazia{color:#4A5A6B}
+.avatar{display:inline-flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;border-radius:50%;font-weight:900;color:var(--tinta);flex:none}
+.avatar.g{width:4.5rem;height:4.5rem;font-size:2rem}
+
+/* ecrã título */
+.titulo{position:relative;min-height:100vh;display:flex;flex-direction:column;max-width:34rem;margin:0 auto;padding:1rem 1rem calc(1.5rem + env(safe-area-inset-bottom))}
+.titulo .topo{display:flex;justify-content:space-between;align-items:center;gap:.5rem;position:relative;z-index:2}
+.chip-conta{display:inline-flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.08);border:1px solid var(--linha);border-radius:999px;padding:.25rem .9rem .25rem .3rem;font-weight:800;min-height:var(--alvo)}
+.heroi{position:relative;flex:1;min-height:16rem;margin:.5rem -1rem 0;display:flex;align-items:center;justify-content:center}
+.heroi img{width:78%;max-width:22rem;filter:drop-shadow(0 1.2rem 1.5rem rgba(0,0,0,.6))}
+.heroi canvas{border-radius:0}
+.marca{text-align:center;position:relative;z-index:2}
+.marca h1{font-size:2.4rem;margin:.2rem 0}
+.marca p{color:var(--fg2);margin:0 0 1.2rem}
+
+/* folha (painel inferior) de definições e pausa */
+.veu{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.folha{background:var(--bg2);width:100%;max-width:34rem;border-radius:1.4rem 1.4rem 0 0;padding:.6rem 1rem calc(1rem + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;animation:sobe .25s ease-out;border-top:1px solid var(--linha)}
+@keyframes sobe{from{transform:translateY(100%)}}
+.folha .pega{width:2.6rem;height:.3rem;border-radius:999px;background:var(--linha);margin:.2rem auto .6rem}
+.item{display:flex;align-items:center;gap:.8rem;width:100%;justify-content:flex-start;text-align:left;background:transparent;border:0;border-radius:.8rem;padding:.8rem .5rem;font-weight:700}
+.item:hover{background:var(--sup)}
+.item .txt{flex:1}.item .dir{color:var(--fg2);font-weight:600}
+.sep{height:1px;background:var(--linha);margin:.4rem 0}
+.interruptor{position:relative;width:3.2rem;height:1.9rem;border-radius:999px;background:#3A4A5C;flex:none;transition:background .15s}
+.interruptor::after{content:"";position:absolute;top:.2rem;left:.2rem;width:1.5rem;height:1.5rem;border-radius:50%;background:#fff;transition:left .15s}
+[aria-checked=true] .interruptor{background:var(--ouro)}[aria-checked=true] .interruptor::after{left:1.5rem}
+.passos-letra{display:flex;align-items:center;gap:.4rem}
+
+/* níveis */
+.nivel{display:grid;grid-template-columns:5.5rem 1fr;gap:.9rem;align-items:center;background:var(--sup);border:1px solid var(--linha);border-radius:var(--r);padding:.8rem;margin:.8rem 0}
+.nivel.ativo{border:2px solid var(--ouro)}
+.nivel .mini{aspect-ratio:1;border-radius:.8rem;background:linear-gradient(#2a6fb0,#1f5fa8);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.nivel .mini img{width:92%}
+.nivel.bloq{opacity:.55}.nivel.bloq .mini{background:var(--bg2);color:var(--fg2)}
+.nivel h2{font-size:1.15rem;margin:.1rem 0}
+.nivel .acoes{grid-column:1/-1}
+
+/* ---------- Procurar (câmara) ---------- */
 .cam{position:fixed;inset:0;overflow:hidden;background:#000;touch-action:none;user-select:none}
 .cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.pano{position:absolute;inset:0;background:
-  linear-gradient(#5aa9e6 0 38%, transparent 38%),
-  repeating-linear-gradient(90deg,#d8bb84 0 60px,#c9a96f 60px 62px),
-  #c9a96f;}
-.pano::before{content:"";position:absolute;left:0;right:0;top:30%;height:9%;
-  background:repeating-linear-gradient(90deg,#d8bb84 0 34px,transparent 34px 56px);background-position-x:inherit}
+.pano{position:absolute;inset:0;background:linear-gradient(#5aa9e6 0 38%,transparent 38%),repeating-linear-gradient(90deg,#d8bb84 0 60px,#c9a96f 60px 62px),#c9a96f}
+.pano::before{content:"";position:absolute;left:0;right:0;top:30%;height:9%;background:repeating-linear-gradient(90deg,#d8bb84 0 34px,transparent 34px 56px)}
 .pano::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30%;background:#8a6a43}
-.peca-ra{position:absolute;top:42%;width:7rem;height:7rem;margin:-3.5rem 0 0 -3.5rem;display:flex;align-items:center;justify-content:center;
-  border-radius:1.2rem;transition:transform .15s;animation:flutua 2.4s ease-in-out infinite;pointer-events:none}
+.peca-ra{position:absolute;top:42%;width:7rem;height:7rem;margin:-3.5rem 0 0 -3.5rem;display:flex;align-items:center;justify-content:center;border-radius:1.2rem;transition:transform .15s;animation:flutua 2.4s ease-in-out infinite;pointer-events:none}
 .peca-ra img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 3px #000) drop-shadow(0 0 2px #000)}
 #mundo.tem3d .peca-ra img{opacity:0}
 #mundo.tem3d .peca-ra{animation:none;top:50%}
 #mundo.tem3d .peca-ra.encontrada{background:transparent}
-.peca-ra.encontrada{pointer-events:auto;transform:scale(1.6);background:rgba(0,0,0,.55);outline:5px solid var(--amarelo);outline-offset:4px;cursor:pointer;animation:none}
+.peca-ra.encontrada{pointer-events:auto;transform:scale(1.6);background:rgba(0,0,0,.5);outline:4px solid var(--ouro);outline-offset:4px;cursor:pointer;animation:none}
 @keyframes flutua{50%{translate:0 -10px}}
-.radar{position:absolute;top:max(1rem,env(safe-area-inset-top));right:1rem;width:6.5rem;height:6.5rem;border-radius:50%;
-  background:rgba(0,0,0,.75);border:3px solid #fff}
-.radar::before{content:"";position:absolute;left:50%;top:0;bottom:50%;width:0;border-left:2px dashed rgba(255,255,255,.6)}
+.hud{position:absolute;top:max(.8rem,env(safe-area-inset-top));left:.8rem;right:8rem;display:flex;flex-direction:column;gap:.4rem;align-items:flex-start}
+.hud .pill,.info-topo .pill{background:rgba(11,16,22,.85);border-color:rgba(255,255,255,.25)}
+.info-topo{position:absolute;top:max(.8rem,env(safe-area-inset-top));left:.8rem;right:8rem;display:flex;flex-direction:column;gap:.4rem;align-items:flex-start}
+.radar{position:absolute;top:max(.8rem,env(safe-area-inset-top));right:.8rem;width:6.5rem;height:6.5rem;border-radius:50%;background:rgba(11,16,22,.82);border:2px solid rgba(255,255,255,.7)}
+.radar::before{content:"";position:absolute;left:50%;top:0;bottom:50%;border-left:2px dashed rgba(255,255,255,.5)}
 .radar .eu{position:absolute;left:50%;top:50%;width:.9rem;height:.9rem;margin:-.45rem;border-radius:50%;background:#fff}
-.radar .alvo{position:absolute;left:50%;top:50%;width:1.3rem;height:1.3rem;margin:-.65rem;border-radius:50%;background:var(--amarelo);border:3px solid #000}
-.dica{position:absolute;left:50%;bottom:calc(7.5rem + env(safe-area-inset-bottom));transform:translateX(-50%);background:rgba(0,0,0,.85);border:3px solid #fff;
-  color:#fff;font-weight:900;font-size:1.35rem;padding:.5rem 1rem;border-radius:1rem;white-space:nowrap;text-align:center}
-.dica.quente{border-color:var(--amarelo);color:var(--amarelo)}
-.info-topo{position:absolute;top:max(1rem,env(safe-area-inset-top));left:1rem;right:8.5rem;display:flex;flex-direction:column;gap:.4rem;align-items:flex-start}
-.info-topo .pill{background:rgba(0,0,0,.8)}
-.calor{width:10rem;max-width:100%;height:.8rem;border:2px solid #fff;border-radius:999px;background:rgba(0,0,0,.8);overflow:hidden}
-.calor i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--azul),var(--amarelo),#ff5a36)}
-.rodar{position:absolute;top:50%;transform:translateY(-50%);font-size:1.6rem;background:rgba(0,0,0,.8)}
+.radar .alvo{position:absolute;left:50%;top:50%;width:1.3rem;height:1.3rem;margin:-.65rem;border-radius:50%;background:var(--ouro);border:3px solid var(--tinta)}
+.dica{position:absolute;left:50%;bottom:calc(6.6rem + env(safe-area-inset-bottom));transform:translateX(-50%);background:rgba(11,16,22,.9);border:2px solid rgba(255,255,255,.6);color:#fff;font-weight:900;font-size:1.25rem;padding:.55rem 1.1rem;border-radius:999px;white-space:nowrap;text-align:center}
+.dica.quente{border-color:var(--ouro);color:var(--ouro)}
+.calor{width:10rem;max-width:100%;height:.6rem;border-radius:999px;background:rgba(11,16,22,.85);border:1px solid rgba(255,255,255,.3);overflow:hidden}
+.calor i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--azul),var(--ouro),#ff6a3d)}
+.rodar{position:absolute;top:50%;transform:translateY(-50%);background:rgba(11,16,22,.82);border-color:rgba(255,255,255,.3);border-radius:50%;width:3.4rem;height:3.4rem;padding:0}
 .rodar.esq{left:.5rem}.rodar.dir{right:.5rem}
-.fundo-cam{position:absolute;left:0;right:0;bottom:0;padding:.6rem .6rem calc(.6rem + env(safe-area-inset-bottom));display:flex;gap:.5rem;background:rgba(0,0,0,.85)}
-.fundo-cam button{flex:1;padding:.5rem}
-.aviso-cam{position:absolute;left:1rem;right:1rem;top:9rem;background:rgba(0,0,0,.85);border:2px solid #fff;border-radius:.8rem;padding:.5rem .8rem;font-size:.95rem}
+.fundo-cam{position:absolute;left:0;right:0;bottom:0;padding:.5rem .5rem calc(.5rem + env(safe-area-inset-bottom));display:flex;gap:.35rem;background:linear-gradient(transparent,rgba(11,16,22,.95) 35%)}
+.fundo-cam button{flex:1;flex-direction:column;gap:.15rem;padding:.4rem .2rem;font-size:.8rem;background:rgba(24,34,45,.92);border-color:rgba(255,255,255,.15);border-radius:.9rem;min-height:3.6rem}
+.fundo-cam button .i{width:1.5rem;height:1.5rem}
+.fundo-cam button.prim{background:var(--ouro);color:var(--tinta)}
+.aviso-cam{position:absolute;left:.8rem;right:.8rem;top:8.8rem;background:rgba(11,16,22,.9);border:1px solid rgba(255,255,255,.3);border-radius:.8rem;padding:.6rem .8rem;font-size:.95rem}
 
 /* ---------- Curiosidade / pergunta ---------- */
-.peca-grande{position:relative;width:100%;max-width:20rem;height:13rem;margin:.5rem auto;display:flex;justify-content:center}
+.peca-grande{position:relative;width:100%;height:13rem;margin:.3rem auto;display:flex;justify-content:center;border-radius:var(--r);background:radial-gradient(circle at 50% 60%,#25415E,transparent 70%)}
 .peca-grande img{width:13rem;height:100%;object-fit:contain}
-.vista3d{position:relative;background:linear-gradient(#5aa9e6,#cfeaff)}
-.dica3d{position:absolute;left:.5rem;bottom:.5rem;background:rgba(0,0,0,.8);color:#fff;font-weight:800;font-size:.9rem;padding:.2rem .6rem;border-radius:999px;pointer-events:none}
-.legenda{font-size:1.2rem;background:#111;border-left:6px solid var(--amarelo);padding:.8rem 1rem;border-radius:.5rem}
+.vista3d{position:relative;background:linear-gradient(#2a6fb0,#9fd0f5)}
+.dica3d{position:absolute;left:.6rem;bottom:.6rem;background:rgba(11,16,22,.85);color:#fff;font-weight:800;font-size:.85rem;padding:.25rem .7rem;border-radius:999px;pointer-events:none}
+.legenda{font-size:1.15rem;background:var(--sup);border-left:5px solid var(--ouro);padding:.9rem 1rem;border-radius:.6rem;line-height:1.5}
 .opcoes{display:grid;gap:.7rem;margin-top:1rem}
-.opcoes button{font-size:1.25rem;text-align:left;min-height:4rem}
-.opcoes button.certa{background:var(--ok);color:#000;border-color:var(--ok)}
-.opcoes button.errada{background:var(--erro);color:#000;border-color:var(--erro)}
+.opcoes button{font-size:1.2rem;justify-content:flex-start;text-align:left;min-height:4rem;background:var(--sup)}
+.opcoes button.certa{background:var(--ok);color:var(--tinta);border-color:var(--ok)}
+.opcoes button.errada{background:var(--erro);color:var(--tinta);border-color:var(--erro)}
 .retro{font-size:1.3rem;font-weight:900;margin-top:1rem}
 
-/* ---------- Ecrã 4: montar ---------- */
-.tabuleiro{position:relative;width:100%;max-width:34rem;margin:0 auto;aspect-ratio:1;border:3px solid #fff;border-radius:1rem;overflow:hidden;background:#5aa9e6}
+/* ---------- Montar ---------- */
+.tabuleiro{position:relative;width:100%;margin:0 auto;aspect-ratio:1;border-radius:var(--r);overflow:hidden;background:#1f5fa8;box-shadow:var(--sombra)}
 .tabuleiro>.fundo{position:absolute;inset:0;width:100%;height:100%}
 .slot{position:absolute}
 .slot img{width:100%;height:100%;display:block}
 .slot.vazio img{opacity:.35;filter:grayscale(1) brightness(.6)}
-.slot.vazio{outline:3px dashed var(--amarelo);outline-offset:1px;border-radius:.3rem}
+.slot.vazio{outline:2px dashed var(--ouro);outline-offset:1px;border-radius:.3rem}
 .slot.encaixa{animation:pop .35s}
 @keyframes pop{50%{transform:scale(1.12)}}
-.mochila{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.5rem,1fr));gap:.6rem;margin-top:1rem}
-.mpeca{aspect-ratio:1;border:3px solid #fff;border-radius:.8rem;display:flex;align-items:center;justify-content:center;padding:.4rem;background:#111;touch-action:none;cursor:grab;position:relative}
+.mochila{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.2rem,1fr));gap:.6rem;margin-top:.4rem}
+.mpeca{aspect-ratio:1;border:2px solid var(--linha);border-radius:.9rem;display:flex;align-items:center;justify-content:center;padding:.4rem;background:var(--sup);touch-action:none;cursor:grab;position:relative}
 .mpeca img{width:100%;height:100%;object-fit:contain;pointer-events:none}
-.mpeca.bloq{border-style:dashed;color:#bbb;font-size:1.6rem;cursor:default}
-.mpeca small{position:absolute;bottom:.1rem;right:.3rem;font-size:.75rem;font-weight:800}
-.fantasma{position:fixed;pointer-events:none;z-index:50;opacity:.9;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6))}
+.mpeca.bloq{border-style:dashed;color:var(--fg2);font-size:1.4rem;cursor:default;background:transparent}
+.mpeca small{position:absolute;bottom:.2rem;right:.25rem;display:flex;background:var(--bg);border-radius:.5rem;padding:.1rem;color:var(--fg2)}
+.mpeca small .i{width:1.1rem;height:1.1rem}
+.mpeca.pronta{border-color:var(--ok);box-shadow:0 0 0 2px var(--ok)}
+.mpeca.pronta small{color:var(--ok)}
+.fantasma{position:fixed;pointer-events:none;z-index:50;opacity:.92;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6))}
 .fantasma img{width:100%;height:100%;display:block}
+.legenda-ic{display:flex;flex-wrap:wrap;gap:.4rem;margin:.2rem 0 .8rem}
+.legenda-ic span{border:1px solid var(--linha);background:var(--sup);border-radius:999px;padding:.2rem .7rem;font-size:.9rem;color:var(--fg2)}
+.slot.alvo{outline:3px solid var(--ouro);animation:piscar .8s infinite}
+@keyframes piscar{50%{outline-color:transparent;background:rgba(255,201,60,.4)}}
+.slot.iman{outline:3px solid var(--ok)!important;background:rgba(91,227,138,.4);animation:none}
+.slot.quase{outline:3px solid var(--erro)!important;animation:none}
 
 /* ---------- Sem RA ---------- */
-.local{display:grid;grid-template-columns:6rem 1fr;gap:.8rem;align-items:center;border:3px solid #fff;border-radius:1rem;padding:.7rem;margin:.7rem 0}
-.local .foto{aspect-ratio:1;background:#5aa9e6;border-radius:.6rem;border:2px solid #fff;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
-#pg img{width:100%;height:100%;object-fit:contain}
-.local .foto img{width:100%;height:100%;object-fit:contain}
+.local{display:grid;grid-template-columns:5.5rem 1fr;gap:.9rem;align-items:center;background:var(--sup);border:1px solid var(--linha);border-radius:var(--r);padding:.7rem;margin:.7rem 0}
+.local .foto{aspect-ratio:1;background:linear-gradient(#2a6fb0,#1f5fa8);border-radius:.7rem;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.local .foto img,#pg img{width:100%;height:100%;object-fit:contain}
 
-/* ---------- Professora ---------- */
-.codigo{font-size:2.6rem;font-weight:900;letter-spacing:.15em;text-align:center;color:var(--amarelo);border:3px dashed var(--amarelo);border-radius:1rem;padding:.6rem}
-table{width:100%;border-collapse:collapse;font-size:1rem}
-th,td{border:2px solid #fff;padding:.4rem .5rem;text-align:left}
-th{background:#222}
-textarea{width:100%;min-height:6rem;font:inherit;background:#000;color:#fff;border:3px solid #fff;border-radius:.7rem;padding:.5rem}
-.qr{background:#fff;padding:.8rem;border-radius:1rem;width:min(18rem,80vw);margin:1rem auto}
+/* ---------- Professora / dados ---------- */
+.codigo{font-size:2.4rem;font-weight:900;letter-spacing:.15em;text-align:center;color:var(--ouro);border:2px dashed var(--ouro);border-radius:var(--r);padding:.6rem}
+table{width:100%;border-collapse:collapse;font-size:.95rem;background:var(--sup);border-radius:.8rem;overflow:hidden}
+th,td{border-bottom:1px solid var(--linha);padding:.55rem .6rem;text-align:left}
+th{background:var(--sup2);color:var(--fg2);font-weight:700}
+.qr{background:#fff;padding:.8rem;border-radius:var(--r);width:min(17rem,78vw);margin:1rem auto}
 .qr svg{width:100%;height:auto;display:block}
-.escala{display:grid;grid-template-columns:repeat(5,1fr);gap:.3rem}
-.escala button{padding:.3rem;font-size:1.1rem}
-.escala button[aria-pressed=true]{background:var(--amarelo);color:#000;border-color:var(--amarelo)}
+.escala{display:grid;grid-template-columns:repeat(5,1fr);gap:.35rem}
+.escala button{padding:.3rem;font-size:1.1rem;background:var(--bg2)}
+.escala button[aria-pressed=true]{background:var(--ouro);color:var(--tinta);border-color:var(--ouro)}
 .ok{color:var(--ok);font-weight:900}.nok{color:var(--erro);font-weight:900}
-.destaque{font-size:1.4rem;font-weight:900;color:var(--amarelo)}
+.destaque{font-size:1.3rem;font-weight:900;color:var(--ouro)}
+.estado{display:inline-block;min-width:4.2rem;text-align:center;border-radius:999px;padding:.1rem .5rem;font-size:.8rem;font-weight:900;margin-right:.5rem}
+.estado.s{background:var(--ok);color:var(--tinta)}.estado.n{background:var(--erro);color:var(--tinta)}.estado.a{background:var(--sup2);color:var(--fg)}
 
+/* ---------- Passar o telemóvel ---------- */
+.passa{min-height:100vh;display:flex;flex-direction:column;justify-content:center;text-align:center;max-width:30rem;margin:0 auto;padding:1.5rem}
+.ic-grande{width:6rem;height:6rem;border-radius:50%;background:var(--sup);border:2px solid var(--ouro);color:var(--ouro);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.ic-grande .i{width:3rem;height:3rem}
+
+/* ---------- Significantes de jogo: pegadas, setas, mão ---------- */
 .xr-ov{position:fixed;inset:0;z-index:40;pointer-events:none;color:#fff}
 .xr-ov button{pointer-events:auto}
-.toast{position:fixed;left:50%;top:1rem;transform:translateX(-50%);z-index:100;background:var(--amarelo);color:#000;font-weight:900;padding:.7rem 1.1rem;border-radius:999px;border:3px solid #000;max-width:90vw;text-align:center}
-.def{position:fixed;right:1rem;top:1rem;z-index:5}
+.pegadas{position:absolute;left:50%;bottom:calc(10.4rem + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:.8rem;pointer-events:none}
+.pegadas span{display:flex;opacity:.15;animation:passo 1.2s infinite}
+.pegadas .i{width:2.4rem;height:2.4rem}
+.pegadas span:nth-child(2){animation-delay:.3s}.pegadas span:nth-child(3){animation-delay:.6s}
+@keyframes passo{30%{opacity:1}65%{opacity:.15}}
+.pegadas.dir span{rotate:90deg}
+.pegadas.esq{flex-direction:row-reverse}.pegadas.esq span{rotate:-90deg}
+.pegadas.frente{flex-direction:column-reverse;gap:.1rem}
+.pegadas.oculta,.seta-lado.oculta{display:none}
+.seta-lado{position:absolute;top:42%;color:var(--ouro);pointer-events:none;animation:empurra 1s infinite;filter:drop-shadow(0 0 3px #000) drop-shadow(0 0 2px #000)}
+.seta-lado .i{width:4rem;height:4rem;stroke-width:3}
+.seta-lado.dir{right:4.2rem}.seta-lado.esq{left:4.2rem;animation-name:empurraE}.seta-lado.esq .i{transform:scaleX(-1)}
+@keyframes empurra{50%{translate:12px 0}}@keyframes empurraE{50%{translate:-12px 0}}
+.pe{fill:var(--ouro);stroke:var(--tinta);stroke-width:1.2}
+.maoi{fill:#fff;stroke:var(--tinta);stroke-width:1.3;stroke-linejoin:round}
+.mao{display:none;position:absolute;right:-1.4rem;bottom:-1.8rem;pointer-events:none;animation:toque 1s infinite}
+.mao .i{width:2.8rem;height:2.8rem;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
+.peca-ra.encontrada .mao,.mao.ver{display:block}
+@keyframes toque{50%{transform:translate(-6px,-12px) scale(.88)}}
+.passo-ic{display:grid;grid-template-columns:3.4rem 1fr;gap:.9rem;align-items:center;border-bottom:1px solid var(--linha);padding:.7rem 0}
+.passo-ic .ic{width:3.2rem;height:3.2rem;border-radius:.9rem;background:var(--sup);display:flex;align-items:center;justify-content:center;color:var(--ouro)}
+.passo-ic .ic .i{width:1.9rem;height:1.9rem}
+.passo-ic b{font-size:1.08rem;display:block}
+.mao-demo{position:fixed;left:0;top:0;z-index:60;pointer-events:none;width:4.5rem;height:4.5rem}
+.mao-demo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.7))}
+.mao-demo span{position:absolute;right:-1.2rem;bottom:-1.4rem}.mao-demo span .i{width:2.6rem;height:2.6rem}
+/* demonstração "como pegar numa peça" */
+.demo-ov{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center}
+.demo-cx{background:var(--bg2);border-radius:1.4rem 1.4rem 0 0;padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom));max-width:34rem;width:100%;max-height:92vh;overflow:auto;animation:sobe .25s ease-out;border-top:1px solid var(--linha)}
+.demo-tel{width:10rem;height:14rem;margin:.4rem auto;border:5px solid #E8EEF4;border-radius:1.4rem;position:relative;overflow:hidden;background:linear-gradient(#5aa9e6 0 40%,#d8bb84 40% 75%,#8a6a43 75%);animation:telRoda 4.5s infinite ease-in-out}
+.demo-peca{position:absolute;top:30%;left:85%;width:4.4rem;height:4.4rem;margin-left:-2.2rem;border-radius:.6rem;animation:pecaVem 4.5s infinite ease-in-out}
+.demo-peca img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 2px #000)}
+.demo-mao{position:absolute;top:52%;left:56%;opacity:0;animation:maoToca 4.5s infinite}.demo-mao .i{width:2.6rem;height:2.6rem}
+.demo-radar{position:absolute;top:.4rem;right:.4rem;width:2.4rem;height:2.4rem;border-radius:50%;background:rgba(11,16,22,.8);border:2px solid #fff}
+.demo-radar i{position:absolute;left:50%;top:50%;width:.7rem;height:.7rem;margin:-.35rem;border-radius:50%;background:var(--ouro);animation:radarVem 4.5s infinite ease-in-out}
+.demo-passos{padding-left:0;list-style:none;margin:.6rem 0}
+.demo-passos li{font-size:1.05rem;padding:.45rem .7rem;border-radius:.7rem;margin:.2rem 0;opacity:.4}
+.demo-passos li:nth-child(1){animation:passo1 4.5s infinite}.demo-passos li:nth-child(2){animation:passo2 4.5s infinite}.demo-passos li:nth-child(3){animation:passo3 4.5s infinite}
+@keyframes telRoda{0%{rotate:12deg}45%,100%{rotate:0deg}}
+@keyframes pecaVem{0%{left:85%;transform:scale(1);outline:0 solid transparent}45%{left:50%;transform:scale(1);outline:0 solid transparent}55%,88%{left:50%;transform:scale(1.25);outline:4px solid #FFC93C;outline-offset:3px}92%,100%{left:50%;transform:scale(.2);opacity:0}}
+@keyframes maoToca{0%,55%{opacity:0;transform:none}62%{opacity:1;transform:none}72%{opacity:1;transform:translate(-6px,-12px) scale(.85)}80%,88%{opacity:1;transform:none}95%,100%{opacity:0}}
+@keyframes radarVem{0%{transform:translate(.8rem,-.4rem)}45%,100%{transform:translate(0,-.75rem)}}
+@keyframes passo1{0%,42%{opacity:1;background:var(--sup2)}48%,100%{opacity:.4;background:none}}
+@keyframes passo2{0%,44%{opacity:.4;background:none}48%,60%{opacity:1;background:var(--sup2)}64%,100%{opacity:.4;background:none}}
+@keyframes passo3{0%,60%{opacity:.4;background:none}64%,95%{opacity:1;background:var(--sup2)}100%{opacity:.4}}
+
+.toast{position:fixed;left:50%;top:max(1rem,env(safe-area-inset-top));transform:translateX(-50%);z-index:100;background:var(--fg);color:var(--tinta);font-weight:800;padding:.7rem 1.2rem;border-radius:999px;box-shadow:var(--sombra);max-width:90vw;text-align:center;animation:entra .2s}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -153,6 +275,43 @@ textarea{width:100%;min-height:6rem;font:inherit;background:#000;color:#fff;bord
    ecrã 4 Montar em equipa (tabuleiro 2D, íman, toque para rodar)
    + resumo para a professora (código da turma)
    ===================================================================== */
+
+/* ---------------- Ícones (SVG próprios, poucos e consistentes) ---------------- */
+const ICONES={
+  voltar:'<path d="M15 18l-6-6 6-6"/>', seta:'<path d="M9 18l6-6-6-6"/>', seta2:'<path d="M5 17l5-5-5-5M13 17l5-5-5-5"/>',
+  fechar:'<path d="M18 6L6 18M6 6l12 12"/>',
+  definicoes:'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  pausa:'<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>',
+  play:'<path d="M7 4.5v15l12.5-7.5z" fill="currentColor" stroke="none"/>',
+  reiniciar:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>', rodar:'<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
+  utilizador:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>', cadeado:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  visto:'<path d="M20 6L9 17l-5-5"/>', estrela:'<path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="currentColor" stroke="none"/>',
+  dica:'<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2z"/>',
+  mochila:'<path d="M5 10a7 7 0 0 1 14 0v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M9 6V4.5a3 3 0 0 1 6 0V6M8 14h8"/>',
+  grelha:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  partilhar:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
+  som:'<path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>', parar:'<rect x="6" y="6" width="12" height="12" rx="2"/>',
+  cubo:'<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/>',
+  pino:'<path d="M12 22s7-7.4 7-12a7 7 0 0 0-14 0c0 4.6 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+  ajuda:'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/>',
+  vibrar:'<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M3 8v8M21 8v8"/>',
+  mensagem:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l6.4-6.4"/>',
+  livro:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16"/>',
+  escola:'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>', telemovel:'<rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/>',
+  casa:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>', grafico:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  lixo:'<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/>', descarregar:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>', mais:'<path d="M12 5v14M5 12h14"/>',
+  formulario:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>', camara:'<path d="M3 8a2 2 0 0 1 2-2h2l2-3h6l2 3h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/>',
+  texto:'<path d="M4 7V5h16v2M9 19h6M12 5v14"/>',
+  pe:'<path class="pe" d="M9.2 22c-2.4 0-3.7-2.1-3.7-5.1 0-3 1.4-6.4 4.2-6.4 2.5 0 3.3 2.7 3.1 5.4-.2 3.4-1.5 6.1-3.6 6.1z"/><circle class="pe" cx="7.3" cy="7.6" r="1.6"/><circle class="pe" cx="10.4" cy="6.3" r="1.7"/><circle class="pe" cx="13.4" cy="6.9" r="1.4"/><circle class="pe" cx="15.6" cy="8.6" r="1.2"/><circle class="pe" cx="16.8" cy="11" r="1"/>',
+  mao:'<path class="maoi" d="M9 11V4.5a1.6 1.6 0 0 1 3.2 0V10h.4V8.6a1.6 1.6 0 0 1 3.2 0V10.4h.4V9.6a1.6 1.6 0 0 1 3.2 0v5.6c0 3.8-2.7 6.8-6.4 6.8h-1c-2.1 0-3.8-1-4.9-2.7l-2.8-4.4a1.6 1.6 0 0 1 2.6-1.9L9 15z"/>',
+};
+const I=(n,cls="")=>`<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONES[n]||""}</svg>`;
+const estrelas=n=>`<span class="estrelas" role="img" aria-label="${n} de 3 estrelas">${[0,1,2].map(i=>I("estrela",i<n?"":"vazia")).join("")}</span>`;
+const CORES=["#FFC93C","#FF9F5A","#8ECAE6","#90D17A","#F28B82","#C6A7F0","#5ED3C3","#F5B8D0"];
+function avatar(c,g=false){const cor=/^#/.test(c.avatar||"")?c.avatar:CORES[[...c.alcunha].reduce((a,x)=>a+x.charCodeAt(0),0)%CORES.length];
+  return `<span class="avatar${g?" g":""}" style="background:${cor}" aria-hidden="true">${esc([...c.alcunha.trim()][0]||"?").toUpperCase()}</span>`}
+const barraApp=(titulo,id="volta")=>`<div class="appbar"><button class="icbtn" id="${id}" aria-label="Voltar">${I("voltar")}</button><h2>${titulo}</h2></div>`;
 
 /* ---------------- Dados do monumento ---------------- */
 const MONUMENTO = { nome:"Fortaleza de São Miguel", cidade:"Luanda" };
@@ -218,14 +377,22 @@ const CHAVE="ch-fsm-v2", CHAVE_DEF="ch-def-v1", CHAVE_RES="ch-resultados-v1";
 const ler=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(e){return d}};
 const gravar=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 let DEF = Object.assign({letra:1,som:true,vib:true,voz:true}, ler(CHAVE_DEF,{}));
-let J = ler(CHAVE,null); // jogo em curso
+/* Contas simples, guardadas só neste telemóvel (sem servidor; R6: só alcunha e avatar).
+   Cada conta tem o seu jogo em curso e o progresso de cada nível (monumento). */
+const CHAVE_CONTAS="ch-contas-v1", NIVEL="fsm";
+let CONTAS=ler(CHAVE_CONTAS,{ativa:null,lista:{}});
+let CONVIDADO=false; // "jogar sem conta" nesta visita
+const conta=()=>CONTAS.lista[CONTAS.ativa]||null;
+const gravarContas=()=>gravar(CHAVE_CONTAS,CONTAS);
+function nivelDe(c){c.niveis=c.niveis||{};return c.niveis[NIVEL]=c.niveis[NIVEL]||{jogo:null,concluido:false,melhor:0,estrelas:0,vezes:0}}
+let J = conta()?nivelDe(conta()).jogo:ler(CHAVE,null); // jogo em curso
 function novoJogo(equipa,turma,modo,familia=false){
   J={equipa,turma,modo,familia,pontos:0,atual:0,inicio:Date.now(),reg:[],
      pecas:Object.fromEntries(PECAS.map(p=>[p.id,{recolhida:false,respondida:false,certa:false,colocada:false,rot:p.roda===false?0:[90,180,270][Math.floor(Math.random()*3)]}]))};
   guardar();
   reg("inicio",{modo,jogadores:equipa.length,familia});
 }
-const guardar=()=>gravar(CHAVE,J);
+const guardar=()=>{const c=conta();if(c){nivelDe(c).jogo=J;gravarContas()}else gravar(CHAVE,J)};
 /* Registo para os testes de usabilidade (PL 14): só tempos e contagens, sem dados pessoais. */
 function reg(tipo,dados={}){if(!J)return;(J.reg=J.reg||[]).push({t:Date.now()-J.inicio,tipo,...dados});guardar()}
 const CHAVE_SES="ch-sessoes-v1";
@@ -260,56 +427,208 @@ function falar(texto,fim){
 const pararVoz=()=>{try{speechSynthesis.cancel()}catch(e){}};
 
 /* ---------------- Equipa e papéis (R4 / desencontro D3) ---------------- */
-const PAPEIS={conta:{n:"Conta",ic:"👴🏾",d:"conta a história aos netos"},aponta:{n:"Aponta",ic:"🎯",d:"procura as peças com a câmara"},responde:{n:"Responde",ic:"💬",d:"ouve a curiosidade e responde"},monta:{n:"Monta",ic:"🧩",d:"encaixa as peças no tabuleiro"}};
+const PAPEIS={conta:{n:"Conta",ic:"livro",d:"conta a história aos netos"},aponta:{n:"Aponta",ic:"radar",d:"procura as peças com a câmara"},responde:{n:"Responde",ic:"mensagem",d:"ouve a curiosidade e responde"},monta:{n:"Monta",ic:"grelha",d:"encaixa as peças no tabuleiro"}};
 function dono(papel){if(J.familia)return papel==="conta"?0:1;const n=J.equipa.length;if(n===1)return 0;if(n===2)return papel==="responde"?1:0;return {aponta:0,responde:1,monta:2}[papel]}
 function passar(papel,depois){
   pararVoz();
   const i=dono(papel);
   if(J.equipa.length===1||i===J.atual){J.atual=i;guardar();return depois()}
   const P=PAPEIS[papel];
-  app.innerHTML=`<main class="ecra" style="text-align:center;padding-top:3rem">
-    <p style="font-size:4rem;margin:0">${P.ic}</p>
-    <h1>Passa o telemóvel a<br><span style="color:var(--amarelo)">${esc(J.equipa[i])}</span></h1>
-    <p style="font-size:1.2rem">Papel: <span class="papel">${P.n}</span> — ${P.d}.</p>
-    <button class="prim larga" id="sou" style="font-size:1.3rem;margin-top:2rem">Sou eu, ${esc(J.equipa[i])} →</button></main>`;
+  app.innerHTML=`<main class="passa">
+    <div class="ic-grande">${I(P.ic)}</div>
+    <p class="sub">Passa o telemóvel a</p>
+    <h1 style="font-size:2.4rem;color:var(--ouro)">${esc(J.equipa[i])}</h1>
+    <p style="font-size:1.15rem"><span class="papel">${P.n}</span><br>${P.d[0].toUpperCase()+P.d.slice(1)}.</p>
+    <button class="prim larga grande" id="sou" style="margin-top:2rem">Sou eu, ${esc(J.equipa[i])}</button></main>`;
   document.getElementById("sou").onclick=()=>{J.atual=i;guardar();depois()};
 }
-const etiquetaPapel=papel=>J.equipa.length>1?`<span class="papel">${PAPEIS[papel].ic} ${PAPEIS[papel].n}: ${esc(J.equipa[dono(papel)])}</span>`:"";
+const etiquetaPapel=papel=>J.equipa.length>1?`<span class="papel">${PAPEIS[papel].n}: ${esc(J.equipa[dono(papel)])}</span>`:"";
 
 /* =====================================================================
    ECRÃS
    ===================================================================== */
+const OUTROS_NIVEIS=[["Palácio de Ferro","Luanda"],["Mbanza Kongo","Zaire"],["Museu Nacional da Escravatura","Luanda"]];
+async function hashPin(p){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("ch:"+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){return "x"+p}}
+const emCurso=()=>!!(J&&contar("colocada")<PECAS.length);
+
+/* Ecrã título: uma acção principal (Jogar); conta à esquerda; definições na engrenagem à direita */
 function inicio(){
-  pararCamara();pararVoz();
-  const emCurso=J&&contar("colocada")<PECAS.length;
-  app.innerHTML=`<main class="ecra">
-    <p class="sub" style="margin-top:1.5rem">${MONUMENTO.nome} · ${MONUMENTO.cidade}</p>
-    <h1>Caçadores da História</h1>
-    <p style="font-size:1.15rem">Há <b>${PECAS.length} peças</b> da fortaleza escondidas à tua volta. Encontra-as com a câmara, responde às perguntas e reconstrói o monumento!</p>
-    ${emCurso?`<button class="prim larga" id="cont">▶ Continuar o jogo (${contar("recolhida")}/${PECAS.length} peças)</button>`:""}
-    <button class="${emCurso?"":"prim "}larga" id="novo">🎯 Novo jogo</button>
-    <button class="larga" id="prof">👩🏾‍🏫 Sou professor(a)</button>
-    <section class="caixa">
-      <h3 style="margin-top:0">Definições</h3>
-      <div class="linha"><span>Tamanho da letra</span>
-        <button id="lm" aria-label="Letra mais pequena">A−</button><button id="lM" aria-label="Letra maior">A+</button></div>
-      <div class="linha" style="margin-top:.5rem">
-        <button id="tv" aria-pressed="${DEF.voz}">${DEF.voz?"🔊":"🔇"} Voz</button>
-        <button id="ts" aria-pressed="${DEF.som}">${DEF.som?"🔔":"🔕"} Sons</button>
-        <button id="tb" aria-pressed="${DEF.vib}">📳 Vibração ${DEF.vib?"sim":"não"}</button></div>
-      <p class="nota">Todos os sons e a voz têm sempre texto no ecrã.</p>
-    </section>
-    <button class="larga" id="diag">🔧 Verificar este telemóvel</button></main>`;
+  pararCamara();pararVoz();fecharFolha();
+  if(!conta()&&!CONVIDADO)return escolherConta();
+  const c=conta(), ec=emCurso();
+  app.innerHTML=`<main class="titulo">
+    <div class="topo">
+      <button class="chip-conta" id="trocar" aria-label="${c?`Conta: ${esc(c.alcunha)}. Trocar de conta`:"Sem conta. Criar conta"}">${c?avatar(c):`<span class="avatar" style="background:#3A4A5C;color:#fff">${I("utilizador")}</span>`}<span>${c?esc(c.alcunha):"Sem conta"}</span></button>
+      <button class="icbtn" id="def" aria-label="Definições">${I("definicoes")}</button>
+    </div>
+    <div class="heroi" id="heroi"><img src="modelos/img/portao_3q.png" alt=""></div>
+    <div class="marca">
+      <p class="sub">${MONUMENTO.nome} · ${MONUMENTO.cidade}</p>
+      <h1>Caçadores da História</h1>
+      <p>Encontra as peças, responde e reconstrói o monumento.</p>
+    </div>
+    ${ec?`<button class="prim larga grande" id="cont">${I("play")}Continuar</button>
+      <p class="nota" style="text-align:center;margin:.2rem 0 .4rem">${contar("recolhida")} de ${PECAS.length} peças encontradas</p>`
+       :`<button class="prim larga grande" id="novo">${I("play")}Jogar</button>`}
+    <button class="larga" id="niveis">Níveis</button>
+  </main>`;
   const $=id=>document.getElementById(id);
-  if(emCurso)$("cont").onclick=retomar;
-  $("novo").onclick=configurar;
-  $("prof").onclick=professora;
-  $("diag").onclick=diagnostico;
-  $("lm").onclick=()=>{DEF.letra=Math.max(.85,+(DEF.letra-.15).toFixed(2));aplicarDef()};
-  $("lM").onclick=()=>{DEF.letra=Math.min(1.9,+(DEF.letra+.15).toFixed(2));aplicarDef()};
-  $("tv").onclick=()=>{DEF.voz=!DEF.voz;aplicarDef();inicio()};
-  $("ts").onclick=()=>{DEF.som=!DEF.som;aplicarDef();inicio()};
-  $("tb").onclick=()=>{DEF.vib=!DEF.vib;aplicarDef();inicio()};
+  if(ec)$("cont").onclick=retomar; else $("novo").onclick=()=>{J=null;guardar();configurar()};
+  $("niveis").onclick=niveis;
+  $("trocar").onclick=()=>{if(c){CONTAS.ativa=null;gravarContas();CONVIDADO=false;escolherConta()}else criarConta()};
+  $("def").onclick=definicoes;
+  // a fortaleza montada em 3D a rodar, como imagem principal
+  if(window.RA3D){const h=$("heroi");RA3D.visualizador(h,PECAS.map(p=>p.id),{montado:true}).then(()=>{const im=h.querySelector("img");if(im)im.remove()}).catch(()=>{})}
+}
+
+function niveis(){
+  pararCamara();pararVoz();
+  const c=conta(), nv=c?nivelDe(c):null, ec=emCurso();
+  const est=ec?`<div class="barra-prog" aria-hidden="true"><i style="width:${Math.round((contar("recolhida")+contar("colocada"))/(2*PECAS.length)*100)}%"></i></div>
+      <p class="nota" style="margin:0">${contar("recolhida")}/${PECAS.length} peças encontradas · ${contar("colocada")}/${PECAS.length} montadas</p>`
+    :nv&&nv.concluido?`<p style="margin:.2rem 0">${estrelas(nv.estrelas)}</p><p class="nota" style="margin:0">Concluído · melhor: ${nv.melhor} pontos</p>`
+    :`<p class="nota" style="margin:0">Ainda não começaste.</p>`;
+  app.innerHTML=`<main class="ecra">
+    ${barraApp("Níveis")}
+    <section class="nivel ativo">
+      <div class="mini"><img src="modelos/img/base_cima.png" alt=""></div>
+      <div><p class="sub" style="margin:0">Nível 1 · ${MONUMENTO.cidade}</p><h2>${MONUMENTO.nome}</h2>${est}</div>
+      <div class="acoes">
+        ${ec?`<button class="prim larga" id="cont">${I("play")}Continuar onde parei</button><button class="larga" id="reini">${I("reiniciar")}Reiniciar o nível</button>`
+            :`<button class="prim larga" id="novo">${I("play")}${nv&&nv.concluido?"Jogar outra vez":"Começar"}</button>`}
+      </div>
+    </section>
+    ${OUTROS_NIVEIS.map(([n,cid],i)=>`<section class="nivel bloq" aria-label="${n}: em breve">
+      <div class="mini">${I("cadeado")}</div><div><p class="sub" style="margin:0;color:var(--fg2)">Nível ${i+2} · ${cid}</p><h2>${n}</h2><p class="nota" style="margin:0">Em breve</p></div></section>`).join("")}
+    ${c?`<button class="larga" id="prog">O meu progresso</button>`:`<p class="nota">Sem conta, o progresso fica só neste telemóvel até alguém começar outro jogo. Cria uma conta para o guardar.</p>`}
+  </main>`;
+  const $=id=>document.getElementById(id);
+  $("volta").onclick=inicio;
+  if(ec){$("cont").onclick=retomar;
+    const r=$("reini");r.onclick=()=>{if(r.dataset.c){J=null;guardar();toast("Nível reiniciado.");niveis()}else{r.dataset.c=1;r.textContent="Perdes as peças deste jogo. Toca outra vez para confirmar"}};}
+  else $("novo").onclick=()=>{J=null;guardar();configurar()};
+  if(c)$("prog").onclick=meuProgresso;
+}
+
+/* Definições num painel que abre pela engrenagem */
+function fecharFolha(){document.querySelectorAll(".veu").forEach(v=>v.remove())}
+function abrirFolha(html,aoMontar){
+  fecharFolha();
+  const v=document.createElement("div");v.className="veu";
+  v.innerHTML=`<div class="folha" role="dialog" aria-modal="true" aria-labelledby="ftit"><div class="pega" aria-hidden="true"></div>${html}</div>`;
+  v.addEventListener("click",e=>{if(e.target===v)fecharFolha()});
+  v.addEventListener("keydown",e=>{if(e.key==="Escape")fecharFolha()});
+  document.body.appendChild(v);aoMontar&&aoMontar(v);
+  const f=v.querySelector("button");f&&f.focus();
+}
+function definicoes(){
+  const sw=(id,txt,ic,on)=>`<button class="item" id="${id}" role="switch" aria-checked="${on}">${I(ic)}<span class="txt">${txt}</span><span class="interruptor" aria-hidden="true"></span></button>`;
+  abrirFolha(`<div class="appbar"><h2 id="ftit">Definições</h2><button class="icbtn" id="fx" aria-label="Fechar">${I("fechar")}</button></div>
+    <div class="item" style="cursor:default">${I("texto")}<span class="txt">Tamanho da letra</span>
+      <span class="passos-letra"><button class="icbtn" id="lm" aria-label="Letra mais pequena">A−</button><b id="lv">${Math.round(DEF.letra*100)}%</b><button class="icbtn" id="lM" aria-label="Letra maior">A+</button></span></div>
+    ${sw("tv","Voz (ler os textos)","som",DEF.voz)}${sw("ts","Sons","som",DEF.som)}${sw("tb","Vibração","vibrar",DEF.vib)}
+    <p class="nota" style="padding:0 .5rem">O que a voz diz aparece sempre escrito no ecrã.</p>
+    <div class="sep"></div>
+    <button class="item" id="fajuda">${I("ajuda")}<span class="txt">Como se joga</span>${I("seta")}</button>
+    <button class="item" id="diag">${I("telemovel")}<span class="txt">Verificar este telemóvel</span>${I("seta")}</button>
+    <button class="item" id="prof">${I("escola")}<span class="txt">Área da professora</span>${I("seta")}</button>`,
+  v=>{
+    const $=id=>v.querySelector("#"+id);
+    $("fx").onclick=fecharFolha;
+    const letra=d=>{DEF.letra=Math.min(1.9,Math.max(.85,+(DEF.letra+d).toFixed(2)));aplicarDef();$("lv").textContent=Math.round(DEF.letra*100)+"%"};
+    $("lm").onclick=()=>letra(-.15);$("lM").onclick=()=>letra(.15);
+    const tog=(id,k)=>{$(id).onclick=()=>{DEF[k]=!DEF[k];aplicarDef();$(id).setAttribute("aria-checked",DEF[k])}};
+    tog("tv","voz");tog("ts","som");tog("tb","vib");
+    $("fajuda").onclick=()=>{fecharFolha();instrucoes(true)};
+    $("diag").onclick=()=>{fecharFolha();diagnostico()};
+    $("prof").onclick=()=>{fecharFolha();professora()};
+  });
+}
+
+/* ---------------- Contas ---------------- */
+function escolherConta(){
+  pararCamara();pararVoz();
+  const L=Object.entries(CONTAS.lista).sort((a,b)=>(b[1].usada||0)-(a[1].usada||0));
+  app.innerHTML=`<main class="ecra" style="padding-top:2rem">
+    <p class="sub">Caçadores da História</p>
+    <h1>Quem vai jogar?</h1>
+    ${L.length?L.map(([id,c])=>{const nv=nivelDe(c);return `<button class="larga" data-c="${id}" style="justify-content:flex-start;text-align:left;padding:.7rem .9rem">
+      ${avatar(c)}<span style="flex:1"><b style="font-size:1.1rem">${esc(c.alcunha)}</b><br>
+      <span class="nota">${nv.concluido?"Fortaleza concluída":nv.jogo?`A meio: ${PECAS.filter(p=>nv.jogo.pecas[p.id].recolhida).length}/${PECAS.length} peças`:"Ainda não começou"}</span></span>${c.pin?I("cadeado"):""}</button>`}).join("")
+      :`<p class="nota">Ainda não há contas neste telemóvel.</p>`}
+    <button class="prim larga" id="criar">${I("mais")}Criar conta</button>
+    <button class="larga" id="conv">Jogar sem conta</button>
+    <p class="nota">As contas ficam só neste telemóvel. Guardamos a alcunha e o progresso, nunca o nome completo.</p></main>`;
+  document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>entrar(b.dataset.c));
+  document.getElementById("criar").onclick=criarConta;
+  document.getElementById("conv").onclick=()=>{CONVIDADO=true;CONTAS.ativa=null;gravarContas();J=ler(CHAVE,null);inicio()};
+}
+function entrar(id,pinOk){
+  const c=CONTAS.lista[id];
+  if(c.pin&&!pinOk){
+    app.innerHTML=`<main class="ecra" style="text-align:center;padding-top:2rem">${barraApp("","vt")}${avatar(c,true)}<h2>${esc(c.alcunha)}</h2>
+      <label for="pin">PIN de 4 números</label><input type="text" id="pin" inputmode="numeric" maxlength="4" autocomplete="off" style="text-align:center;font-size:1.6rem;letter-spacing:.4em">
+      <button class="prim larga" id="ok">Entrar</button></main>`;
+    const i=document.getElementById("pin");i.focus();
+    const ok=async()=>{if(await hashPin(i.value)===c.pin)entrar(id,true);else{toast("PIN errado. Tenta outra vez.");i.value="";vibrar(150)}};
+    document.getElementById("ok").onclick=ok;i.onkeydown=e=>{if(e.key==="Enter")ok()};
+    document.getElementById("vt").onclick=escolherConta;return;
+  }
+  CONTAS.ativa=id;c.usada=Date.now();gravarContas();CONVIDADO=false;
+  J=nivelDe(c).jogo;inicio();
+  toast(`Olá, ${c.alcunha}!${emCurso()?" Podes continuar onde paraste.":""}`);
+}
+function criarConta(){
+  let cor=CORES[Math.floor(Math.random()*CORES.length)];
+  const des=()=>{
+    const al=(document.getElementById("al")||{}).value||"", pin=(document.getElementById("pin")||{}).value||"";
+    app.innerHTML=`<main class="ecra">
+      ${barraApp("Criar conta","vt")}
+      <div style="text-align:center">${avatar({alcunha:al||"?",avatar:cor},true)}</div>
+      <label for="al">Alcunha</label>
+      <input type="text" id="al" maxlength="16" autocomplete="off" placeholder="Ex.: Kiki" value="${esc(al)}">
+      <p class="nota">Não escrevas o nome completo.</p>
+      <label>Cor</label>
+      <div class="escolha" style="grid-template-columns:repeat(8,1fr)">${CORES.map(x=>`<button data-a="${x}" aria-pressed="${x===cor}" aria-label="Cor ${x}" style="background:${x};border-color:${x===cor?"#fff":x};min-width:0;padding:0;height:2.8rem"></button>`).join("")}</div>
+      <label for="pin">PIN de 4 números (opcional)</label>
+      <input type="text" id="pin" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="Para telemóveis partilhados" value="${esc(pin)}">
+      <p class="nota">O PIN só evita que um colega entre na tua conta por engano. Não uses o PIN do banco.</p>
+      <button class="prim larga grande" id="ok">Criar e jogar</button></main>`;
+    document.getElementById("al").oninput=e=>{const a=document.querySelector(".avatar.g");if(a)a.textContent=([...e.target.value.trim()][0]||"?").toUpperCase()};
+    document.getElementById("vt").onclick=()=>CONVIDADO?inicio():escolherConta();
+    document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{cor=b.dataset.a;des()});
+    document.getElementById("ok").onclick=async()=>{
+      const al=document.getElementById("al").value.trim(), pin=document.getElementById("pin").value.trim();
+      if(!al){toast("Escreve uma alcunha.");document.getElementById("al").focus();return}
+      if(Object.values(CONTAS.lista).some(c=>c.alcunha.toLowerCase()===al.toLowerCase())){toast("Já existe uma conta com essa alcunha.");return}
+      if(pin&&!/^\d{4}$/.test(pin)){toast("O PIN tem de ter 4 números, ou ficar vazio.");return}
+      const id="c"+Date.now().toString(36);
+      CONTAS.lista[id]={alcunha:al,avatar:cor,pin:pin?await hashPin(pin):null,criada:Date.now(),usada:Date.now(),historico:[]};
+      // se estava a jogar sem conta, o jogo em curso passa para a conta nova
+      if(CONVIDADO&&J)nivelDe(CONTAS.lista[id]).jogo=J;
+      CONTAS.ativa=id;CONVIDADO=false;gravarContas();J=nivelDe(CONTAS.lista[id]).jogo;
+      toast(`Conta criada. Olá, ${al}!`);inicio();
+    };
+  };
+  des();
+}
+function meuProgresso(){
+  const c=conta(), nv=nivelDe(c), H=c.historico||[];
+  app.innerHTML=`<main class="ecra">
+    ${barraApp("O meu progresso","vt")}
+    <div class="linha" style="flex-wrap:nowrap">${avatar(c,true)}<div><h2 style="margin:0">${esc(c.alcunha)}</h2><p class="nota" style="margin:0">Jogou ${nv.vezes} ${nv.vezes===1?"vez":"vezes"}</p></div></div>
+    <section class="caixa"><p class="sub" style="margin:0">Nível 1</p><h3 style="margin:.2rem 0;color:var(--fg)">${MONUMENTO.nome}</h3>
+      ${nv.concluido?`${estrelas(nv.estrelas)}<p class="nota">Melhor pontuação: <b>${nv.melhor}</b></p>`:`<p class="nota">Ainda não concluído.</p>`}</section>
+    <h3>Jogos terminados</h3>
+    ${H.length?`<table><thead><tr><th>Data</th><th>Certas</th><th>Pontos</th><th>Min.</th></tr></thead><tbody>
+      ${H.slice().reverse().map(h=>`<tr><td>${esc(h.data)}</td><td>${h.certas}/${h.perguntas}</td><td>${h.pontos}</td><td>${h.min}</td></tr>`).join("")}</tbody></table>`:`<p class="nota">Ainda não terminaste nenhum jogo.</p>`}
+    <h3>Conta</h3>
+    <button class="larga" id="reset">${I("reiniciar")}Recomeçar tudo</button>
+    <button class="larga" id="apagar">${I("lixo")}Apagar a conta</button></main>`;
+  document.getElementById("vt").onclick=niveis;
+  const dois=(b,acao,txt)=>{b.onclick=()=>{if(b.dataset.c)acao();else{b.dataset.c=1;b.textContent=txt}}};
+  dois(document.getElementById("reset"),()=>{c.niveis={};c.historico=[];gravarContas();J=null;toast("Progresso apagado.");inicio()},"Apaga todo o progresso. Toca outra vez para confirmar");
+  dois(document.getElementById("apagar"),()=>{delete CONTAS.lista[CONTAS.ativa];CONTAS.ativa=null;gravarContas();J=null;toast("Conta apagada.");escolherConta()},"Apaga a conta. Toca outra vez para confirmar");
 }
 function retomar(){
   const falta=PECAS.find(p=>J.pecas[p.id].recolhida&&!J.pecas[p.id].respondida);
@@ -319,30 +638,36 @@ function retomar(){
 }
 
 function configurar(){
-  let n=1, modo="ra"; // n: 1, 2, 3 ou "f" (família)
+  let n=1, modo="ra", espaco="grande"; // n: 1, 2, 3 ou "f" (família)
   const desenhar=()=>{
     app.innerHTML=`<main class="ecra">
-      <button id="volta">← Voltar</button>
-      <h2>Novo jogo</h2>
-      <h3>Quantos vão jogar com este telemóvel?</h3>
-      <div class="escolha" role="group">${[1,2,3,"f"].map(k=>`<button data-n="${k}" aria-pressed="${n===k}">${k===1?"👤 Sozinho":k===2?"👥 2 colegas":k===3?"👥 3 colegas":"👴🏾 Família"}</button>`).join("")}</div>
+      ${barraApp("Novo jogo")}
+      <h3>Quem joga com este telemóvel?</h3>
+      <div class="escolha" role="group">${[1,2,3,"f"].map(k=>`<button data-n="${k}" aria-pressed="${n===k}">${k===1?"Sozinho":k===2?"2 jogadores":k===3?"3 jogadores":"Família"}</button>`).join("")}</div>
       ${n==="f"?`<p class="caixa amarela">Modo família: quem é mais velho <b>conta a história</b> por palavras suas; os netos procuram, respondem e montam. Pode jogar-se sentado.</p>
         <label for="al0">Alcunha de quem conta a história (avô, avó…)</label><input type="text" id="al0" maxlength="16" autocomplete="off" placeholder="Ex.: Vovô Mateus">
         <label for="al1">Alcunha dos netos</label><input type="text" id="al1" maxlength="16" autocomplete="off" placeholder="Ex.: Os Netos">`
       :[...Array(n)].map((_,i)=>`<label for="al${i}">Alcunha ${n>1?`do jogador ${i+1} (${["Aponta","Responde","Monta"][i]}${n===2&&i===0?" e Monta":""})`:""}</label>
         <input type="text" id="al${i}" maxlength="16" autocomplete="off" placeholder="Ex.: ${["Kiki","Tchico","Nany"][i]}">`).join("")}
-      <p class="nota">🔒 Só guardamos a alcunha e a pontuação. Não escrevas o teu nome completo.</p>
+      <p class="nota">Só guardamos a alcunha e a pontuação. Não escrevas o nome completo.</p>
       <label for="turma">Código da turma (se a professora deu um)</label>
       <input type="text" id="turma" maxlength="10" autocomplete="off" placeholder="Ex.: FSM-4821" style="text-transform:uppercase" value="${esc(TURMA_URL)}">
       <h3>Como queres procurar?</h3>
       <div class="escolha" role="group">
-        <button data-m="ra" aria-pressed="${modo==="ra"}">📷 Com a câmara</button>
-        <button data-m="semra" aria-pressed="${modo==="semra"}">🖼️ Sem câmara (fotografias)</button></div>
-      <p class="nota">Podes jogar <b>sentado</b>: as peças aparecem à tua volta, basta rodar o telemóvel. Sem câmara gasta menos bateria.</p>
-      <button class="prim larga" id="comecar" style="margin-top:1rem">Começar →</button></main>`;
+        <button data-m="ra" aria-pressed="${modo==="ra"}">Com a câmara</button>
+        <button data-m="semra" aria-pressed="${modo==="semra"}">Sem câmara</button></div>
+      ${modo==="ra"?`<h3>Onde vão jogar?</h3>
+      <div class="escolha" role="group">
+        <button data-e="grande" aria-pressed="${espaco==="grande"}">Pátio ou espaço aberto</button>
+        <button data-e="pequeno" aria-pressed="${espaco==="pequeno"}">Sala pequena</button></div>
+      <p class="nota">Joga-se <b>de pé, a andar</b>: as peças ficam escondidas à volta, a alguns metros. Segue as pegadas e chega perto para as apanhar.</p>`
+      :`<p class="nota">Sem câmara, cada peça tem uma imagem do sítio onde está: vai até lá e toca em <b>Estou aqui</b>. Gasta menos bateria.</p>`}
+      <p class="nota">Não podes andar? Escolhe <b>Sem câmara</b> ou o modo <b>Família</b>; também dá para rodar no lugar.</p>
+      <button class="prim larga grande" id="comecar" style="margin-top:1rem">${I("play")}Começar</button></main>`;
     document.getElementById("volta").onclick=inicio;
     document.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{guardaCampos();n=b.dataset.n==="f"?"f":+b.dataset.n;desenhar();repoeCampos()});
     document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{guardaCampos();modo=b.dataset.m;desenhar();repoeCampos()});
+    document.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{guardaCampos();espaco=b.dataset.e;desenhar();repoeCampos()});
     document.getElementById("comecar").onclick=async()=>{
       const nomes=[...Array(n==="f"?2:n)].map((_,i)=>document.getElementById("al"+i).value.trim());
       if(nomes.some(x=>!x)){toast("Escreve uma alcunha para cada jogador.");document.getElementById("al"+nomes.findIndex(x=>!x)).focus();return}
@@ -351,28 +676,38 @@ function configurar(){
       if(modo==="ra"&&window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==="function"){try{await DeviceOrientationEvent.requestPermission()}catch(e){}}
       try{actx=actx||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}
       novoJogo(nomes,turma,modo,n==="f");
+      // modo principal: andar com as peças pousadas no chão real (WebXR), se o telemóvel o suportar
+      J.espaco=espaco;J.xr=modo==="ra"&&!!(window.RA3D&&RA3D.xr);guardar();
       passar(n==="f"?"conta":"aponta",instrucoes);
     };
   };
   let cache={};
+  if(conta())cache.al0=conta().alcunha;
   const guardaCampos=()=>{document.querySelectorAll("input").forEach(i=>cache[i.id]=i.value)};
   const repoeCampos=()=>{for(const k in cache){const el=document.getElementById(k);if(el)el.value=cache[k]}};
-  desenhar();
+  desenhar();repoeCampos();
 }
 
-function instrucoes(){
+// Os mesmos símbolos são usados no ecrã de jogo (consistência, H4)
+const PASSOS=[
+  ["pe","Anda e segue as pegadas","Joga-se de pé. As pegadas mostram para onde ir; as setas amarelas, para onde virar."],
+  ["radar","Olha o radar","O ponto amarelo é a peça mais próxima. Vira-te até ele ficar em cima e anda."],
+  ["vibrar","Sente a vibração","O telemóvel vibra mais depressa quando estás perto."],
+  ["mao","Chega perto e toca","Quando chegas perto, a peça ganha uma moldura e aparece a mão: toca para a apanhar."],
+  ["mensagem","Ouve e responde","Só ganhas pontos com a resposta certa."],
+  ["grelha","Arrasta para montar","Leva cada peça até à forma igual. O lugar fica verde quando estás perto."],
+  ["rodar","Toca para rodar","Se a peça estiver de lado, toca nela. Moldura verde quer dizer pronta."],
+  ["dica","Pede uma dica","Os botões Ajuda e Dica mostram como se faz."],
+];
+function instrucoes(soVer){
   app.innerHTML=`<main class="ecra">
-    <h2>Como se joga</h2>
-    <ol style="font-size:1.15rem;padding-left:1.3rem">
-      <li><b>Roda devagar</b> com o telemóvel. O <b>radar</b> (canto de cima) mostra a peça mais próxima.</li>
-      <li>Quanto mais perto, mais o telemóvel <b>vibra</b> e aparece <b>"Mais perto!"</b>.</li>
-      <li>Quando a peça ficar no meio do ecrã, <b>toca nela</b> para a recolher.</li>
-      <li>Ouve (ou lê) a curiosidade e <b>responde</b>. Só ganhas pontos com a resposta certa!</li>
-      <li>No fim, <b>monta a fortaleza</b> no tabuleiro.</li>
-    </ol>
-    ${J.familia?`<p class="caixa amarela"><b>${esc(J.equipa[0])}</b> conta a história de cada peça aos netos; <b>${esc(J.equipa[1])}</b> procuram, respondem e montam. O jogo avisa quando é para <b>passar o telemóvel</b>.</p>`:""}
-    ${!J.familia&&J.equipa.length>1?`<p class="caixa amarela">Em equipa, cada um tem um papel. O jogo avisa quando é para <b>passar o telemóvel</b>.</p>`:""}
-    <button class="prim larga" id="ok" style="font-size:1.3rem">Vamos procurar! →</button></main>`;
+    ${soVer?barraApp("Como se joga"):`<h2>Como se joga</h2>`}
+    <p class="nota">Estes sinais aparecem durante o jogo.</p>
+    ${PASSOS.map(([ic,t,d])=>`<div class="passo-ic"><div class="ic">${I(ic)}</div><div><b>${t}</b>${d}</div></div>`).join("")}
+    ${!soVer&&J&&J.familia?`<p class="caixa amarela"><b>${esc(J.equipa[0])}</b> conta a história de cada peça aos netos; <b>${esc(J.equipa[1])}</b> procuram, respondem e montam. O jogo avisa quando é para passar o telemóvel.</p>`:""}
+    ${!soVer&&J&&!J.familia&&J.equipa.length>1?`<p class="caixa amarela">Em equipa, cada um tem um papel. O jogo avisa quando é para passar o telemóvel.</p>`:""}
+    ${soVer?"":`<button class="prim larga grande" id="ok">Vamos procurar</button>`}</main>`;
+  if(soVer){document.getElementById("volta").onclick=()=>J&&emCurso()&&document.getElementById("volta").dataset.jogo?menuJogo():inicio();return}
   document.getElementById("ok").onclick=()=>passar("aponta",()=>J.modo==="ra"?procurar():semRA());
 }
 
@@ -380,6 +715,7 @@ function instrucoes(){
 let cam={stream:null,raf:0,tick:0,ouvinte:null};
 function pararCamara(){
   cancelAnimationFrame(cam.raf);clearInterval(cam.tick);
+  document.querySelectorAll(".demo-ov").forEach(e=>e.remove());
   if(cam.cena3d)cam.cena3d.parar();
   if(cam.ouvinte)window.removeEventListener("deviceorientation",cam.ouvinte);
   if(cam.teclas)window.removeEventListener("keydown",cam.teclas);
@@ -398,22 +734,25 @@ function procurar(){
     <div class="pano" id="pano"></div>
     <video id="vid" playsinline muted autoplay></video>
     <div id="tres" style="position:absolute;inset:0;pointer-events:none"></div>
-    <div id="mundo">${faltam.map(p=>`<div class="peca-ra" data-id="${p.id}" role="button" aria-label="${esc(p.nome)}">${svgPeca(p.id)}</div>`).join("")}</div>
+    <div id="mundo">${faltam.map(p=>`<div class="peca-ra" data-id="${p.id}" role="button" aria-label="${esc(p.nome)}">${svgPeca(p.id)}<span class="mao" aria-hidden="true">${I("mao")}</span></div>`).join("")}</div>
     <div class="info-topo">
-      <span class="pill">🎒 ${contar("recolhida")}/${PECAS.length} peças</span>
+      <span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>
       ${etiquetaPapel("aponta")}
       <div class="calor" aria-hidden="true"><i id="calor"></i></div>
     </div>
     <div class="radar" aria-hidden="true"><div class="eu"></div><div class="alvo" id="alvo"></div></div>
     <div class="aviso-cam" id="aviso" hidden></div>
-    <button class="rodar esq" id="re" aria-label="Rodar para a esquerda" hidden>◀</button>
-    <button class="rodar dir" id="rd" aria-label="Rodar para a direita" hidden>▶</button>
+    <button class="rodar esq" id="re" aria-label="Rodar para a esquerda" hidden>${I("voltar")}</button>
+    <button class="rodar dir" id="rd" aria-label="Rodar para a direita" hidden>${I("seta")}</button>
+    <div class="seta-lado oculta" id="seta" aria-hidden="true">${I("seta2")}</div>
+    <div class="pegadas oculta" id="pegadas" aria-hidden="true">${PEGADAS}</div>
     <div class="dica" id="dica" role="status" aria-live="polite">Roda devagar…</div>
     <div class="fundo-cam">
-      <button id="bmenu">☰ Menu</button>
-      <button id="bfixar" hidden>📌 Fixar</button>
-      <button id="bxr" class="prim" hidden>🌍 RA no chão</button>
-      <button id="bmontar">🧩 Montar (${contar("recolhida")-contar("colocada")})</button>
+      <button id="bmenu">${I("pausa")}Pausa</button>
+      <button id="bexemplo">${I("ajuda")}Ajuda</button>
+      <button id="bfixar" hidden>${I("pino")}Fixar</button>
+      <button id="bxr" class="prim" hidden>${I("cubo")}RA no chão</button>
+      <button id="bmontar">${I("grelha")}Montar (${contar("recolhida")-contar("colocada")})</button>
     </div></div>`;
   const $=id=>document.getElementById(id);
   const vid=$("vid"),pano=$("pano"),dica=$("dica"),alvo=$("alvo"),calor=$("calor");
@@ -454,11 +793,13 @@ function procurar(){
 
   // "Fixar": ver a peça sem continuar a apontar (lição 3 da PL 7)
   $("bfixar").onclick=()=>{
-    if(fixado){fixado=null;$("bfixar").textContent="📌 Fixar";return}
-    fixado=encontrada;$("bfixar").textContent="📷 Voltar à câmara";
+    if(fixado){fixado=null;$("bfixar").innerHTML=I("pino")+"Fixar";return}
+    fixado=encontrada;$("bfixar").innerHTML=I("camara")+"Câmara";
   };
   $("bmenu").onclick=menuJogo;
   $("bmontar").onclick=()=>passar("monta",montar);
+  $("bexemplo").onclick=()=>{reg("ajuda",{onde:"procurar"});demoRecolher(faltam[0].id)};
+  if(!J.viuDemoRecolher){J.viuDemoRecolher=true;guardar();setTimeout(()=>{if($("cam"))demoRecolher(faltam[0].id)},500)}
   // WebXR: só aparece em aparelhos que o suportam (Android com ARCore, em https)
   const mostrarXR=()=>{const b=document.getElementById("bxr");if(b&&window.RA3D&&RA3D.xr)b.hidden=false};
   mostrarXR();window.addEventListener("ra3d-xr",mostrarXR,{once:true});
@@ -496,6 +837,7 @@ function procurar(){
     else if(md<30){t="Mais perto!";cls="quente"}
     else if(md<70)t=melhor.d>0?"Mais perto! Vira à direita →":"← Mais perto! Vira à esquerda";
     else t=melhor.d>0?"Vira à direita →":"← Vira à esquerda";
+    sinais($("pegadas"),$("seta"),achou?null:md<20?"frente":melhor.d>0?"dir":"esq");
     if(t!==ultimaDica){dica.textContent=t;dica.className="dica "+cls;ultimaDica=t}
     if(cam.cena3d)cam.cena3d.desenhar(rumo,encontrada,fixado);
   }
@@ -510,17 +852,44 @@ function procurar(){
   },100);
 }
 
+const PEGADAS=`<span>${I("pe")}</span><span>${I("pe")}</span><span>${I("pe")}</span>`;
+// Exemplo animado: como pegar numa peça (mostrar, não só dizer)
+function demoRecolher(id){
+  document.querySelectorAll(".demo-ov").forEach(e=>e.remove());
+  const d=document.createElement("div");d.className="demo-ov";d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");d.setAttribute("aria-labelledby","demot");
+  d.innerHTML=`<div class="demo-cx">
+    <h2 id="demot" style="margin-top:0">Como pegar numa peça</h2>
+    <div class="demo-tel" aria-hidden="true"><div class="demo-radar"><i></i></div><div class="demo-peca">${svgPeca(id)}</div><div class="demo-mao">${I("mao")}</div></div>
+    <ol class="demo-passos">
+      <li><b>1.</b> Anda pelo monumento com o telemóvel à frente, seguindo as pegadas e o radar…</li>
+      <li><b>2.</b> …até chegares perto e a peça ficar no meio. Aparece a <b>moldura amarela</b>.</li>
+      <li><b>3.</b> <b>Toca na peça</b> para a pegar. Vai para a mochila.</li></ol>
+    <button class="prim larga grande" id="demook">Percebi</button></div>`;
+  document.body.appendChild(d);
+  const ok=d.querySelector("#demook");ok.focus();ok.onclick=()=>d.remove();
+}
+
+// Pegadas e setas: significante de direcção (para onde virar/andar)
+function sinais(peg,seta,dir){
+  if(!peg||peg.dataset.d===String(dir))return;
+  peg.dataset.d=String(dir);
+  peg.className="pegadas "+(dir||"oculta");
+  seta.className="seta-lado "+(dir==="dir"||dir==="esq"?dir:"oculta");
+}
+
 /* ---------------- RA no chão (WebXR + hit-test) ---------------- */
 function iniciarXR(){
   pararCamara();reg("xr");
   const faltam=PECAS.filter(p=>!J.pecas[p.id].recolhida);
-  app.innerHTML=`<main class="ecra" style="text-align:center;padding-top:4rem"><p style="font-size:3rem;margin:0">🌍</p><h2>A abrir a RA…</h2></main>`;
+  app.innerHTML=`<main class="passa"><div class="ic-grande">${I("cubo")}</div><h2>A abrir a RA…</h2></main>`;
   const ov=document.createElement("div");ov.className="xr-ov";
-  ov.innerHTML=`<div class="info-topo"><span class="pill">🎒 ${contar("recolhida")}/${PECAS.length} peças</span>${etiquetaPapel("aponta")}
+  ov.innerHTML=`<div class="info-topo"><span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>${etiquetaPapel("aponta")}
       <div class="calor" aria-hidden="true"><i id="xcalor"></i></div></div>
     <div class="radar" aria-hidden="true" id="xradar" hidden><div class="eu"></div><div class="alvo" id="xalvo"></div></div>
+    <div class="seta-lado oculta" id="xseta" aria-hidden="true">${I("seta2")}</div>
+    <div class="pegadas oculta" id="xpeg" aria-hidden="true">${PEGADAS}</div>
     <div class="dica" id="xdica" role="status" aria-live="polite">Aponta para o chão e move o telemóvel devagar…</div>
-    <div class="fundo-cam"><button id="xsair">✕ Sair da RA</button></div>`;
+    <div class="fundo-cam"><button id="xsair">${I("fechar")}Sair da RA</button></div>`;
   document.body.appendChild(ov);
   // os toques nos botões não contam como "toque no ecrã" da RA
   ov.querySelectorAll("button").forEach(b=>b.addEventListener("beforexrselect",e=>e.preventDefault()));
@@ -537,8 +906,12 @@ function iniciarXR(){
       $("xcalor").style.width=(s.perto*100)+"%";
       if(s.encontrada&&s.encontrada!==ultimaEnc){som("encontrar");vibrar([90,50,90])}
       ultimaEnc=s.encontrada;
+      const m=s.dist!=null?` · ${s.dist.toFixed(1).replace(".",",")} m`:"";
+      sinais($("xpeg"),$("xseta"),s.encontrada?null:Math.abs(s.diff)<20?"frente":s.diff>0?"dir":"esq");
       if(s.encontrada)dica("Encontraste! Toca no ecrã","quente");
-      else if(Math.abs(s.diff)<30)dica("Mais perto!","quente");
+      else if(Math.abs(s.diff)<20&&s.dist>s.alcance)dica("Anda em frente, segue as pegadas"+m,"quente");
+      else if(Math.abs(s.diff)<35&&s.dist<=s.alcance)dica("Estás perto! Olha para a peça","quente");
+      else if(Math.abs(s.diff)<30)dica("Mais perto!"+m,"quente");
       else if(Math.abs(s.diff)<70)dica(s.diff>0?"Mais perto! Vira à direita →":"← Mais perto! Vira à esquerda");
       else dica(s.diff>0?"Vira à direita →":"← Vira à esquerda");
       // quente/frio por vibração
@@ -551,7 +924,7 @@ function iniciarXR(){
       if(motivo!=="encontrou"){J.xr=false;guardar()} // saiu: volta ao modo por orientação
       if(achada)recolher(achada);else procurar();
     },
-  }).then(s=>{sessao=s}).catch(()=>{
+  },{escala:J.espaco==="pequeno"?.5:1}).then(s=>{sessao=s}).catch(()=>{
     ov.remove();J.xr=false;guardar();
     toast("Não foi possível abrir a RA no chão. A usar o modo normal.");
     procurar();
@@ -561,7 +934,7 @@ function iniciarXR(){
 function recolher(id){
   pararCamara();
   J.pecas[id].recolhida=true;guardar();
-  toast("🎒 Peça na mochila! "+contar("recolhida")+"/"+PECAS.length);
+  toast("Peça na mochila: "+contar("recolhida")+" de "+PECAS.length);
   reg("peca",{id});
   passar(J.familia?"conta":"responde",()=>curiosidade(PECAS.find(p=>p.id===id)));
 }
@@ -572,20 +945,22 @@ function semRA(){
   const faltam=PECAS.filter(p=>!J.pecas[p.id].recolhida);
   if(!faltam.length)return passar("monta",montar);
   app.innerHTML=`<main class="ecra">
-    <div class="barra-topo"><span class="pill">🎒 ${contar("recolhida")}/${PECAS.length} peças</span>${etiquetaPapel("aponta")}</div>
+    <div class="barra-topo"><span class="pill">${I("mochila")}${contar("recolhida")}/${PECAS.length}</span>${etiquetaPapel("aponta")}</div>
     <h2>Onde estão as peças?</h2>
-    <p>Vai até ao sítio da fotografia e toca em <b>"Estou aqui"</b>.</p>
+    <p class="nota">Vai até ao sítio da imagem e toca em <b>Estou aqui</b>.</p>
     ${faltam.map(p=>`<div class="local"><div class="foto">${svgPeca(p.id)}</div>
-      <div><b>${esc(p.onde)}</b><button class="prim larga" data-id="${p.id}">📍 Estou aqui</button></div></div>`).join("")}
-    <div class="linha"><button id="bmenu">☰ Menu</button><button id="bmontar">🧩 Montar (${contar("recolhida")-contar("colocada")})</button></div></main>`;
+      <div><b>${esc(p.onde)}</b><button class="prim larga" data-id="${p.id}">${I("pino")}Estou aqui</button></div></div>`).join("")}
+    <div class="linha"><button id="bmenu">${I("pausa")}Pausa</button><button id="bmontar">${I("grelha")}Montar (${contar("recolhida")-contar("colocada")})</button></div></main>`;
   document.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{
     const p=PECAS.find(x=>x.id===b.dataset.id);
     som("encontrar");vibrar([90,50,90]);
     app.innerHTML=`<main class="ecra" style="text-align:center">
       <h2>Encontraste uma peça!</h2>
-      <button id="pg" aria-label="Recolher ${esc(p.nome)}" style="border:5px solid var(--amarelo);background:#111;padding:1rem;width:14rem;height:14rem;margin:1rem auto;display:block">${svgPeca(p.id)}</button>
+      <div style="position:relative;width:14rem;margin:1rem auto">
+        <button id="pg" aria-label="Recolher ${esc(p.nome)}" style="border:4px solid var(--ouro);background:var(--sup);padding:1rem;width:14rem;height:14rem;display:block;border-radius:1.2rem">${svgPeca(p.id)}</button>
+        <span class="mao ver" aria-hidden="true">${I("mao")}</span></div>
       <p class="destaque">${esc(p.nome)}</p><p>Toca na peça para a recolher.</p>
-      <button class="larga" id="vt">← Voltar</button></main>`;
+      <button class="larga" id="vt">${I("voltar")}Voltar</button></main>`;
     document.getElementById("pg").onclick=()=>recolher(p.id);
     document.getElementById("vt").onclick=semRA;
   });
@@ -602,24 +977,24 @@ function curiosidade(p){
     <h2>${fam?"Conta esta história aos netos":"Sabias que…"}</h2>
     ${fam?`<p class="nota">Leia ou oiça, e depois conte por palavras suas. Se souber mais alguma coisa sobre este lugar, conte também!</p>`:""}
     <p class="legenda" id="leg">${esc(p.curio)}</p>
-    <div class="linha"><button id="ouvir">🔊 Ouvir de novo</button><button id="pausa">⏸ Parar</button></div>
-    <button class="prim larga" id="seg" disabled style="font-size:1.25rem;margin-top:1rem">A carregar a pergunta…</button>
+    <div class="linha"><button id="ouvir">${I("som")}Ouvir de novo</button><button id="pausa">${I("parar")}Parar</button></div>
+    <button class="prim larga grande" id="seg" disabled style="margin-top:1rem">A carregar a pergunta…</button>
   </main>`;
   const seg=document.getElementById("seg");
   if(window.RA3D){const v=document.getElementById("p3d");RA3D.visualizador(v,[p.id]).then(()=>{const s=v.querySelector("img");if(s)s.style.display="none"}).catch(()=>{})}
   // D1: a pergunta só abre depois de ouvida ou lida a curiosidade
   let pronto=false;
-  const libertar=()=>{if(pronto)return;pronto=true;seg.disabled=false;seg.textContent=fam?"Já contei — os netos respondem →":"Já ouvi — à pergunta →"};
+  const libertar=()=>{if(pronto)return;pronto=true;seg.disabled=false;seg.textContent=fam?"Já contei: os netos respondem":"Responder à pergunta"};
   const minimo=Math.min(9000,2500+p.curio.length*35);
   setTimeout(libertar, fam?3000:DEF.voz?minimo+4000:minimo);
-  if(fam){document.getElementById("ouvir").textContent="🔊 Ouvir"}else falar(p.curio,()=>setTimeout(libertar,400));
+  if(fam){document.getElementById("ouvir").innerHTML=I("som")+"Ouvir"}else falar(p.curio,()=>setTimeout(libertar,400));
   document.getElementById("ouvir").onclick=()=>falar(p.curio,libertar);
   document.getElementById("pausa").onclick=pararVoz;
   seg.onclick=()=>{pararVoz();fam?passar("responde",()=>pergunta(p)):pergunta(p)};
 }
 function pergunta(p){
   app.innerHTML=`<main class="ecra">
-    <div class="barra-topo"><span class="pill">⭐ ${J.pontos} pontos</span>${etiquetaPapel("responde")}</div>
+    <div class="barra-topo"><span class="pill" style="color:var(--ouro)">${I("estrela")}<span style="color:var(--fg)">${J.pontos} pontos</span></span>${etiquetaPapel("responde")}</div>
     <h2>${esc(p.q)}</h2>
     <div class="opcoes">${p.o.map((o,i)=>`<button data-i="${i}">${esc(o)}</button>`).join("")}</div>
     <div id="retro" role="status" aria-live="assertive"></div></main>`;
@@ -634,10 +1009,10 @@ function pergunta(p){
     if(!certa)b.classList.add("errada");
     const st=J.pecas[p.id];st.respondida=true;st.certa=certa;if(certa)J.pontos+=PONTOS_CERTA;guardar();
     som(certa?"certo":"errado");vibrar(certa?60:[200,80,200]);
-    const txt=certa?`✓ Certo! ${p.o[p.a]}. +${PONTOS_CERTA} pontos`:`✗ Não foi desta. A resposta certa é: ${p.o[p.a]}.`;
+    const txt=certa?`Certo! ${p.o[p.a]}. Mais ${PONTOS_CERTA} pontos.`:`Não foi desta. A resposta certa é: ${p.o[p.a]}.`;
     document.getElementById("retro").innerHTML=`<p class="retro" style="color:${certa?"var(--ok)":"var(--erro)"}">${esc(txt)}</p>
       <p class="legenda">${esc(p.explica)}</p>
-      <button class="prim larga" id="cont" style="font-size:1.2rem">${contar("recolhida")<PECAS.length?"Procurar a próxima peça →":"Montar a fortaleza →"}</button>`;
+      <button class="prim larga grande" id="cont">${contar("recolhida")<PECAS.length?"Procurar a próxima peça":"Montar a fortaleza"}</button>`;
     falar(txt+" "+p.explica);
     document.getElementById("cont").onclick=()=>{pararVoz();contar("recolhida")<PECAS.length?passar("aponta",procurar):passar("monta",montar)};
   });
@@ -649,23 +1024,31 @@ function montar(){
   const naMochila=PECAS.filter(p=>J.pecas[p.id].recolhida&&!J.pecas[p.id].colocada);
   const faltam=PECAS.length-contar("recolhida");
   app.innerHTML=`<main class="ecra">
-    <div class="barra-topo"><span class="pill">🧩 ${contar("colocada")}/${PECAS.length} no lugar</span>${etiquetaPapel("monta")}</div>
+    <div class="barra-topo"><span class="pill">${I("grelha")}${contar("colocada")}/${PECAS.length} no lugar</span>${etiquetaPapel("monta")}</div>
     <h2>Monta a fortaleza</h2>
-    <p class="nota">A fortaleza vista de cima tem a forma de uma <b>estrela</b>. <b>Arrasta</b> a peça para o seu lugar (encaixa sozinha quando estás perto). <b>Toca</b> na peça para a rodar.</p>
+    <p class="nota">Vista de cima, a fortaleza é uma <b>estrela</b>. Leva cada peça até à forma igual.</p>
+    <div class="legenda-ic" aria-hidden="true"><span>Arrasta para o lugar</span><span>Toca para rodar</span><span style="border-color:var(--ok);color:var(--ok)">Verde = pronta</span></div>
     <div class="tabuleiro" id="tab">${SVG_FUNDO}
       ${PECAS.map(p=>{const c=J.pecas[p.id].colocada;return `<div class="slot ${c?"":"vazio"}" data-slot="${p.id}" style="${posSlot(p.slot)}">${svgPeca(p.id,"cima")}</div>`}).join("")}
     </div>
-    <h3>🎒 Mochila</h3>
+    <h3 style="display:flex;align-items:center;gap:.4rem">${I("mochila")}Mochila</h3>
     <div class="mochila">
-      ${naMochila.map(p=>`<div class="mpeca" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.nome)}, rodada ${J.pecas[p.id].rot} graus. Toca para rodar, arrasta para encaixar."><div style="width:100%;height:100%;transform:rotate(${J.pecas[p.id].rot}deg);transition:transform .2s">${svgPeca(p.id,"cima")}</div></div>`).join("")}
+      ${naMochila.map(p=>`<div class="mpeca ${J.pecas[p.id].rot===0?"pronta":""}" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.nome)}. ${J.pecas[p.id].rot===0?"Pronta: arrasta para encaixar.":"Toca para rodar."}"><div style="width:100%;height:100%;transform:rotate(${J.pecas[p.id].rot}deg);transition:transform .2s">${svgPeca(p.id,"cima")}</div><small>${I(J.pecas[p.id].rot===0?"visto":"rodar")}</small></div>`).join("")}
       ${[...Array(faltam)].map(()=>`<div class="mpeca bloq" aria-label="Peça por encontrar">?</div>`).join("")}
     </div>
     ${!naMochila.length&&faltam?`<p class="caixa amarela">A mochila está vazia. Ainda faltam <b>${faltam}</b> peças para encontrar.</p>`:""}
     <div class="linha" style="margin-top:1rem">
-      <button id="bmenu">☰ Menu</button>
-      ${faltam?`<button class="prim" id="bproc">🎯 Procurar mais (${faltam})</button>`:""}
+      <button id="bmenu">${I("pausa")}Pausa</button>
+      ${naMochila.length?`<button id="bdica">${I("dica")}Dica</button>`:""}
+      ${faltam?`<button class="prim" id="bproc">${I("radar")}Procurar (${faltam})</button>`:""}
     </div></main>`;
   document.getElementById("bmenu").onclick=menuJogo;
+  J.falhas=J.falhas||{};
+  if(naMochila.length){
+    document.getElementById("bdica").onclick=()=>{reg("ajuda",{onde:"montar"});demoMontar()};
+    // demonstração automática na primeira vez (mostrar, não só dizer)
+    if(!J.viuDemo){J.viuDemo=true;guardar();setTimeout(demoMontar,700)}
+  }
   if(faltam)document.getElementById("bproc").onclick=()=>passar("aponta",procurar);
   const tab=document.getElementById("tab");
 
@@ -674,7 +1057,10 @@ function montar(){
     let ini=null, fant=null;
     const rodar=()=>{if(PECAS.find(p=>p.id===id).roda===false){toast("Esta peça não precisa de rodar: arrasta-a para o pátio.");return}
       J.pecas[id].rot=(J.pecas[id].rot+90)%360;guardar();inner.style.transform=`rotate(${J.pecas[id].rot}deg)`;som("encaixe");
-      el.setAttribute("aria-label",`${PECAS.find(p=>p.id===id).nome}, rodada ${J.pecas[id].rot} graus.`)};
+      const pronta=J.pecas[id].rot===0;
+      el.classList.toggle("pronta",pronta);el.querySelector("small").innerHTML=I(pronta?"visto":"rodar");
+      el.setAttribute("aria-label",`${PECAS.find(p=>p.id===id).nome}. ${pronta?"Pronta: arrasta para encaixar.":"Toca para rodar."}`);
+      if(pronta){vibrar(40);toast("Pronta! Agora arrasta-a para a forma igual.")}};
     el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();rodar()}});
     el.addEventListener("pointerdown",e=>{ini={x:e.clientX,y:e.clientY};el.setPointerCapture(e.pointerId)});
     el.addEventListener("pointermove",e=>{
@@ -687,13 +1073,23 @@ function montar(){
         fant.style.width=(s.w/TAB.w*W*k)+"px";fant.style.height=(s.h/TAB.w*W*k)+"px";
         fant.style.transform=`translate(-50%,-50%) rotate(${J.pecas[id].rot}deg)`;
         fant.innerHTML=svgPeca(id,"cima");document.body.appendChild(fant);el.style.opacity=.3;
+        // ajuda progressiva: depois de 2 tentativas falhadas, o lugar certo pisca
+        if((J.falhas[id]||0)>=2)tab.querySelector(`[data-slot="${id}"]`).classList.add("alvo");
       }
-      if(fant){fant.style.left=e.clientX+"px";fant.style.top=e.clientY+"px"}
+      if(fant){fant.style.left=e.clientX+"px";fant.style.top=e.clientY+"px";
+        // retroacção do "íman": verde se encaixa, vermelho se está perto mas de lado
+        const sl=tab.querySelector(`[data-slot="${id}"]`),r=sl.getBoundingClientRect();
+        const perto=Math.hypot(e.clientX-(r.left+r.width/2),e.clientY-(r.top+r.height/2))<Math.max(40,Math.min(r.width,r.height)*.6);
+        sl.classList.toggle("iman",perto&&J.pecas[id].rot===0);sl.classList.toggle("quase",perto&&J.pecas[id].rot!==0);
+      }
     });
+    const falhou=()=>{J.falhas[id]=(J.falhas[id]||0)+1;guardar();
+      if(J.falhas[id]===2)setTimeout(()=>toast("Na próxima vez, o lugar certo vai piscar."),2300)};
     const largar=e=>{
       if(!ini)return; ini=null;
       if(!fant){rodar();return}
       fant.remove();fant=null;el.style.opacity=1;
+      tab.querySelectorAll(".slot").forEach(x=>x.classList.remove("iman","quase","alvo"));
       const slot=tab.querySelector(`[data-slot="${id}"]`).getBoundingClientRect();
       const cx=slot.left+slot.width/2, cy=slot.top+slot.height/2;
       // "íman": encaixa se largada perto do lugar (≈1 cm ou metade da peça)
@@ -703,10 +1099,10 @@ function montar(){
         // largou noutro lugar: diz se está em cima de outro molde
         const outro=[...tab.querySelectorAll(".slot.vazio")].find(s=>{const r=s.getBoundingClientRect();return e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom});
         toast(outro?"Esse lugar é de outra peça. Procura a forma igual!":"A peça voltou à mochila. Larga-a em cima da forma igual.");
-        reg("encaixe_falhado",{id,motivo:outro?"lugar_errado":"longe"});
+        reg("encaixe_falhado",{id,motivo:outro?"lugar_errado":"longe"});falhou();
         return;
       }
-      if(J.pecas[id].rot!==0){toast("Quase! Está ao contrário — toca na peça para a rodar.");vibrar(150);reg("encaixe_falhado",{id,motivo:"rodada"});return}
+      if(J.pecas[id].rot!==0){toast("Quase! Está ao contrário — toca na peça para a rodar.");vibrar(150);reg("encaixe_falhado",{id,motivo:"rodada"});falhou();return}
       J.pecas[id].colocada=true;guardar();som("encaixe");vibrar(60);reg("encaixe",{id});
       if(contar("colocada")===PECAS.length)return fim();
       montar();
@@ -716,6 +1112,25 @@ function montar(){
     el.addEventListener("pointerup",largar);
     el.addEventListener("pointercancel",()=>{ini=null;if(fant){fant.remove();fant=null;el.style.opacity=1}});
   });
+}
+
+// Demonstração: uma mão leva a primeira peça da mochila até ao seu lugar (roda-a primeiro, se preciso)
+function demoMontar(){
+  const el=document.querySelector(".mpeca:not(.bloq)"), tab=document.getElementById("tab");
+  if(!el||!tab)return;
+  const id=el.dataset.id, sl=tab.querySelector(`[data-slot="${id}"]`);
+  const a=el.getBoundingClientRect(), b=sl.getBoundingClientRect(), r=J.pecas[id].rot;
+  const d=document.createElement("div");d.className="mao-demo";d.setAttribute("aria-hidden","true");
+  d.innerHTML=svgPeca(id,"cima")+"<span>"+I("mao")+"</span>";document.body.appendChild(d);
+  sl.classList.add("alvo");
+  toast(r?"Vê: toca para rodar e depois arrasta até à forma igual.":"Vê: arrasta a peça até à forma igual.",3800);
+  const P=(x,y,rot)=>`translate(${x}px,${y}px) translate(-50%,-50%) rotate(${rot}deg)`;
+  const ax=a.left+a.width/2, ay=a.top+a.height/2, bx=b.left+b.width/2, by=b.top+b.height/2;
+  const anim=d.animate([
+    {transform:P(ax,ay,r),opacity:0},{transform:P(ax,ay,r),opacity:1,offset:.12},
+    {transform:P(ax,ay,0),offset:.35},{transform:P(bx,by,0),offset:.85},{transform:P(bx,by,0),opacity:0}],
+    {duration:2600,iterations:2,easing:"ease-in-out"});
+  anim.onfinish=()=>{d.remove();sl.classList.remove("alvo")};
 }
 
 /* ---------------- Fim e resultado ---------------- */
@@ -740,30 +1155,38 @@ function fim(){
   pararVoz();som("fim");vibrar([100,60,100,60,200]);
   if(!(J.reg||[]).some(e=>e.tipo==="fim"))reg("fim");
   guardarSessao(Object.assign(resumoSessao(),{sus:(ler(CHAVE_SES,[]).find(x=>x.id===J.inicio)||{}).sus??null}));
+  const cc=conta();
+  if(cc&&!J.contado){
+    const nv=nivelDe(cc), certasF=contar("certa"), est=certasF===PECAS.length?3:certasF>=4?2:1;
+    nv.concluido=true;nv.vezes++;nv.melhor=Math.max(nv.melhor,J.pontos);nv.estrelas=Math.max(nv.estrelas,est);
+    (cc.historico=cc.historico||[]).push({data:new Date().toLocaleString("pt-PT"),certas:certasF,perguntas:PECAS.length,pontos:J.pontos,min:Math.round((Date.now()-J.inicio)/60000)});
+    J.contado=true;guardar();
+  }
   const certas=contar("certa"), linha=linhaResultado();
   const res=ler(CHAVE_RES,[]); if(!res.includes(linha)){res.push(linha);gravar(CHAVE_RES,res)}
   app.innerHTML=`<main class="ecra">
-    <h1 style="color:var(--amarelo)">🏰 Fortaleza reconstruída!</h1>
+    <p class="sub" style="text-align:center;margin-top:1rem">Nível 1 concluído</p>
+    <h1 style="text-align:center">Fortaleza reconstruída!</h1>
+    <p style="text-align:center;font-size:2rem;margin:.2rem 0 .8rem">${estrelas(certas===PECAS.length?3:certas>=4?2:1)}</p>
     <div class="tabuleiro vista3d" id="v3d">${SVG_FUNDO}${PECAS.map(p=>`<div class="slot" style="${posSlot(p.slot)}">${svgPeca(p.id,"cima")}</div>`).join("")}</div>
-    <p class="destaque" style="margin-top:1rem">${esc(J.equipa.join(", "))}: ${certas} de ${PECAS.length} respostas certas · ${J.pontos} pontos</p>
+    <p class="destaque" style="margin-top:1rem;text-align:center">${certas} de ${PECAS.length} respostas certas · ${J.pontos} pontos</p>
     <section class="caixa amarela"><h3 style="margin-top:0">Três coisas para lembrar</h3>
       <ol style="font-size:1.1rem;margin:0;padding-left:1.3rem">
         <li>A fortaleza começou a ser construída em <b>1576</b>, quando Luanda foi fundada.</li>
         <li>Os <b>holandeses</b> ocuparam-na entre <b>1641 e 1648</b>.</li>
         <li>Hoje é o <b>Museu Nacional de História Militar</b>.</li></ol></section>
-    <button class="prim larga" id="prof">📤 Enviar o resultado à professora</button>
-    <button class="larga" id="sus">📝 Questionário rápido (2 min)</button>
-    <button class="larga" id="part">📷 Partilhar a fortaleza</button>
-    <button class="larga" id="novo">↻ Jogar de novo</button>
-    <button class="larga" id="ini">⌂ Início</button></main>`;
+    <button class="prim larga grande" id="ini">${I("casa")}Continuar</button>
+    <button class="larga" id="prof">${I("partilhar")}Enviar o resultado à professora</button>
+    <button class="larga" id="sus">${I("formulario")}Responder ao questionário (2 min)</button>
+    <div class="linha"><button id="part">${I("partilhar")}Partilhar</button><button id="novo">${I("reiniciar")}Jogar outra vez</button></div></main>`;
   if(window.RA3D){const v=document.getElementById("v3d");
-    RA3D.visualizador(v,PECAS.map(p=>p.id),{montado:true}).then(()=>{v.querySelectorAll(".slot,.fundo").forEach(e=>e.remove());v.insertAdjacentHTML("beforeend",'<span class="dica3d">↔ Arrasta para rodar</span>')}).catch(()=>{})}
+    RA3D.visualizador(v,PECAS.map(p=>p.id),{montado:true}).then(()=>{v.querySelectorAll(".slot,.fundo").forEach(e=>e.remove());v.insertAdjacentHTML("beforeend",'<span class="dica3d">Arrasta para rodar</span>')}).catch(()=>{})}
   falar(`Parabéns! Reconstruíram a Fortaleza de São Miguel. Acertaram ${certas} de ${PECAS.length} perguntas.`);
   document.getElementById("prof").onclick=()=>partilhar(`Caçadores da História — ${MONUMENTO.nome}\n${J.equipa.join(", ")}: ${certas}/${PECAS.length} certas.\nCódigo do resultado (colar no resumo da turma):\n${linha}`);
-  document.getElementById("part").onclick=()=>partilhar(`Reconstruímos a ${MONUMENTO.nome} no jogo Caçadores da História! 🏰 ${certas}/${PECAS.length} respostas certas.`);
+  document.getElementById("part").onclick=()=>partilhar(`Reconstruímos a ${MONUMENTO.nome} no jogo Caçadores da História! ${certas}/${PECAS.length} respostas certas.`);
   document.getElementById("sus").onclick=questionarioSUS;
-  document.getElementById("novo").onclick=configurar;
-  document.getElementById("ini").onclick=()=>{J=null;gravar(CHAVE,null);inicio()};
+  document.getElementById("novo").onclick=()=>{J=null;guardar();configurar()};
+  document.getElementById("ini").onclick=()=>{J=null;guardar();inicio()};
 }
 
 /* ---------------- Questionário SUS (System Usability Scale), para a meta "SUS ≥ 70" ---------------- */
@@ -781,7 +1204,7 @@ function questionarioSUS(){
       <div class="escala" role="group" aria-label="Resposta ${i+1}">${[1,2,3,4,5].map(v=>`<button data-q="${i}" data-v="${v}" aria-pressed="false">${v}</button>`).join("")}</div>
       <div class="linha nota" style="justify-content:space-between"><span>Discordo</span><span style="text-align:right">Concordo</span></div></div>`).join("")}
     <button class="prim larga" id="env" disabled>Enviar</button>
-    <button class="larga" id="vt">← Voltar sem responder</button></main>`;
+    <button class="larga" id="vt">Voltar sem responder</button></main>`;
   const env=document.getElementById("env");
   document.querySelectorAll(".escala button").forEach(b=>b.onclick=()=>{
     const q=+b.dataset.q;resp[q]=+b.dataset.v;
@@ -793,7 +1216,7 @@ function questionarioSUS(){
     // ímpares: resposta − 1; pares: 5 − resposta; soma × 2,5 → 0 a 100
     const nota=resp.reduce((s,v,i)=>s+(i%2===0?v-1:5-v),0)*2.5;
     const ses=Object.assign(resumoSessao(),{sus:nota});guardarSessao(ses);reg("sus",{nota});
-    app.innerHTML=`<main class="ecra" style="text-align:center;padding-top:3rem"><p style="font-size:3rem;margin:0">🙏🏾</p><h2>Obrigado!</h2>
+    app.innerHTML=`<main class="passa"><div class="ic-grande">${I("visto")}</div><h2>Obrigado!</h2>
       <p>As respostas ficam guardadas neste telemóvel, sem nomes.</p><button class="prim larga" id="ok">Continuar</button></main>`;
     document.getElementById("ok").onclick=fim;
   };
@@ -808,39 +1231,46 @@ function partilhar(texto){
 /* ---------------- Menu durante o jogo ---------------- */
 function menuJogo(){
   pararCamara();pararVoz();
-  app.innerHTML=`<main class="ecra">
-    <h2>Menu</h2>
-    <p><span class="pill">🎒 ${contar("recolhida")}/${PECAS.length}</span> <span class="pill">🧩 ${contar("colocada")}/${PECAS.length}</span> <span class="pill">⭐ ${J.pontos}</span></p>
-    <button class="prim larga" id="cont">▶ Continuar</button>
-    <button class="larga" id="modo">${J.modo==="ra"?"🖼️ Mudar para \"sem câmara\" (poupa bateria)":"📷 Mudar para \"com a câmara\""}</button>
-    <button class="larga" id="ajuda">❓ Como se joga</button>
-    <button class="larga" id="sair">⌂ Sair para o início (o jogo fica guardado)</button></main>`;
-  document.getElementById("cont").onclick=retomar;
-  document.getElementById("modo").onclick=()=>{J.modo=J.modo==="ra"?"semra":"ra";guardar();retomar()};
-  document.getElementById("ajuda").onclick=()=>{reg("ajuda");instrucoes()};
-  document.getElementById("sair").onclick=inicio;
+  app.innerHTML=`<main class="passa"><div class="ic-grande">${I("pausa")}</div><h2>Em pausa</h2>
+    <p class="nota">${contar("recolhida")}/${PECAS.length} peças · ${contar("colocada")}/${PECAS.length} montadas · ${J.pontos} pontos</p></main>`;
+  abrirFolha(`<div class="appbar"><h2 id="ftit">Pausa</h2></div>
+    <button class="prim larga grande" id="cont">${I("play")}Continuar</button>
+    <button class="item" id="modo">${I(J.modo==="ra"?"telemovel":"camara")}<span class="txt">${J.modo==="ra"?"Jogar sem câmara":"Jogar com a câmara"}</span><span class="dir">${J.modo==="ra"?"poupa bateria":""}</span></button>
+    <button class="item" id="ajuda">${I("ajuda")}<span class="txt">Como se joga</span>${I("seta")}</button>
+    <button class="item" id="fdef">${I("definicoes")}<span class="txt">Definições</span>${I("seta")}</button>
+    <div class="sep"></div>
+    <button class="item" id="sair">${I("casa")}<span class="txt">Sair para o início</span><span class="dir">o jogo fica guardado</span></button>`,
+  v=>{
+    const $=id=>v.querySelector("#"+id);
+    $("cont").onclick=()=>{fecharFolha();retomar()};
+    $("modo").onclick=()=>{fecharFolha();J.modo=J.modo==="ra"?"semra":"ra";guardar();retomar()};
+    $("ajuda").onclick=()=>{fecharFolha();reg("ajuda");instrucoes(true);const b=document.getElementById("volta");b.dataset.jogo=1};
+    $("fdef").onclick=definicoes;
+    $("sair").onclick=()=>{fecharFolha();inicio()};
+  });
+  // fechar o painel sem escolher = continuar
+  const veu=document.querySelector(".veu");veu.addEventListener("click",e=>{if(e.target===veu)retomar()});
 }
 
 /* ---------------- Professora: código da turma e resumo (R5, R10) ---------------- */
 function professora(){
   const turmas=ler("ch-turmas-v1",[]);
   app.innerHTML=`<main class="ecra">
-    <button id="volta">← Voltar</button>
-    <h2>Área da professora</h2>
+    ${barraApp("Área da professora")}
     <section class="caixa"><h3 style="margin-top:0">1. Preparar a visita</h3>
       <p>Crie um código e mostre o <b>QR</b> à turma (ou envie-o no grupo do WhatsApp). Ao ler o QR, o jogo abre já com o código da turma.</p>
-      <button class="prim larga" id="criar">➕ Criar código da turma</button>
+      <button class="prim larga" id="criar">${I("mais")}Criar código da turma</button>
       ${turmas.length?`<p>Turmas criadas: ${turmas.map(t=>`<button class="pill" data-t="${esc(t)}" style="min-height:auto;margin:.2rem">${esc(t)}</button>`).join(" ")}</p>`:""}
       <p class="nota">Antes de sair da escola, abram o jogo uma vez com Wi-Fi: depois funciona sem internet.</p></section>
     <section class="caixa"><h3 style="margin-top:0">2. Ver o resumo da turma</h3>
       <label for="cod">Código da turma</label><input type="text" id="cod" value="${esc(turmas[turmas.length-1]||"")}" style="text-transform:uppercase">
       <label for="colar">Resultados recebidos (cole aqui as mensagens das equipas)</label>
       <textarea id="colar" placeholder="CH1;FSM-4821;Kiki+Tchico;6;5;6;1;14"></textarea>
-      <button class="prim larga" id="ver">📊 Ver resumo</button>
+      <button class="prim larga" id="ver">${I("grafico")}Ver resumo</button>
       <div id="resumo"></div></section>
     <section class="caixa"><h3 style="margin-top:0">3. Testes de usabilidade (PL 14)</h3>
       <p>Tempos, erros e questionário SUS de cada jogo feito <b>neste telemóvel</b>, comparados com as metas.</p>
-      <button class="larga" id="dados">📈 Ver dados dos testes</button></section></main>`;
+      <button class="larga" id="dados">${I("grafico")}Ver dados dos testes</button></section></main>`;
   document.getElementById("volta").onclick=inicio;
   document.getElementById("criar").onclick=()=>{
     const cod="FSM-"+String(Math.floor(1000+Math.random()*9000));
@@ -875,7 +1305,7 @@ function mostrarTurma(cod){
   app.innerHTML=`<main class="ecra" style="text-align:center"><h2>Código da turma</h2>
     <p class="codigo">${esc(cod)}</p>
     ${qr?`<div class="qr" role="img" aria-label="QR que abre o jogo com o código ${esc(cod)}">${qr}</div><p>Os alunos lêem o QR com a câmara: o jogo abre já com o código.</p>`:`<p>Os alunos escrevem este código no ecrã "Novo jogo".</p>`}
-    <button class="prim larga" id="env">📤 Enviar à turma</button><button class="larga" id="ok">Feito</button></main>`;
+    <button class="prim larga" id="env">${I("partilhar")}Enviar à turma</button><button class="larga" id="ok">Feito</button></main>`;
   document.getElementById("env").onclick=()=>partilhar(`Visita à ${MONUMENTO.nome}: abram este link com Wi-Fi antes de sair (depois funciona sem internet): ${linkTurma(cod)} — código da turma ${cod}.`);
   document.getElementById("ok").onclick=professora;
 }
@@ -890,8 +1320,7 @@ function dadosTestes(){
   const certas=L.reduce((a,s)=>a+s.certas,0), perg=L.reduce((a,s)=>a+s.perguntas,0);
   const meta=(ok,txt)=>`<span class="${ok==null?"":ok?"ok":"nok"}">${txt}</span>`;
   app.innerHTML=`<main class="ecra">
-    <button id="volta">← Voltar</button>
-    <h2>Dados dos testes (PL 14)</h2>
+    ${barraApp("Dados dos testes (PL 14)")}
     <p>${L.length} jogo(s) terminado(s) neste telemóvel.</p>
     <table><thead><tr><th>Meta (secção 5.3)</th><th>Resultado</th></tr></thead><tbody>
       <tr><td>1.ª peça em ≤ 2 min (meta ≥ 90 %)</td><td>${meta(comT1.length?okT1/comT1.length>=.9:null,`${pct(okT1,comT1.length)} (${okT1}/${comT1.length})`)}</td></tr>
@@ -901,10 +1330,10 @@ function dadosTestes(){
     </tbody></table>
     <p class="nota">"Ajuda no jogo" = abrir "Como se joga" no menu. Os pedidos de ajuda a pessoas e a meta 2 (saber se acertou) continuam a medir-se por observação. Tarefa 1 sem ajuda: confirmar com a folha de observação.</p>
     <div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Equipa</th><th>1.ª peça (s)</th><th>Montar (s)</th><th>Total (s)</th><th>Certas</th><th>Ajudas</th><th>Falhas encaixe</th><th>SUS</th></tr></thead><tbody>
-    ${L.map(s=>`<tr><td>${esc(s.data)}</td><td>${esc(s.equipa.replace(/\+/g,", "))}${s.familia?" 👴🏾":""}${s.xr?" 🌍":""}</td><td>${s.t_primeira_peca??"—"}</td><td>${s.t_montar??"—"}</td><td>${s.t_total??"—"}</td><td>${s.certas}/${s.perguntas}</td><td>${s.ajudas}</td><td>${s.encaixes_falhados}</td><td>${s.sus??"—"}</td></tr>`).join("")}
+    ${L.map(s=>`<tr><td>${esc(s.data)}</td><td>${esc(s.equipa.replace(/\+/g,", "))}${s.familia?" (família)":""}${s.xr?" (RA)":""}</td><td>${s.t_primeira_peca??"—"}</td><td>${s.t_montar??"—"}</td><td>${s.t_total??"—"}</td><td>${s.certas}/${s.perguntas}</td><td>${s.ajudas}</td><td>${s.encaixes_falhados}</td><td>${s.sus??"—"}</td></tr>`).join("")}
     </tbody></table></div>
-    <button class="prim larga" id="csv" ${L.length?"":"disabled"}>⬇ Descarregar CSV (para a folha de cálculo)</button>
-    <button class="larga" id="apagar" ${L.length?"":"disabled"}>🗑 Apagar os dados dos testes</button></main>`;
+    <button class="prim larga" id="csv" ${L.length?"":"disabled"}>${I("descarregar")}Descarregar CSV</button>
+    <button class="larga" id="apagar" ${L.length?"":"disabled"}>${I("lixo")}Apagar os dados dos testes</button></main>`;
   document.getElementById("volta").onclick=professora;
   document.getElementById("csv").onclick=()=>{
     const cols=["data","turma","equipa","jogadores","familia","modo","xr","t_primeira_peca","t_montar","t_total","certas","perguntas","t_resposta_medio","ajudas","encaixes_falhados","sus"];
@@ -920,17 +1349,18 @@ function dadosTestes(){
 function diagnostico(){
   pararCamara();pararVoz();
   app.innerHTML=`<main class="ecra">
-    <button id="volta">← Voltar</button>
-    <h2>Verificar este telemóvel</h2>
+    ${barraApp("Verificar este telemóvel")}
     <p>Testa a câmara, o giroscópio, a RA, a voz e o modo offline. Leva cerca de 10 segundos. Se o telemóvel pedir autorização, toque em <b>Permitir</b>.</p>
-    <button class="prim larga" id="ir">▶ Começar a verificação</button>
+    <button class="prim larga grande" id="ir">${I("play")}Começar a verificação</button>
     <div id="res"></div></main>`;
   document.getElementById("volta").onclick=inicio;
   document.getElementById("ir").onclick=async()=>{
     const R=document.getElementById("res"), linhas=[];
     document.getElementById("ir").disabled=true;
-    const add=(ok,nome,det="")=>{linhas.push(`${ok===true?"✅":ok===false?"❌":"⚠️"} ${nome}${det?": "+det:""}`);
-      R.innerHTML=`<div class="caixa">${linhas.map(l=>`<p style="margin:.3rem 0">${esc(l)}</p>`).join("")}</div>`};
+    const vis=[];
+    const add=(ok,nome,det="")=>{const e=ok===true?"OK":ok===false?"FALHA":"INFO";linhas.push(`[${e}] ${nome}${det?": "+det:""}`);
+      vis.push(`<p style="margin:.45rem 0"><span class="estado ${ok===true?"s":ok===false?"n":"a"}">${e}</span><b>${esc(nome)}</b>${det?`<br><span class="nota">${esc(det)}</span>`:""}</p>`);
+      R.innerHTML=`<div class="caixa">${vis.join("")}</div>`};
     const ua=navigator.userAgent, and=(ua.match(/Android [\d.]+/)||["—"])[0], chr=(ua.match(/Chrome\/(\d+)/)||[,"—"])[1];
     add(null,"Aparelho",`${and} · Chrome ${chr} · ecrã ${screen.width}×${screen.height} (×${devicePixelRatio})`);
     add(window.isSecureContext,"Ligação segura (https)",window.isSecureContext?"sim":"não — a câmara e a RA não funcionam");
@@ -942,12 +1372,12 @@ function diagnostico(){
     try{if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==="function")await DeviceOrientationEvent.requestPermission()}catch(e){}
     const ori=await new Promise(res=>{let n=0,bus=false;const h=e=>{if(e.alpha!=null){n++;if(typeof e.webkitCompassHeading==="number"||e.absolute)bus=true}};
       window.addEventListener("deviceorientation",h);setTimeout(()=>{window.removeEventListener("deviceorientation",h);res({n,bus})},2000)});
-    add(ori.n>0,"Giroscópio (rodar para procurar)",ori.n>0?`${ori.n} leituras em 2 s${ori.bus?" · com bússola":""}`:"sem leituras — o jogo usa as setas ◀ ▶");
+    add(ori.n>0,"Giroscópio (rodar para procurar)",ori.n>0?`${ori.n} leituras em 2 s${ori.bus?" · com bússola":""}`:"sem leituras — o jogo usa as setas no ecrã");
     // WebGL e WebXR
     let gl=false;try{const c=document.createElement("canvas");gl=!!(c.getContext("webgl2")||c.getContext("webgl"))}catch(e){}
     add(gl,"Peças em 3D (WebGL)",gl?"sim":"não — o jogo usa as imagens 2D");
     let xr=false;try{xr=!!(navigator.xr&&await navigator.xr.isSessionSupported("immersive-ar"))}catch(e){}
-    add(xr?true:null,"RA no chão (WebXR / ARCore)",xr?"sim — aparece o botão 🌍":"não — fica a RA por orientação");
+    add(xr?true:null,"RA no chão (WebXR / ARCore)",xr?"sim — aparece o botão RA no chão":"não — fica a RA por orientação");
     // voz
     let vozes=speechSynthesis?speechSynthesis.getVoices():[];
     if(!vozes.length&&window.speechSynthesis)vozes=await new Promise(r=>{speechSynthesis.onvoiceschanged=()=>r(speechSynthesis.getVoices());setTimeout(()=>r(speechSynthesis.getVoices()),1500)});
@@ -962,7 +1392,7 @@ function diagnostico(){
     let off=false,n=0;try{const ks=await caches.keys();for(const k of ks)n+=(await (await caches.open(k)).keys()).length;off=!!navigator.serviceWorker.controller&&n>0}catch(e){}
     add(off?true:null,"Jogar sem internet",off?`pronto (${n} ficheiros guardados)`:"ainda não — abra o jogo outra vez com internet");
     add(null,"Aplicação instalada",matchMedia("(display-mode: standalone)").matches?"sim":"não (menu do Chrome → Instalar aplicação)");
-    R.insertAdjacentHTML("beforeend",`<button class="prim larga" id="part">📤 Partilhar o resultado</button>`);
+    R.insertAdjacentHTML("beforeend",`<button class="prim larga" id="part">${I("partilhar")}Partilhar o resultado</button>`);
     document.getElementById("part").onclick=()=>partilhar("Caçadores da História — verificação do telemóvel\n"+linhas.join("\n"));
   };
 }
@@ -971,7 +1401,7 @@ function diagnostico(){
 if("serviceWorker" in navigator&&location.protocol!=="file:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 if("speechSynthesis" in window)speechSynthesis.getVoices();
 inicio();
-if(TURMA_URL)toast("Turma "+TURMA_URL+": toca em \"Novo jogo\" para começar.",4000);
+if(TURMA_URL)toast("Turma "+TURMA_URL+": toca em Jogar para começar.",4000);
 </script>
 </body>
 </html>

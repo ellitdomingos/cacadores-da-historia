@@ -188,27 +188,29 @@ async function xrSuportado() {
   catch (e) { return false; }
 }
 
-const RAIO_XR = 2.0;   // metros entre o jogador e as peças
-const TAM_XR = 0.55;   // tamanho de cada peça no chão (metros)
+// Jogo de pé: as peças ficam espalhadas a distâncias diferentes e só se apanham quando se chega perto.
+const DIST_XR = [2.5, 4.0, 5.5, 3.2, 6.0, 4.6];  // metros, por ordem das peças (× escala do espaço)
+const PERTO_XR = 1.8;  // é preciso chegar a menos de 1,8 m da peça para a apanhar
+const TAM_XR = 0.7;    // tamanho de cada peça no chão (metros)
 const graus = r => THREE.MathUtils.radToDeg(r);
 const normaliza = d => ((d % 360) + 540) % 360 - 180;
 
 // cb: { estado({fase, diff, perto, encontrada}), encontrar(id), sair(motivo) }
-async function sessaoXR(pecas, overlay, cb) {
+async function sessaoXR(pecas, overlay, cb, opcoes = {}) {
   const sessao = await navigator.xr.requestSession("immersive-ar", {
     requiredFeatures: ["hit-test"],
     optionalFeatures: ["dom-overlay"],
     domOverlay: { root: overlay },
   });
   try {
-    return await montarXR(sessao, pecas, cb);
+    return await montarXR(sessao, pecas, cb, opcoes.escala || 1);
   } catch (e) {
     try { await sessao.end(); } catch (e2) {}
     throw e;
   }
 }
 
-async function montarXR(sessao, pecas, cb) {
+async function montarXR(sessao, pecas, cb, escala) {
   const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
   r.outputColorSpace = THREE.SRGBColorSpace;
   r.xr.enabled = true;
@@ -238,10 +240,23 @@ async function montarXR(sessao, pecas, cb) {
     anel.visible = false;
     suporte.add(anel);
     suporte.visible = false;
-    suporte.userData = { id: p.id, az: p.az, anel, base: 1 };
+    suporte.userData = { id: p.id, az: p.az, anel, base: 1, dist: DIST_XR[Math.max(0, pecas.indexOf(p)) % DIST_XR.length] * escala };
     cena.add(suporte);
     objs[p.id] = suporte;
   }
+
+  // Pegadas no chão real, do jogador até à peça mais próxima (significante de caminho)
+  const texPe = (() => {
+    const c = document.createElement("canvas"); c.width = 64; c.height = 128;
+    const g = c.getContext("2d"); g.fillStyle = "#FFD400"; g.strokeStyle = "#000"; g.lineWidth = 5;
+    g.beginPath(); g.ellipse(32, 80, 19, 38, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+    for (const [x, y, rr] of [[12, 28, 7], [25, 18, 8], [39, 17, 7], [51, 23, 6], [58, 34, 5]]) { g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill(); g.stroke(); }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  })();
+  const matPe = new THREE.MeshBasicMaterial({ map: texPe, transparent: true, depthWrite: false });
+  const geoPe = new THREE.PlaneGeometry(0.11, 0.22).rotateX(-Math.PI / 2);
+  const pegadas = [...Array(7)].map(() => { const m = new THREE.Mesh(geoPe, matPe); m.visible = false; cena.add(m); return m; });
+  let chaoY = 0;
 
   await r.xr.setSession(sessao);
   const viewer = await sessao.requestReferenceSpace("viewer");
@@ -253,10 +268,12 @@ async function montarXR(sessao, pecas, cb) {
 
   const pousar = () => {
     const chao = new THREE.Vector3().setFromMatrixPosition(mira.matrix);
+    chaoY = chao.y;
     const rumo0 = rumo;
     for (const o of Object.values(objs)) {
       const a = THREE.MathUtils.degToRad(rumo0 + o.userData.az);
-      o.position.set(camPos.x + Math.sin(a) * RAIO_XR, chao.y, camPos.z - Math.cos(a) * RAIO_XR);
+      const R = Math.max(1.5, o.userData.dist);
+      o.position.set(camPos.x + Math.sin(a) * R, chao.y, camPos.z - Math.cos(a) * R);
       o.rotation.y = -a;      // fachada virada para o jogador
       o.visible = true;
     }
@@ -304,7 +321,8 @@ async function montarXR(sessao, pecas, cb) {
         o.children[0].rotation.y = s * 0.5;
       }
       if (melhor) {
-        if (md < 14 && melhor.dist < 6) { if (!desde) desde = performance.now(); } else desde = 0;
+        // só se apanha ao chegar perto, de frente para a peça
+        if (melhor.dist < PERTO_XR && md < 35) { if (!desde) desde = performance.now(); } else desde = 0;
         const achou = desde && performance.now() - desde > 400;
         encontrada = achou ? melhor.o.userData.id : null;
         for (const o of Object.values(objs)) {
@@ -313,7 +331,19 @@ async function montarXR(sessao, pecas, cb) {
           const alvo = sim ? 1.35 : 1;
           o.scale.setScalar(o.scale.x + (alvo - o.scale.x) * 0.2);
         }
-        cb.estado({ fase, diff: melhor.diff, perto: Math.max(0, 1 - md / 120), encontrada });
+        // pegadas: de 0,5 m à frente do jogador até perto da peça, alternando pé esquerdo/direito
+        const dx = melhor.o.position.x - camPos.x, dz = melhor.o.position.z - camPos.z, L = Math.hypot(dx, dz);
+        const ux = dx / L, uz = dz / L, ang = Math.atan2(-dx, -dz);
+        pegadas.forEach((m, i) => {
+          const d = 0.5 + i * 0.35;
+          m.visible = !encontrada && d < L - 0.35;
+          if (!m.visible) return;
+          const lado = (i % 2 ? 1 : -1) * 0.07;
+          m.position.set(camPos.x + ux * d - uz * lado, chaoY + 0.005, camPos.z + uz * d + ux * lado);
+          m.rotation.y = ang;
+          m.scale.setScalar(0.85 + 0.25 * Math.max(0, Math.sin(s * 5 - i * 0.9)));
+        });
+        cb.estado({ fase, diff: melhor.diff, dist: melhor.dist, perto: Math.max(0, Math.min(1, 1 - (melhor.dist - PERTO_XR) / 5)) * (md < 60 ? 1 : 0.5), encontrada, alcance: PERTO_XR });
       }
     }
     r.render(cena, cam);

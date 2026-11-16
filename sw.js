@@ -1,5 +1,5 @@
 // R11: depois de aberto uma vez com rede, o jogo funciona sem internet.
-const CACHE = "ch-fsm-v6";
+const CACHE = "ch-fsm-v7";
 const FICHEIROS = ["./", "index.html", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png", "ra3d.js", "vendor/qrcode.js",
   "vendor/three.module.min.js", "vendor/jsm/loaders/GLTFLoader.js", "vendor/jsm/utils/BufferGeometryUtils.js",
   "modelos/pecas.json", "modelos/tabuleiro.js", "modelos/base.glb", "modelos/img/base_cima.png",

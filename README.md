@@ -7,7 +7,7 @@ PL 3–8 (`IHC/pl/guioes`). HTML/CSS/JS sem build; three.js r160 guardado em `ve
 | Ficheiro | O que é |
 |---|---|
 | `index.html` | O jogo (ecrãs, regras, equipa, professora) |
-| `ra3d.js` | Camada 3D (three.js): peças por cima da câmara, peça a rodar na curiosidade, fortaleza montada no fim |
+| `ra3d.js` | Camada 3D (three.js): peças por cima da câmara, peça a rodar na curiosidade, monumento montado no fim, RA no chão (WebXR) |
 | `ferramentas/gerar_pecas.py` | Blender: nível 1, Fortaleza de São Miguel |
 | `ferramentas/gerar_niveis.py` | Blender: níveis 2–4 (Palácio de Ferro, Mbanza Kongo, Museu Nacional da Escravatura) |
 | `modelos/<nível>/` | Peças e base (.glb), posições (`pecas.json`) e renderizações (`img/`) de cada nível |
@@ -74,17 +74,21 @@ python3 -m http.server 8080      # ou: npx http-server
 | Sem RA: fotografias dos locais (B2) | O "Estou aqui" serve para as salas fechadas (sem GPS) |
 | Código da turma e resumo para a professora (R5, R10) | O resultado vai por WhatsApp como uma linha `CH1;…`, e a professora cola-a no resumo |
 | R6 só alcunha · R7 contraste alto · alvos ≥ 48 px · R11 offline | ✓ |
-| Modo família (D5): o avô ou a avó conta a história, e os netos procuram, respondem e montam | Botão "👴🏾 Família" no novo jogo |
+| Modo família (D5): o avô ou a avó conta a história, e os netos procuram, respondem e montam | Opção "Família" ao configurar o jogo |
+| Guardar o progresso sem repetir o que já se fez | Contas locais (alcunha, cor, PIN opcional): "Continuar", "Reiniciar o nível" e "Recomeçar tudo" |
+| Orientação (IHC): para onde andar, como apanhar, como montar | Pegadas e setas para o lado da peça, mão animada, demonstração de apanhar e de montar, dica depois de 2 encaixes falhados |
 | QR da turma (interacção 8) | O QR abre o jogo com `?turma=CÓDIGO` já preenchido (`vendor/qrcode.js`, MIT) |
 | Metas da secção 5.3 / PL 14 | Registo automático (1.ª peça, montar, respostas, ajudas no jogo, encaixes falhados), questionário SUS no fim, tabela comparada com as metas e CSV (Área da professora → 3) |
 | Instalar no Android | `icon-192.png`, `icon-512.png` (gerados a partir da planta da fortaleza) |
 
 ## Limitações (para discutir nas aulas)
 - **RA no chão (WebXR)** só em Android com ARCore e Chrome, em **https**: aponta-se para o chão, toca-se
-  no ecrã quando aparece o círculo amarelo e as peças ficam pousadas no chão real, a 2 m, à volta do jogador.
-  Cada vez que se volta a entrar na RA (depois de responder), as peças restantes são pousadas de novo.
+  no ecrã quando aparece o círculo amarelo e as peças ficam pousadas no chão real, entre 2,5 e 6 m, à volta
+  do jogador (metade disso no espaço "sala pequena"). Só se apanha uma peça a menos de 1,8 m dela, por isso
+  joga-se **de pé, a andar**. Cada vez que se volta a entrar na RA (depois de responder), as peças restantes
+  são pousadas de novo.
   No iPhone (o Safari não tem WebXR) e nos outros aparelhos fica a RA por **orientação** (peças a 3 m, sem chão).
 - Ainda não há reconhecimento por imagem nas salas fechadas.
-- Os modelos são simplificados (blocos low-poly), não uma réplica da fortaleza real.
+- Os modelos são simplificados (blocos low-poly), não réplicas dos monumentos reais.
 - Não há servidor: o resumo da turma junta os resultados guardados neste aparelho e os que a professora colar.
 - As "fotografias" do modo sem RA são desenhos das peças. Para a visita real, substituir por fotos do local.

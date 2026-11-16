@@ -298,11 +298,13 @@ function inicio(){
         <button id="ts" aria-pressed="${DEF.som}">${DEF.som?"🔔":"🔕"} Sons</button>
         <button id="tb" aria-pressed="${DEF.vib}">📳 Vibração ${DEF.vib?"sim":"não"}</button></div>
       <p class="nota">Todos os sons e a voz têm sempre texto no ecrã.</p>
-    </section></main>`;
+    </section>
+    <button class="larga" id="diag">🔧 Verificar este telemóvel</button></main>`;
   const $=id=>document.getElementById(id);
   if(emCurso)$("cont").onclick=retomar;
   $("novo").onclick=configurar;
   $("prof").onclick=professora;
+  $("diag").onclick=diagnostico;
   $("lm").onclick=()=>{DEF.letra=Math.max(.85,+(DEF.letra-.15).toFixed(2));aplicarDef()};
   $("lM").onclick=()=>{DEF.letra=Math.min(1.9,+(DEF.letra+.15).toFixed(2));aplicarDef()};
   $("tv").onclick=()=>{DEF.voz=!DEF.voz;aplicarDef();inicio()};
@@ -912,6 +914,57 @@ function dadosTestes(){
   };
   const ap=document.getElementById("apagar");
   ap.onclick=()=>{if(ap.dataset.c){gravar(CHAVE_SES,[]);dadosTestes()}else{ap.dataset.c=1;ap.textContent="Tem a certeza? Toque outra vez para apagar"}};
+}
+
+/* ---------------- Diagnóstico do aparelho (para o teste no Android) ---------------- */
+function diagnostico(){
+  pararCamara();pararVoz();
+  app.innerHTML=`<main class="ecra">
+    <button id="volta">← Voltar</button>
+    <h2>Verificar este telemóvel</h2>
+    <p>Testa a câmara, o giroscópio, a RA, a voz e o modo offline. Leva cerca de 10 segundos. Se o telemóvel pedir autorização, toque em <b>Permitir</b>.</p>
+    <button class="prim larga" id="ir">▶ Começar a verificação</button>
+    <div id="res"></div></main>`;
+  document.getElementById("volta").onclick=inicio;
+  document.getElementById("ir").onclick=async()=>{
+    const R=document.getElementById("res"), linhas=[];
+    document.getElementById("ir").disabled=true;
+    const add=(ok,nome,det="")=>{linhas.push(`${ok===true?"✅":ok===false?"❌":"⚠️"} ${nome}${det?": "+det:""}`);
+      R.innerHTML=`<div class="caixa">${linhas.map(l=>`<p style="margin:.3rem 0">${esc(l)}</p>`).join("")}</div>`};
+    const ua=navigator.userAgent, and=(ua.match(/Android [\d.]+/)||["—"])[0], chr=(ua.match(/Chrome\/(\d+)/)||[,"—"])[1];
+    add(null,"Aparelho",`${and} · Chrome ${chr} · ecrã ${screen.width}×${screen.height} (×${devicePixelRatio})`);
+    add(window.isSecureContext,"Ligação segura (https)",window.isSecureContext?"sim":"não — a câmara e a RA não funcionam");
+    // câmara
+    try{const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+      const t=st.getVideoTracks()[0], c=t.getSettings();add(true,"Câmara traseira",`${c.width||"?"}×${c.height||"?"}`);st.getTracks().forEach(x=>x.stop())}
+    catch(e){add(false,"Câmara",e.name==="NotAllowedError"?"autorização negada":e.name||"indisponível")}
+    // giroscópio / bússola
+    try{if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==="function")await DeviceOrientationEvent.requestPermission()}catch(e){}
+    const ori=await new Promise(res=>{let n=0,bus=false;const h=e=>{if(e.alpha!=null){n++;if(typeof e.webkitCompassHeading==="number"||e.absolute)bus=true}};
+      window.addEventListener("deviceorientation",h);setTimeout(()=>{window.removeEventListener("deviceorientation",h);res({n,bus})},2000)});
+    add(ori.n>0,"Giroscópio (rodar para procurar)",ori.n>0?`${ori.n} leituras em 2 s${ori.bus?" · com bússola":""}`:"sem leituras — o jogo usa as setas ◀ ▶");
+    // WebGL e WebXR
+    let gl=false;try{const c=document.createElement("canvas");gl=!!(c.getContext("webgl2")||c.getContext("webgl"))}catch(e){}
+    add(gl,"Peças em 3D (WebGL)",gl?"sim":"não — o jogo usa as imagens 2D");
+    let xr=false;try{xr=!!(navigator.xr&&await navigator.xr.isSessionSupported("immersive-ar"))}catch(e){}
+    add(xr?true:null,"RA no chão (WebXR / ARCore)",xr?"sim — aparece o botão 🌍":"não — fica a RA por orientação");
+    // voz
+    let vozes=speechSynthesis?speechSynthesis.getVoices():[];
+    if(!vozes.length&&window.speechSynthesis)vozes=await new Promise(r=>{speechSynthesis.onvoiceschanged=()=>r(speechSynthesis.getVoices());setTimeout(()=>r(speechSynthesis.getVoices()),1500)});
+    const pt=vozes.filter(v=>/^pt/i.test(v.lang)), ptl=pt.filter(v=>v.localService);
+    add(pt.length?(ptl.length?true:null):false,"Voz em português",pt.length?`${pt.length} voz(es) (${[...new Set(pt.map(v=>v.lang))].join(", ")})${ptl.length?" · funciona sem internet":" · pode precisar de internet"}`:"nenhuma — instalar em Definições → Texto para voz");
+    if(pt.length&&DEF.voz)falar("Olá! Esta é a voz do jogo Caçadores da História.");
+    // vibração, bateria, armazenamento, offline
+    add(!!navigator.vibrate?true:null,"Vibração",navigator.vibrate?"sim (deve ter sentido agora)":"não suportada");vibrar([150,80,150]);
+    try{const b=await navigator.getBattery();add(null,"Bateria",`${Math.round(b.level*100)} %${b.charging?" (a carregar)":""}`)}catch(e){}
+    let ls=false;try{localStorage.setItem("ch-t","1");localStorage.removeItem("ch-t");ls=true}catch(e){}
+    add(ls,"Guardar o progresso",ls?"sim":"não — o jogo não fica guardado");
+    let off=false,n=0;try{const ks=await caches.keys();for(const k of ks)n+=(await (await caches.open(k)).keys()).length;off=!!navigator.serviceWorker.controller&&n>0}catch(e){}
+    add(off?true:null,"Jogar sem internet",off?`pronto (${n} ficheiros guardados)`:"ainda não — abra o jogo outra vez com internet");
+    add(null,"Aplicação instalada",matchMedia("(display-mode: standalone)").matches?"sim":"não (menu do Chrome → Instalar aplicação)");
+    R.insertAdjacentHTML("beforeend",`<button class="prim larga" id="part">📤 Partilhar o resultado</button>`);
+    document.getElementById("part").onclick=()=>partilhar("Caçadores da História — verificação do telemóvel\n"+linhas.join("\n"));
+  };
 }
 
 /* ---------------- Arranque ---------------- */

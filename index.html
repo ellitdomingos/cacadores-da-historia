@@ -18,18 +18,20 @@
    Alvos de toque ≥ 48 px (3 rem). Um só destaque de cor: o dourado.
    ===================================================================== */
 :root{
+  --alt:100vh;
   --bg:#0B1016; --bg2:#121A23; --sup:#18222D; --sup2:#223040; --linha:#2E3F52;
   --fg:#FFFFFF; --fg2:#C9D4DF; --ouro:#FFC93C; --ouro2:#FFDE7A; --tinta:#0B1016;
   --ok:#5BE38A; --erro:#FF8A80; --azul:#8CCBFF;
   --r:1rem; --alvo:3rem; --sombra:0 .5rem 1.5rem rgba(0,0,0,.45);
   --amarelo:var(--ouro);
 }
+@supports (height:100dvh){:root{--alt:100dvh}}
 *{box-sizing:border-box}
 html{font-size:100%;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg)}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;line-height:1.45;overscroll-behavior:none;
   background:radial-gradient(120% 60% at 50% 0%,#1A2634 0%,var(--bg) 60%) fixed}
-#app{min-height:100vh}
+#app{min-height:var(--alt)}
 .ecra{max-width:34rem;margin:0 auto;padding:1rem 1rem 5rem;animation:entra .25s ease-out}
 @keyframes entra{from{opacity:0;transform:translateY(.4rem)}}
 h1{font-size:2rem;line-height:1.1;margin:.4rem 0 .6rem;letter-spacing:-.01em}
@@ -79,7 +81,7 @@ input[type=text]:focus,textarea:focus{border-color:var(--ouro)}
 .avatar.g{width:4.5rem;height:4.5rem;font-size:2rem}
 
 /* ecrã título */
-.titulo{position:relative;min-height:100vh;display:flex;flex-direction:column;max-width:34rem;margin:0 auto;padding:1rem 1rem calc(1.5rem + env(safe-area-inset-bottom))}
+.titulo{position:relative;min-height:var(--alt);display:flex;flex-direction:column;max-width:34rem;margin:0 auto;padding:1rem 1rem calc(1.5rem + env(safe-area-inset-bottom))}
 .titulo .topo{display:flex;justify-content:space-between;align-items:center;gap:.5rem;position:relative;z-index:2}
 .chip-conta{display:inline-flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.08);border:1px solid var(--linha);border-radius:999px;padding:.25rem .9rem .25rem .3rem;font-weight:800;min-height:var(--alvo)}
 .heroi{position:relative;flex:1;min-height:16rem;margin:.5rem -1rem 0;display:flex;align-items:center;justify-content:center}
@@ -92,7 +94,7 @@ input[type=text]:focus,textarea:focus{border-color:var(--ouro)}
 /* folha (painel inferior) de definições e pausa */
 .veu{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
 @keyframes fade{from{opacity:0}}
-.folha{background:var(--bg2);width:100%;max-width:34rem;border-radius:1.4rem 1.4rem 0 0;padding:.6rem 1rem calc(1rem + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;animation:sobe .25s ease-out;border-top:1px solid var(--linha)}
+.folha{background:var(--bg2);width:100%;max-width:34rem;border-radius:1.4rem 1.4rem 0 0;padding:.6rem 1rem calc(1rem + env(safe-area-inset-bottom));max-height:calc(var(--alt) * .88);overflow:auto;animation:sobe .25s ease-out;border-top:1px solid var(--linha)}
 @keyframes sobe{from{transform:translateY(100%)}}
 .folha .pega{width:2.6rem;height:.3rem;border-radius:999px;background:var(--linha);margin:.2rem auto .6rem}
 .item{display:flex;align-items:center;gap:.8rem;width:100%;justify-content:flex-start;text-align:left;background:transparent;border:0;border-radius:.8rem;padding:.8rem .5rem;font-weight:700}
@@ -205,7 +207,7 @@ th{background:var(--sup2);color:var(--fg2);font-weight:700}
 .estado.s{background:var(--ok);color:var(--tinta)}.estado.n{background:var(--erro);color:var(--tinta)}.estado.a{background:var(--sup2);color:var(--fg)}
 
 /* ---------- Passar o telemóvel ---------- */
-.passa{min-height:100vh;display:flex;flex-direction:column;justify-content:center;gap:.2rem;text-align:center;max-width:30rem;margin:0 auto;padding:1.5rem}
+.passa{min-height:var(--alt);display:flex;flex-direction:column;justify-content:center;gap:.2rem;text-align:center;max-width:30rem;margin:0 auto;padding:1.5rem}
 .ic-grande{width:6rem;height:6rem;border-radius:50%;background:var(--sup);border:2px solid var(--ouro);color:var(--ouro);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
 .ic-grande .i{width:3rem;height:3rem}
 
@@ -240,7 +242,7 @@ th{background:var(--sup2);color:var(--fg2);font-weight:700}
 .mao-demo span{position:absolute;right:-1.2rem;bottom:-1.4rem}.mao-demo span .i{width:2.6rem;height:2.6rem}
 /* demonstração "como pegar numa peça" */
 .demo-ov{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center}
-.demo-cx{background:var(--bg2);border-radius:1.4rem 1.4rem 0 0;padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom));max-width:34rem;width:100%;max-height:92vh;overflow:auto;animation:sobe .25s ease-out;border-top:1px solid var(--linha)}
+.demo-cx{background:var(--bg2);border-radius:1.4rem 1.4rem 0 0;padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom));max-width:34rem;width:100%;max-height:calc(var(--alt) * .92);overflow:auto;animation:sobe .25s ease-out;border-top:1px solid var(--linha)}
 .demo-tel{width:10rem;height:14rem;margin:.4rem auto;border:5px solid #E8EEF4;border-radius:1.4rem;position:relative;overflow:hidden;background:linear-gradient(#5aa9e6 0 40%,#d8bb84 40% 75%,#8a6a43 75%);animation:telRoda 4.5s infinite ease-in-out}
 .demo-peca{position:absolute;top:30%;left:85%;width:4.4rem;height:4.4rem;margin-left:-2.2rem;border-radius:.6rem;animation:pecaVem 4.5s infinite ease-in-out}
 .demo-peca img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 2px #000)}
@@ -278,8 +280,8 @@ button,.btn{font-weight:600;letter-spacing:.01em;border-radius:1.1rem}
 .sub{font-weight:600;letter-spacing:.08em}
 button:active:not(:disabled){transform:scale(.96)}
 .prim:active:not(:disabled){transform:translateY(.2rem);box-shadow:0 .1rem 0 #B8860B}
-#app,.passa,.titulo{min-height:100vh;min-height:100dvh}
-.ecra{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:0 1rem;animation:entra .28s cubic-bezier(.2,.8,.2,1)}
+#app,.passa,.titulo{min-height:var(--alt)}
+.ecra{min-height:var(--alt);display:flex;flex-direction:column;padding:0 1rem;animation:entra .28s cubic-bezier(.2,.8,.2,1)}
 .ecra:not(:has(>.rodape)){padding-bottom:calc(2rem + env(safe-area-inset-bottom))}
 .ecra>:first-child:not(.appbar):not(.barra-topo):not(.peca-grande){margin-top:calc(1rem + env(safe-area-inset-top))}
 @keyframes entra{from{opacity:0;transform:translateX(1.2rem)}}
@@ -329,7 +331,7 @@ input[type=text],textarea{min-height:3.4rem;border-radius:1rem;padding:.8rem 1re
 .pontos i{width:.5rem;height:.5rem;border-radius:999px;background:var(--linha);transition:width .2s,background .2s}
 .pontos i.on{width:1.5rem;background:var(--ouro)}
 /* níveis como cartões grandes */
-.nivel{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;border-radius:1.5rem;min-height:min(60vh,31rem)}
+.nivel{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;border-radius:1.5rem;min-height:min(calc(var(--alt) * .6),31rem)}
 .nivel .mini{aspect-ratio:auto;flex:1;min-height:11rem;border-radius:0;background:radial-gradient(90% 80% at 50% 100%,#5aa0dc,#1f5fa8 70%)}
 .nivel .mini img{width:auto;max-width:82%;max-height:13rem;filter:drop-shadow(0 .8rem 1rem rgba(0,0,0,.45))}
 .nivel.bloq .mini{background:var(--bg2)}
@@ -350,7 +352,7 @@ input[type=text],textarea{min-height:3.4rem;border-radius:1rem;padding:.8rem 1re
 .cores button{width:2.9rem;height:2.9rem;min-width:0;padding:0;border-radius:50%;border:3px solid transparent}
 .cores button[aria-pressed=true]{border-color:#fff;box-shadow:0 0 0 3px var(--bg),0 0 0 5px #fff}
 /* instruções em cartões */
-.passo-c{background:var(--sup);border:1px solid var(--linha);border-radius:1.5rem;padding:1.6rem 1.2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:min(52vh,25rem)}
+.passo-c{background:var(--sup);border:1px solid var(--linha);border-radius:1.5rem;padding:1.6rem 1.2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:min(calc(var(--alt) * .52),25rem)}
 .passo-c .ic{width:6rem;height:6rem;border-radius:50%;background:#2B2715;color:var(--ouro);display:grid;place-items:center;margin-bottom:1.1rem}
 .passo-c .ic .i{width:3.2rem;height:3.2rem}
 .passo-c b{font-family:var(--fd);font-weight:600;font-size:1.5rem;line-height:1.2;margin-bottom:.5rem}
@@ -367,7 +369,7 @@ input[type=text],textarea{min-height:3.4rem;border-radius:1rem;padding:.8rem 1re
 .local b{font-size:.92rem;line-height:1.25;flex:1;padding:0 .2rem}
 .local .larga{margin:0;min-height:2.9rem;font-size:.95rem;padding:.5rem}
 /* curiosidade: peça em grande, de ponta a ponta */
-.peca-grande{width:auto;margin:0 -1rem .6rem;height:min(36vh,16rem);border-radius:0 0 1.8rem 1.8rem}
+.peca-grande{width:auto;margin:0 -1rem .6rem;height:min(calc(var(--alt) * .36),16rem);border-radius:0 0 1.8rem 1.8rem}
 .legenda{font-size:1.12rem;border-radius:1rem}
 /* pergunta: a pergunta em cima, as respostas em baixo (polegar) */
 .q-zona{flex:1;display:flex;flex-direction:column;justify-content:center;padding:1rem 0}
@@ -377,12 +379,12 @@ input[type=text],textarea{min-height:3.4rem;border-radius:1rem;padding:.8rem 1re
 .opcoes .letra{width:2.3rem;height:2.3rem;border-radius:.7rem;background:var(--sup2);display:grid;place-items:center;flex:none;font-size:1rem}
 .opcoes button.certa .letra,.opcoes button.errada .letra{background:rgba(11,16,22,.2)}
 .resultado{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:34rem;z-index:20;background:var(--bg2);border-radius:1.6rem 1.6rem 0 0;
-  padding:.4rem 1rem calc(1rem + env(safe-area-inset-bottom));border-top:5px solid var(--ok);box-shadow:0 -1rem 2rem rgba(0,0,0,.5);max-height:80vh;overflow:auto;animation:sobe .3s ease-out}
+  padding:.4rem 1rem calc(1rem + env(safe-area-inset-bottom));border-top:5px solid var(--ok);box-shadow:0 -1rem 2rem rgba(0,0,0,.5);max-height:calc(var(--alt) * .8);overflow:auto;animation:sobe .3s ease-out}
 .resultado.mal{border-top-color:var(--erro)}
 .resultado .retro{font-size:1.4rem;margin:.6rem 0 .4rem}
 .resultado .legenda{font-size:1.02rem;margin:.4rem 0 .8rem}
 /* montar: tabuleiro que cabe no ecrã e mochila em baixo */
-#tab{max-width:max(16rem,calc(100dvh - 21rem))}
+#tab{max-width:max(16rem,calc(var(--alt) - 21rem))}
 .rodape .mochila{grid-template-columns:repeat(6,1fr);gap:.4rem;margin:0}
 .rodape .mpeca{border-radius:.8rem;padding:.25rem}
 .rodape .mpeca.bloq{font-size:1.1rem}
@@ -391,11 +393,33 @@ input[type=text],textarea{min-height:3.4rem;border-radius:1rem;padding:.8rem 1re
 .estat{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin:.8rem 0}
 .estat span{background:var(--sup);border:1px solid var(--linha);border-radius:1rem;padding:.5rem .9rem;text-align:center;font-family:var(--fd);font-weight:600;color:var(--fg2);font-size:.85rem}
 .estat b{display:block;color:var(--ouro);font-size:1.5rem;line-height:1.1}
-@media (min-width:40rem){.carrossel>*{flex-basis:70%}}
+/* No computador: o jogo aparece dentro de uma moldura de telemóvel, com o QR ao lado */
+#lado{display:none}
+@media (min-width:52rem) and (min-height:34rem){
+  :root{--alt:min(calc(100vh - 3rem),54rem)}
+  html,body{height:100%;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center;gap:clamp(2rem,6vw,6rem);
+    background:radial-gradient(60% 70% at 30% 40%,#1F3046 0%,transparent 70%),radial-gradient(50% 60% at 80% 80%,#2B2715 0%,transparent 70%),var(--bg)}
+  #app{width:24.4rem;height:var(--alt);flex:none;overflow-y:auto;overflow-x:hidden;border-radius:2.6rem;background:var(--bg);
+    box-shadow:0 0 0 .55rem #04070A,0 0 0 .65rem #34465A,0 2.5rem 5rem rgba(0,0,0,.65);transform:translateZ(0);scrollbar-width:none;overscroll-behavior:contain}
+  #app::-webkit-scrollbar{display:none}
+  #lado{display:flex;flex-direction:column;gap:1rem;max-width:20rem}
+  #lado h1{font-size:2.6rem;margin:0}
+  #lado p{color:var(--fg2);font-size:1.05rem;margin:0}
+  #lado .qrl{background:#fff;border-radius:1.2rem;padding:.8rem;width:11rem}
+  #lado .qrl svg{display:block;width:100%;height:auto}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<aside id="lado" aria-label="Jogar no telemóvel">
+  <p class="sub" style="margin:0">Jogo para o telemóvel</p>
+  <h1>Caçadores da História</h1>
+  <p>Anda pelo monumento, encontra as peças, responde e reconstrói-o. Lê o código com o telemóvel para jogar a sério (câmara, passos e RA).</p>
+  <div class="qrl" id="qrlado"></div>
+  <p style="font-size:.9rem">No computador também dá para experimentar: ← → para rodar, ↑ para andar.</p>
+</aside>
 <div id="app"></div>
 <script src="modelos/tabuleiros.js"></script>
 <script src="vendor/qrcode.js"></script>
@@ -647,7 +671,7 @@ const app=document.getElementById("app");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const norm=d=>((d%360)+540)%360-180;
 const contar=k=>PECAS.filter(p=>J.pecas[p.id][k]).length;
-function toast(msg,ms=2200){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),ms)}
+function toast(msg,ms=2200){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;app.appendChild(t);setTimeout(()=>t.remove(),ms)}
 let actx=null;
 function som(tipo){
   if(!DEF.som)return;
@@ -788,7 +812,7 @@ function abrirFolha(html,aoMontar){
   v.innerHTML=`<div class="folha" role="dialog" aria-modal="true" aria-labelledby="ftit"><div class="pega" aria-hidden="true"></div>${html}</div>`;
   v.addEventListener("click",e=>{if(e.target===v)fecharFolha()});
   v.addEventListener("keydown",e=>{if(e.key==="Escape")fecharFolha()});
-  document.body.appendChild(v);aoMontar&&aoMontar(v);
+  app.appendChild(v);aoMontar&&aoMontar(v);
   const f=v.querySelector("button");f&&f.focus();
 }
 function definicoes(){
@@ -1189,7 +1213,7 @@ function demoRecolher(id){
       <li><b>2.</b> …até chegares perto e a peça ficar no meio. Aparece a <b>moldura amarela</b>.</li>
       <li><b>3.</b> <b>Toca na peça</b> para a pegar. Vai para a mochila.</li></ol>
     <button class="prim larga grande" id="demook">Percebi</button></div>`;
-  document.body.appendChild(d);
+  app.appendChild(d);
   const ok=d.querySelector("#demook");ok.focus();ok.onclick=()=>d.remove();
 }
 
@@ -1778,6 +1802,7 @@ window.addEventListener("popstate",()=>{
 document.addEventListener("pointerdown",e=>{if(e.target.closest&&e.target.closest("button:not(:disabled)"))vibrar(8)},{passive:true});
 
 /* ---------------- Arranque ---------------- */
+try{if(matchMedia("(min-width:52rem)").matches&&window.qrcode){const q=qrcode(0,"M");q.addData(location.origin+location.pathname+"?instalar");q.make();document.getElementById("qrlado").innerHTML=q.createSvgTag({cellSize:4,margin:0,scalable:true})}}catch(e){}
 if("serviceWorker" in navigator&&location.protocol!=="file:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 if("speechSynthesis" in window)speechSynthesis.getVoices();
 inicio();

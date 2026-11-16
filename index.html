@@ -847,7 +847,7 @@ function niveis(){
     <p class="nota" style="margin:0 0 .4rem">${NIVEIS.filter(n=>concluido(n.id)).length} de ${NIVEIS.length} monumentos reconstruídos</p>
     <div class="carrossel" id="car">${NIVEIS.map(cartao).join("")}</div>
     <div class="pontos" id="pts" aria-hidden="true">${NIVEIS.map(()=>"<i></i>").join("")}</div>
-    <div class="rodape">${c?`<button class="larga" id="prog">O meu progresso</button>`:`<p class="nota">Sem conta, o progresso fica só neste telemóvel.</p>`}</div>
+    <div class="rodape"><div class="linha"><button id="recs">${I("relogio")}Recordes</button>${c?`<button id="prog">O meu progresso</button>`:""}</div></div>
   </main>`;
   document.getElementById("volta").onclick=inicio;
   carrossel(document.getElementById("car"),document.getElementById("pts"),Math.max(0,NIVEIS.indexOf(N)));
@@ -861,6 +861,7 @@ function niveis(){
     configurar();
   });
   if(c)document.getElementById("prog").onclick=meuProgresso;
+  document.getElementById("recs").onclick=()=>recordes(Math.max(0,NIVEIS.indexOf(N)));
 }
 
 /* Cartões que se deslizam para o lado, com pontos a indicar onde se está */
@@ -989,6 +990,22 @@ function criarConta(){
   };
   des();
 }
+/* Recordes deste telemóvel: os 5 melhores tempos de cada monumento */
+function recordes(k=0){
+  const R=ler("ch-recordes-v1",[]), nv=NIVEIS[k];
+  const L=R.filter(r=>r.nivel===nv.id).sort((a,b)=>a.tempo-b.tempo).slice(0,5);
+  const DIF={facil:"Fácil",normal:"Normal",dificil:"Difícil"};
+  app.innerHTML=`<main class="ecra">
+    ${barraApp("Recordes")}
+    <div class="seg" role="group" style="margin:.4rem 0 .8rem">${NIVEIS.map((n,i)=>`<button data-k="${i}" aria-pressed="${i===k}">${i+1}</button>`).join("")}</div>
+    <p class="sub" style="margin:0">Nível ${k+1} · ${nv.cidade}</p><h2 style="margin-top:.2rem">${nv.nome}</h2>
+    ${L.length?`<div class="grupo">${L.map((r,i)=>`<div class="item" style="cursor:default"><b style="width:1.6rem;color:${i===0?"var(--ouro)":"var(--fg2)"};font-family:var(--fd)">${i+1}.</b>
+      <span class="txt">${esc(r.nome)}<small>${DIF[r.dif]||"Normal"} · ${r.pontos} pontos</small></span><b style="font-family:var(--fd);font-size:1.2rem">${mmss(r.tempo)}</b></div>`).join("")}</div>`
+      :`<p class="nota">Ainda ninguém acabou este monumento neste telemóvel. Sê o primeiro!</p>`}
+  </main>`;
+  document.getElementById("volta").onclick=niveis;
+  document.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>recordes(+b.dataset.k));
+}
 function meuProgresso(){
   const c=conta(), nv=nivelDe(c), H=c.historico||[];
   app.innerHTML=`<main class="ecra">
@@ -1067,18 +1084,31 @@ function configurar(){
 }
 
 // Os mesmos símbolos são usados no ecrã de jogo (consistência, H4)
-const PASSOS=[
-  ["pe","Anda e segue as pegadas","Joga-se de pé, a andar. As peças estão a alguns metros: o telemóvel conta os teus passos e a peça só aparece quando chegas perto."],
-  ["radar","Olha o radar","O ponto amarelo é a peça mais próxima. Vira-te até ele ficar em cima e anda."],
-  ["vibrar","Sente a vibração","O telemóvel vibra mais depressa quando estás perto."],
-  ["mao","Chega perto e toca","Quando chegas perto, a peça ganha uma moldura e aparece a mão: toca para a apanhar."],
-  ["mensagem","Ouve e responde","Só ganhas pontos com a resposta certa."],
+// "Como se joga": a procura muda com o modo; responder e montar são iguais em todos
+const PASSOS_MODO={
+  ra:[
+    ["pe","Anda e segue as pegadas","Joga-se de pé, a andar. As peças estão a alguns metros: o telemóvel conta os teus passos e as curvas, e a peça só aparece quando chegas perto."],
+    ["radar","Olha o radar","O ponto amarelo é a peça mais próxima. Vira-te até ele ficar em cima e anda."],
+    ["vibrar","Sente a vibração","O telemóvel vibra mais depressa quando estás perto."],
+    ["mao","Chega perto e toca","Quando chegas perto, a peça ganha uma moldura e aparece a mão: toca para a apanhar."]],
+  pers:[
+    ["mao","Arrasta o dedo para andar","Toca em qualquer sítio do ecrã e arrasta: a Kiala anda para esse lado. No computador: setas ou W A S D."],
+    ["radar","Segue a seta e as pegadas","A seta por cima da cabeça e as pegadas no chão levam à peça mais perto. O radar também ajuda."],
+    ["mochila","Passa por cima da peça","As peças têm um feixe de luz dourada. Basta chegar lá para a peça saltar para a mochila."],
+    ["cubo","Tens óculos VR?","Com óculos VR ligados ao computador, aparece o botão Jogar em VR."]],
+  semra:[
+    ["pino","Encontra o sítio","Cada peça tem uma imagem do sítio onde está escondida. Vai até lá."],
+    ["mao","Toca em Estou aqui","Quando chegares ao sítio, toca em Estou aqui e depois na peça para a apanhar."]],
+};
+const PASSOS_COMUNS=[
+  ["mensagem","Ouve e responde","Acertar à primeira dá os pontos todos. Se errares, podes tentar outra vez e ganhas metade. A peça fica sempre contigo."],
   ["grelha","Arrasta para montar","Leva cada peça até à forma igual. O lugar fica verde quando estás perto."],
   ["rodar","Toca para rodar","Se a peça estiver de lado, toca nela. Moldura verde quer dizer pronta."],
-  ["dica","Pede uma dica","Os botões Ajuda e Dica mostram como se faz."],
+  ["relogio","Contra o relógio","O tempo conta (pára na pausa). Bate o teu recorde em cada monumento!"],
 ];
+const PASSOS=[...PASSOS_MODO.ra,...PASSOS_COMUNS];
 function instrucoes(soVer){
-  const L=PASSOS.slice();
+  const L=[...(PASSOS_MODO[(J&&J.modo)||"ra"]||PASSOS_MODO.ra),...PASSOS_COMUNS];
   if(!soVer&&J&&J.familia)L.unshift(["livro","Quem conta, quem joga",`${esc(J.equipa[0])} conta a história de cada peça; ${esc(J.equipa[1])} procuram, respondem e montam. O jogo avisa quando é para passar o telemóvel.`]);
   else if(!soVer&&J&&J.equipa.length>1)L.unshift(["utilizador","Cada um tem um papel","Aponta, Responde e Monta. O jogo avisa quando é para passar o telemóvel."]);
   app.innerHTML=`<main class="ecra">
@@ -1316,7 +1346,8 @@ function procurarPersonagem(){
     </div></div>`;
   const $=id=>document.getElementById(id), dica=$("dica"), joy=$("joy");
   // óculos VR ligados ao PC: aparece "Jogar em VR"
-  const mostrarVR=()=>{const b=$("bvr");if(b&&window.RA3D&&RA3D.vr)b.hidden=false};
+  // só no computador (óculos ligados ao PC); nos telemóveis o Chrome diz que há VR mesmo sem óculos
+  const mostrarVR=()=>{const b=$("bvr");if(b&&window.RA3D&&RA3D.vr&&!/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent))b.hidden=false};
   mostrarVR();window.addEventListener("ra3d-vr",mostrarVR,{once:true});
   $("bvr").onclick=()=>{guardarPos();iniciarVR()};
   ligarBotaoVoz($("cvoz"));
@@ -1760,6 +1791,8 @@ function fim(){
     (cc.historico=cc.historico||[]).push({data:new Date().toLocaleString("pt-PT"),certas:certasF,perguntas:PECAS.length,pontos:J.pontos,min:Math.round((Date.now()-J.inicio)/60000)});
     J.contado=true;guardar();
   }
+  if(!J.noRecorde){J.noRecorde=true;const R=ler("ch-recordes-v1",[]);
+    R.push({nivel:NIVEL,nome:J.equipa.join(" + "),tempo:tf,pontos:J.pontos,dif:J.dif||"normal",modo:J.modo,data:Date.now()});gravar("ch-recordes-v1",R.slice(-200));guardar()}
   const certas=contar("certa"), linha=linhaResultado();
   if(!conta()){const l=ler("ch-concluidos",[]);if(!l.includes(NIVEL)){l.push(NIVEL);gravar("ch-concluidos",l)}}
   const PROX=NIVEIS[NIVEIS.indexOf(N)+1]||null;

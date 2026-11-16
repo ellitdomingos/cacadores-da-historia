@@ -236,6 +236,32 @@ function criarPersonagem(cor) {
   return { g, pe, pd, be, bd };
 }
 
+// Pegadas amarelas no chão, alternando pé esquerdo e direito, a pulsar no sentido do caminho
+function criarPegadas(cena, n, tam) {
+  const c = document.createElement("canvas"); c.width = 64; c.height = 128;
+  const g = c.getContext("2d"); g.fillStyle = "#FFD400"; g.strokeStyle = "#000"; g.lineWidth = 5;
+  g.beginPath(); g.ellipse(32, 80, 19, 38, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+  for (const [x, y, rr] of [[12, 28, 7], [25, 18, 8], [39, 17, 7], [51, 23, 6], [58, 34, 5]]) { g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill(); g.stroke(); }
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+  const geo = new THREE.PlaneGeometry(tam * 0.5, tam).rotateX(-Math.PI / 2);
+  const ms = [...Array(n)].map(() => { const m = new THREE.Mesh(geo, mat); m.visible = false; cena.add(m); return m; });
+  return {
+    mostrar(de, ate, t, passo) {
+      const dx = ate.x - de.x, dz = ate.z - de.z, L = Math.hypot(dx, dz), ux = dx / L, uz = dz / L, ang = Math.atan2(-dx, -dz);
+      ms.forEach((m, i) => {
+        const d = 1 + i * passo; m.visible = d < L - 1;
+        if (!m.visible) return;
+        const lado = (i % 2 ? 1 : -1) * tam * 0.3;
+        m.position.set(de.x + ux * d - uz * lado, 0.03, de.z + uz * d + ux * lado);
+        m.rotation.y = ang;
+        m.scale.setScalar(0.8 + 0.35 * Math.max(0, Math.sin(t * 5 - i * 0.9)));
+      });
+    },
+    esconder() { ms.forEach(m => (m.visible = false)); },
+  };
+}
+
 // O mundo do monumento (igual no ecrã e na VR): chão, monumento incompleto, árvores e peças com feixe de luz
 async function construirMundo(pecas, op = {}) {
   const CEU = 0x9fd3f5;
@@ -300,6 +326,8 @@ async function mundo(contentor, pecas, op = {}, cb = {}) {
   const seta = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.55, 12).rotateX(Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffc93c }));
   cena.add(seta);
 
+  // pegadas no chão, da Kiala até à peça mais perto (só no Fácil e no Normal)
+  const pegadas = criarPegadas(cena, 9, 0.75);
   const cam = new THREE.PerspectiveCamera(58, 1, 0.1, 200);
   const OFF = new THREE.Vector3(0, 13, 10);
   cam.position.copy(P.g.position).add(OFF);
@@ -352,6 +380,8 @@ async function mundo(contentor, pecas, op = {}, cb = {}) {
       apanhar = { o: melhor.o, t0: agora, de: melhor.o.position.clone() };
       melhor.o.userData.apanhada = true; melhor.o.children.forEach(c => { if (c !== melhor.o.userData.m) c.visible = false; });
     }
+    if (melhor && !apanhar && op.seta !== false) pegadas.mostrar(P.g.position, melhor.o.position, t, 1.4);
+    else pegadas.esconder();
     if (melhor && !apanhar) {
       seta.visible = op.seta !== false && melhor.dist > 2.5;   // no difícil não há seta
       seta.position.set(P.g.position.x, 2.35 + Math.sin(t * 4) * 0.08, P.g.position.z);

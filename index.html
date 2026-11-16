@@ -349,6 +349,8 @@ input[type=text],textarea{min-height:3.4rem;border-radius:1rem;padding:.8rem 1re
 .grupo>.item{border-radius:0;font-family:system-ui,sans-serif}
 .grupo>.item+.item{border-top:1px solid var(--linha)}
 .grupo>.item .i{color:var(--ouro)}
+.grupo.def>.item{min-height:3.6rem;font-size:1.05rem}
+.item .txt small{display:block;font-weight:500;color:var(--fg2);font-size:.82rem;margin-top:.1rem}
 /* cartões que se deslizam para o lado (níveis, instruções) */
 .carrossel{display:flex;gap:.8rem;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -1rem;padding:.4rem 1rem .8rem;scrollbar-width:none;overscroll-behavior-x:contain;scroll-padding:0 1rem}
 .carrossel::-webkit-scrollbar{display:none}
@@ -636,7 +638,9 @@ function usarNivel(id){
 }
 const NIVEL_URL=(()=>{try{const v=new URLSearchParams(location.search).get("nivel");return NIVEIS.some(n=>n.id===v)?v:null}catch(e){return null}})();
 usarNivel(NIVEL_URL||(()=>{try{return localStorage.getItem("ch-nivel-atual")}catch(e){return null}})()||"fsm");
-const PONTOS_CERTA = 100;
+// Dificuldade: distância das peças, ajudas no caminho e pontos por resposta certa
+const DIFICULDADE={facil:{dist:.5,pistas:true,pontos:50},normal:{dist:1,pistas:true,pontos:100},dificil:{dist:1.4,pistas:false,pontos:150}};
+const dific=()=>DIFICULDADE[(J&&J.dif)||"normal"]||DIFICULDADE.normal;
 
 /* ---------------- Imagens das peças (renderizadas no Blender a partir dos modelos 3D) ---------------- */
 // vista "cima": recorte da planta (tabuleiro, mochila); vista "3q": três quartos (fotografias, curiosidade)
@@ -664,7 +668,7 @@ const CHAVE_DEF="ch-def-v1", CHAVE_RES="ch-resultados-v1";
 const chaveJogo=()=>`ch-${NIVEL}-v2`;   // jogo sem conta, por nível
 const ler=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(e){return d}};
 const gravar=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-let DEF = Object.assign({letra:1,som:true,vib:true,voz:true}, ler(CHAVE_DEF,{}));
+let DEF = Object.assign({letra:1,som:true,vib:true,voz:true,cam:true}, ler(CHAVE_DEF,{}));
 /* Contas simples, guardadas só neste telemóvel (sem servidor; R6: só alcunha e avatar).
    Cada conta tem o seu jogo em curso e o progresso de cada nível (monumento). */
 const CHAVE_CONTAS="ch-contas-v1";
@@ -865,28 +869,38 @@ function abrirFolha(html,aoMontar){
   const f=v.querySelector("button");f&&f.focus();
 }
 function definicoes(){
-  const sw=(id,txt,ic,on)=>`<button class="item" id="${id}" role="switch" aria-checked="${on}">${I(ic)}<span class="txt">${txt}</span><span class="interruptor" aria-hidden="true"></span></button>`;
+  const sw=(id,txt,on,sub="")=>`<button class="item" id="${id}" role="switch" aria-checked="${on}"><span class="txt">${txt}${sub?`<small>${sub}</small>`:""}</span><span class="interruptor" aria-hidden="true"></span></button>`;
   abrirFolha(`<div class="appbar"><h2 id="ftit">Definições</h2><button class="icbtn" id="fx" aria-label="Fechar">${I("fechar")}</button></div>
-    <div class="grupo"><div class="item" style="cursor:default">${I("texto")}<span class="txt">Tamanho da letra</span>
-      <span class="passos-letra"><button class="icbtn" id="lm" aria-label="Letra mais pequena">A−</button><b id="lv">${Math.round(DEF.letra*100)}%</b><button class="icbtn" id="lM" aria-label="Letra maior">A+</button></span></div>
-    ${sw("tv","Voz (ler os textos)","som",DEF.voz)}${sw("ts","Sons","som",DEF.som)}${sw("tb","Vibração","vibrar",DEF.vib)}</div>
-    <p class="nota" style="padding:0 .5rem;margin:.2rem 0 .8rem">O que a voz diz aparece sempre escrito no ecrã.</p>
-    <div class="grupo"><button class="item" id="fajuda">${I("ajuda")}<span class="txt">Como se joga</span>${I("seta")}</button>
-    ${instalada()?"":`<button class="item" id="finst">${I("descarregar")}<span class="txt">Instalar a app</span>${I("seta")}</button>`}
-    <button class="item" id="diag">${I("telemovel")}<span class="txt">Verificar este telemóvel</span>${I("seta")}</button>
-    <button class="item" id="prof">${I("escola")}<span class="txt">Área da professora</span>${I("seta")}</button></div>`,
+    <div class="grupo def">
+      ${sw("tc","Câmara",DEF.cam!==false,"Mostra o mundo real nos modos de realidade aumentada")}
+      ${sw("ts","Som",DEF.som)}
+      ${sw("tv","Voz",DEF.voz,"Lê as dicas e as histórias em voz alta")}
+      ${sw("tb","Vibração",DEF.vib)}
+      ${sw("tl","Letra grande",DEF.letra>1)}
+    </div>
+    <div class="grupo def">
+      <button class="item" id="fajuda"><span class="txt">Como se joga</span></button>
+      ${instalada()?"":`<button class="item" id="finst"><span class="txt">Instalar a app</span></button>`}
+    </div>`,
   v=>{
     const $=id=>v.querySelector("#"+id);
     $("fx").onclick=fecharFolha;
-    const letra=d=>{DEF.letra=Math.min(1.9,Math.max(.85,+(DEF.letra+d).toFixed(2)));aplicarDef();$("lv").textContent=Math.round(DEF.letra*100)+"%"};
-    $("lm").onclick=()=>letra(-.15);$("lM").onclick=()=>letra(.15);
-    const tog=(id,k)=>{$(id).onclick=()=>{DEF[k]=!DEF[k];aplicarDef();$(id).setAttribute("aria-checked",DEF[k])}};
-    tog("tv","voz");tog("ts","som");tog("tb","vib");
+    const tog=(id,obter,mudar)=>{$(id).onclick=()=>{mudar();aplicarDef();$(id).setAttribute("aria-checked",obter())}};
+    tog("tc",()=>DEF.cam!==false,()=>DEF.cam=DEF.cam===false);
+    tog("ts",()=>DEF.som,()=>DEF.som=!DEF.som);
+    tog("tv",()=>DEF.voz,()=>{DEF.voz=!DEF.voz;if(!DEF.voz)pararVoz()});
+    tog("tb",()=>DEF.vib,()=>DEF.vib=!DEF.vib);
+    tog("tl",()=>DEF.letra>1,()=>DEF.letra=DEF.letra>1?1:1.25);
     $("fajuda").onclick=()=>{fecharFolha();instrucoes(true)};
-    $("diag").onclick=()=>{fecharFolha();diagnostico()};
     if($("finst"))$("finst").onclick=instalar;
-    $("prof").onclick=()=>{fecharFolha();professora()};
   });
+}
+/* Ferramentas escondidas (verificar o telemóvel, dados guardados): só com ?ferramentas no link */
+function ferramentas(){
+  abrirFolha(`<div class="appbar"><h2 id="ftit">Ferramentas</h2><button class="icbtn" id="fx" aria-label="Fechar">${I("fechar")}</button></div>
+    <div class="grupo def"><button class="item" id="diag"><span class="txt">Verificar este telemóvel</span></button>
+    <button class="item" id="prof"><span class="txt">Dados dos jogos</span></button></div>`,
+  v=>{v.querySelector("#fx").onclick=fecharFolha;v.querySelector("#diag").onclick=()=>{fecharFolha();diagnostico()};v.querySelector("#prof").onclick=()=>{fecharFolha();professora()}});
 }
 
 /* ---------------- Contas ---------------- */
@@ -988,52 +1002,50 @@ function retomar(){
 }
 
 function configurar(){
-  let n=1, modo="ra", espaco="grande"; // n: 1, 2, 3 ou "f" (família)
+  // lembra as últimas escolhas (modo e dificuldade)
+  let n=1, modo=DEF.ultModo||"ra", dif=DEF.ultDif||"normal"; // n: 1, 2, 3 ou "f" (família)
+  const c=conta();
+  const DIFS={facil:["Fácil","Peças perto, com pegadas e setas a mostrar o caminho."],normal:["Normal","Peças a alguns metros, com pegadas e radar."],dificil:["Difícil","Peças mais longe e só o radar para as encontrar. Vale mais pontos."]};
   const desenhar=()=>{
-    const papelIc=(i)=>n==="f"?(i?"utilizador":"livro"):n===1?"utilizador":["radar","mensagem","grelha"][i];
-    const campo=(i,ph,lab)=>`<label for="al${i}">${lab}</label><div class="campo"><span class="avatar" style="background:var(--sup2);color:var(--ouro)">${I(papelIc(i))}</span>
-      <input type="text" id="al${i}" maxlength="16" autocomplete="off" placeholder="${ph}"></div>`;
+    const campo=(i,ph)=>`<input type="text" id="al${i}" maxlength="16" autocomplete="off" placeholder="${ph}" aria-label="${ph}" style="margin-top:.5rem">`;
     app.innerHTML=`<main class="ecra">
       ${barraApp("Novo jogo")}
-      <h3 style="margin-top:.6rem">Quantos jogam com este telemóvel?</h3>
-      <div class="seg" role="group">${[1,2,3,"f"].map(k=>`<button data-n="${k}" aria-pressed="${n===k}">${k===1?"Sozinho":k===2?"Dois":k===3?"Três":"Família"}</button>`).join("")}</div>
-      ${n==="f"?`<p class="nota">Quem é mais velho <b>conta a história</b> por palavras suas; os netos procuram, respondem e montam. Joga-se sentado.</p>
-        ${campo(0,"Ex.: Vovô Mateus","Quem conta a história (avô, avó…)")}${campo(1,"Ex.: Os Netos","Os netos")}`
-      :[...Array(n)].map((_,i)=>campo(i,"Ex.: "+["Kiki","Tchico","Nany"][i],n>1?`Jogador ${i+1} · ${["Aponta","Responde","Monta"][i]}${n===2&&i===0?" e Monta":""}`:"A tua alcunha")).join("")}
-      <h3>Como queres procurar?</h3>
+      <h3 style="margin-top:.6rem">Modo de jogo</h3>
       <div class="cartoes" role="group">
-        <button class="cartao" data-m="ra" aria-pressed="${modo==="ra"}">${I("camara")}<span><b>Realidade aumentada</b><small>Anda pelo sítio de verdade: as peças aparecem na câmara quando chegas perto.</small></span></button>
-        <button class="cartao" data-m="pers" aria-pressed="${modo==="pers"}">${I("utilizador")}<span><b>Com personagem</b><small>Guia a Kiala pelo monumento em 3D com o dedo. Para a sala ou para casa.</small></span></button>
-        <button class="cartao" data-m="semra" aria-pressed="${modo==="semra"}">${I("pino")}<span><b>Sem câmara</b><small>Imagens dos sítios onde estão as peças. Gasta menos bateria.</small></span></button></div>
-      ${modo==="ra"&&n!=="f"?`<h3>Onde vão jogar?</h3>
-      <div class="seg" role="group">
-        <button data-e="grande" aria-pressed="${espaco==="grande"}">Pátio</button>
-        <button data-e="pequeno" aria-pressed="${espaco==="pequeno"}">Sala pequena</button></div>
-      <p class="nota">${espaco==="grande"?"Peças a 4–10 metros: precisas de um espaço livre para andar.":"Peças a 2–7 metros, para uma sala ou um corredor."}</p>`:""}
-      <label for="turma">Código da turma <span style="font-weight:500">(se a professora deu um)</span></label>
-      <input type="text" id="turma" maxlength="10" autocomplete="off" placeholder="Ex.: FSM-4821" style="text-transform:uppercase" value="${esc(TURMA_URL)}">
-      <p class="nota">Só guardamos a alcunha e a pontuação. Não podes andar? Escolhe <b>Sem câmara</b> ou <b>Família</b>.</p>
-      <div class="rodape"><button class="prim larga grande" id="comecar">${I("play")}Começar</button></div></main>`;
+        <button class="cartao" data-m="ra" aria-pressed="${modo==="ra"}">${I("camara")}<span><b>Realidade aumentada</b><small>Anda de verdade: as peças aparecem na câmara quando chegas perto.</small></span></button>
+        <button class="cartao" data-m="pers" aria-pressed="${modo==="pers"}">${I("utilizador")}<span><b>Aventura com a Kiala</b><small>Guia a Kiala pelo monumento em 3D com o dedo.</small></span></button>
+        <button class="cartao" data-m="semra" aria-pressed="${modo==="semra"}">${I("pino")}<span><b>Caça às imagens</b><small>Encontra os sítios das imagens. Sem câmara.</small></span></button></div>
+      <h3>Dificuldade</h3>
+      <div class="seg" role="group">${Object.entries(DIFS).map(([k,[t]])=>`<button data-d="${k}" aria-pressed="${dif===k}">${t}</button>`).join("")}</div>
+      <p class="nota" style="margin:.4rem .2rem 0">${DIFS[dif][1]}</p>
+      <h3>Jogadores</h3>
+      <div class="seg" role="group">${[1,2,3,"f"].map(k=>`<button data-n="${k}" aria-pressed="${n===k}">${k===1?"Sozinho":k===2?"Dois":k===3?"Três":"Família"}</button>`).join("")}</div>
+      ${n==="f"?`<p class="nota" style="margin:.4rem .2rem 0">O avô ou a avó conta a história; os netos procuram, respondem e montam.</p>${campo(0,"Quem conta (ex.: Vovô Mateus)")}${campo(1,"Os netos (ex.: Os Netos)")}`
+       :n===1?(c?`<p class="nota" style="margin:.5rem .2rem 0">A jogar como <b>${esc(c.alcunha)}</b>.</p>`:campo(0,"O teu nome no jogo"))
+       :[...Array(n)].map((_,i)=>campo(i,`Jogador ${i+1}`)).join("")+`<p class="nota" style="margin:.4rem .2rem 0">Cada um tem a sua vez: o jogo avisa quando passar o telemóvel.</p>`}
+      <div class="rodape"><button class="prim larga grande" id="comecar">${I("play")}Jogar</button></div></main>`;
     document.getElementById("volta").onclick=inicio;
     document.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{guardaCampos();n=b.dataset.n==="f"?"f":+b.dataset.n;desenhar();repoeCampos()});
     document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{guardaCampos();modo=b.dataset.m;desenhar();repoeCampos()});
-    document.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{guardaCampos();espaco=b.dataset.e;desenhar();repoeCampos()});
+    document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{guardaCampos();dif=b.dataset.d;desenhar();repoeCampos()});
     document.getElementById("comecar").onclick=async()=>{
-      const nomes=[...Array(n==="f"?2:n)].map((_,i)=>document.getElementById("al"+i).value.trim());
-      if(nomes.some(x=>!x)){toast("Escreve uma alcunha para cada jogador.");document.getElementById("al"+nomes.findIndex(x=>!x)).focus();return}
-      const turma=document.getElementById("turma").value.trim().toUpperCase();
-      // iOS: pedir acesso ao giroscópio tem de ser feito dentro do toque
+      const k=n==="f"?2:n;
+      const nomes=[...Array(k)].map((_,i)=>{const el=document.getElementById("al"+i);return el?el.value.trim():(c?c.alcunha:"")});
+      if(nomes.some(x=>!x)){const i=nomes.findIndex(x=>!x);toast(k>1?"Escreve o nome de cada jogador.":"Escreve o teu nome no jogo.");const el=document.getElementById("al"+i);el&&el.focus();return}
+      // iOS: pedir acesso aos sensores tem de ser feito dentro do toque
       if(modo==="ra"&&window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==="function"){try{await DeviceOrientationEvent.requestPermission()}catch(e){}}
       if(modo==="ra"&&window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==="function"){try{await DeviceMotionEvent.requestPermission()}catch(e){}}
       try{actx=actx||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}
-      novoJogo(nomes,turma,modo,n==="f");
-      // modo principal: andar com as peças pousadas no chão real (WebXR), se o telemóvel o suportar
-      J.espaco=espaco;J.xr=modo==="ra"&&!!(window.RA3D&&RA3D.xr);guardar();
+      DEF.ultModo=modo;DEF.ultDif=dif;aplicarDef();
+      novoJogo(nomes,"",modo,n==="f");
+      J.dif=dif;
+      // RA no chão (WebXR) se o telemóvel o suportar e a câmara estiver ligada
+      J.xr=modo==="ra"&&DEF.cam!==false&&!!(window.RA3D&&RA3D.xr);guardar();
       passar(n==="f"?"conta":"aponta",instrucoes);
     };
   };
   let cache={};
-  if(conta())cache.al0=conta().alcunha;
+  if(c)cache.al0=c.alcunha;
   const guardaCampos=()=>{document.querySelectorAll("input").forEach(i=>cache[i.id]=i.value)};
   const repoeCampos=()=>{for(const k in cache){const el=document.getElementById(k);if(el)el.value=cache[k]}};
   desenhar();repoeCampos();
@@ -1071,7 +1083,7 @@ function pararCamara(){
   cancelAnimationFrame(cam.raf);clearInterval(cam.tick);
   document.querySelectorAll(".demo-ov").forEach(e=>e.remove());
   if(cam.cena3d)cam.cena3d.parar();
-  if(cam.ouvinte)window.removeEventListener("deviceorientation",cam.ouvinte);
+  if(cam.ouvinte){window.removeEventListener("deviceorientation",cam.ouvinte);window.removeEventListener("deviceorientationabsolute",cam.ouvinte)}
   if(cam.movimento)window.removeEventListener("devicemotion",cam.movimento);
   if(cam.teclas)window.removeEventListener("keydown",cam.teclas);
   if(cam.teclasSolta)window.removeEventListener("keyup",cam.teclasSolta);
@@ -1086,13 +1098,13 @@ function procurar(){
   pararCamara();
   const faltam=PECAS.filter(p=>!J.pecas[p.id].recolhida);
   if(!faltam.length)return passar("monta",montar);
-  if(J.xr&&window.RA3D&&RA3D.xr)return iniciarXR(); // RA no chão (WebXR), se foi escolhida
+  if(J.xr&&DEF.cam!==false&&window.RA3D&&RA3D.xr)return iniciarXR(); // RA no chão (WebXR), se foi escolhida
   const FOV=60;
   // Joga-se A ANDAR: cada peça está a alguns metros, numa direcção. O telemóvel conta os passos
   // (acelerómetro) e a peça só aparece quando se chega perto. No modo família joga-se sentado:
   // as peças ficam à volta, a rodar no lugar (R14, D5).
   const sentado=!!J.familia, PASSO=0.7, VER=4, APANHA=1.6;
-  const DIST=[6,9,12,7.5,14,10.5].map(d=>d*(J.espaco==="pequeno"?.5:1));
+  const DIST=[6,9,12,7.5,14,10.5].map(d=>d*dific().dist);
   const mundo={}; // posição de cada peça (m), em relação ao sítio e à direcção em que se começa
   faltam.forEach(p=>{const k=PECAS.indexOf(p),a=p.az*Math.PI/180,d=sentado?3:DIST[k%DIST.length];mundo[p.id]={x:Math.sin(a)*d,y:Math.cos(a)*d}});
   const eu={x:0,y:0};
@@ -1128,22 +1140,28 @@ function procurar(){
   let rumo=0, alvoRumo=0, base=null, giroscopio=false, movimento=false, passos=0, fixado=null, perto=0, encontrada=null, ultimaDica="";
 
   // Câmara traseira (se houver). Sem câmara → fundo desenhado.
-  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+  if(DEF.cam===false){/* câmara desligada nas definições: fundo desenhado */}
+  else if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
     navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false})
       .then(s=>{cam.stream=s;vid.srcObject=s;pano.hidden=true})
       .catch(()=>aviso("Sem acesso à câmara: a jogar com o fundo desenhado. Podes mudar para \"Sem câmara\" no menu."));
   } else aviso("Este aparelho não dá acesso à câmara aqui (é preciso https). A jogar com o fundo desenhado.");
   function aviso(t){const a=$("aviso");a.textContent=t;a.hidden=false;setTimeout(()=>a.hidden=true,6000)}
 
-  // Giroscópio: rodar o corpo com o telemóvel apontado (interacção 1)
+  // Giroscópio e bússola: para onde aponta a câmara (interacção 1). Cada passo vai nessa direcção,
+  // por isso as curvas que o jogador faz a andar contam.
+  let absoluta=false;
   cam.ouvinte=e=>{
-    let h=typeof e.webkitCompassHeading==="number"?e.webkitCompassHeading:(e.alpha!=null?360-e.alpha:null);
+    if(e.type==="deviceorientation"&&absoluta)return;          // já há bússola absoluta: ignora a relativa
+    if(e.type==="deviceorientationabsolute"&&e.alpha!=null)absoluta=true;
+    const h=typeof e.webkitCompassHeading==="number"?e.webkitCompassHeading:rumoCamara(e.alpha,e.beta,e.gamma);
     if(h==null)return;
     if(!giroscopio){giroscopio=true;$("re").hidden=$("rd").hidden=true}
     if(base==null)base=h;
     alvoRumo=norm(h-base);
   };
   window.addEventListener("deviceorientation",cam.ouvinte);
+  window.addEventListener("deviceorientationabsolute",cam.ouvinte);
   // Passos: picos da aceleração (com a gravidade), no máximo ~3 por segundo
   function passo(){
     if(sentado)return;
@@ -1190,7 +1208,7 @@ function procurar(){
   $("bexemplo").onclick=()=>{reg("ajuda",{onde:"procurar"});demoRecolher(faltam[0].id)};
   if(!J.viuDemoRecolher){J.viuDemoRecolher=true;guardar();setTimeout(()=>{if($("cam"))demoRecolher(faltam[0].id)},500)}
   // WebXR: só aparece em aparelhos que o suportam (Android com ARCore, em https)
-  const mostrarXR=()=>{const b=document.getElementById("bxr");if(b&&window.RA3D&&RA3D.xr)b.hidden=false};
+  const mostrarXR=()=>{const b=document.getElementById("bxr");if(b&&DEF.cam!==false&&window.RA3D&&RA3D.xr)b.hidden=false};
   mostrarXR();window.addEventListener("ra3d-xr",mostrarXR,{once:true});
   $("bxr").onclick=()=>{J.xr=true;guardar();iniciarXR()};
 
@@ -1299,7 +1317,7 @@ function procurarPersonagem(){
   const c=conta(), cor=c&&/^#/.test(c.avatar||"")?parseInt(c.avatar.slice(1),16):0x2a9d8f;
   let api=null, ultimaDica="";
   function guardarPos(){if(api){J.posPers=api.posicao();guardar()}}
-  RA3D.mundo($("tres"),faltam,{fundo:N.fundo,cor,inicio:J.posPers},{
+  RA3D.mundo($("tres"),faltam,{fundo:N.fundo,cor,inicio:J.posPers,dist:dific().dist,seta:dific().pistas},{
     estado(e){
       const r=.5+1.8*Math.min(1,e.dist/25), a=e.az*Math.PI/180;
       $("alvo").style.transform=`translate(${Math.sin(a)*r}rem,${-Math.cos(a)*r}rem)`;
@@ -1341,6 +1359,19 @@ function procurarPersonagem(){
   window.addEventListener("keydown",cam.teclas);window.addEventListener("keyup",cam.teclasSolta);
 }
 
+/* Rumo (graus, 0–360, sentido dos ponteiros) para onde aponta a câmara traseira, a partir dos três
+   ângulos do sensor (alfa, beta, gama). Funciona com o telemóvel de pé (a apontar a câmara) ou deitado
+   (aí usa o topo do telemóvel). */
+function rumoCamara(a,b,g){
+  if(a==null)return null;
+  const d=Math.PI/180, ca=Math.cos(a*d), sa=Math.sin(a*d), cb=Math.cos((b||0)*d), sb=Math.sin((b||0)*d), cg=Math.cos((g||0)*d), sg=Math.sin((g||0)*d);
+  // eixo -Z do aparelho (para onde olha a câmara traseira), nas coordenadas da Terra (x = este, y = norte)
+  let x=-(ca*sg+sa*sb*cg), y=-(sa*sg-ca*sb*cg);
+  // telemóvel quase deitado: a câmara aponta para o chão, usa-se o topo do aparelho
+  if(Math.hypot(x,y)<.35){x=-sa*cb;y=ca*cb}
+  return (Math.atan2(x,y)/d+360)%360;
+}
+
 const PEGADAS=`<span>${I("pe")}</span><span>${I("pe")}</span><span>${I("pe")}</span>`;
 // Exemplo animado: como pegar numa peça (mostrar, não só dizer)
 function demoRecolher(id){
@@ -1360,6 +1391,7 @@ function demoRecolher(id){
 
 // Pegadas e setas: significante de direcção (para onde virar/andar)
 function sinais(peg,seta,dir){
+  if(J&&!dific().pistas)dir=null;
   if(!peg||peg.dataset.d===String(dir))return;
   peg.dataset.d=String(dir);
   peg.className="pegadas "+(dir||"oculta");
@@ -1430,7 +1462,7 @@ function iniciarXR(){
       if(motivo!=="encontrou"){J.xr=false;guardar()} // saiu: volta ao modo por orientação
       if(achada)recolher(achada);else procurar();
     },
-  },{escala:J.espaco==="pequeno"?.5:1}).then(s=>{sessao=s}).catch(()=>{
+  },{escala:dific().dist}).then(s=>{sessao=s}).catch(()=>{
     if(saiu)return;saiu=true;XR_SAIR=null;
     ov.remove();J.xr=false;guardar();
     toast("Não foi possível abrir a RA no chão. A usar o modo normal.");
@@ -1514,9 +1546,9 @@ function pergunta(p){
     // irreversível de propósito (evita responder ao acaso)
     document.querySelectorAll(".opcoes button").forEach((x,k)=>{x.disabled=true;x.style.opacity=1;if(k===p.a)x.classList.add("certa")});
     if(!certa)b.classList.add("errada");
-    const st=J.pecas[p.id];st.respondida=true;st.certa=certa;if(certa)J.pontos+=PONTOS_CERTA;guardar();
+    const st=J.pecas[p.id];st.respondida=true;st.certa=certa;if(certa)J.pontos+=dific().pontos;guardar();
     som(certa?"certo":"errado");vibrar(certa?60:[200,80,200]);
-    const txt=certa?`Certo! ${p.o[p.a]}. Mais ${PONTOS_CERTA} pontos.`:`Não foi desta. A resposta certa é: ${p.o[p.a]}.`;
+    const txt=certa?`Certo! ${p.o[p.a]}. Mais ${dific().pontos} pontos.`:`Não foi desta. A resposta certa é: ${p.o[p.a]}.`;
     document.getElementById("retro").innerHTML=`<div class="resultado${certa?"":" mal"}"><div class="pega" aria-hidden="true" style="width:2.6rem;height:.3rem;border-radius:999px;background:var(--linha);margin:.2rem auto 0"></div>
       <p class="retro" style="color:${certa?"var(--ok)":"var(--erro)"}">${esc(txt)}</p>
       <p class="legenda">${esc(p.explica)}</p>
@@ -1685,19 +1717,17 @@ function fim(){
     <h3>Três coisas para lembrar</h3>
     <section class="caixa" style="margin-top:0"><ol style="font-size:1.08rem;margin:0;padding-left:1.3rem">${N.lembrar.map(l=>`<li>${l}</li>`).join("")}</ol></section>
     <div class="grupo">
-      <button class="item" id="prof">${I("partilhar")}<span class="txt">Enviar o resultado à professora</span>${I("seta")}</button>
-      <button class="item" id="sus">${I("formulario")}<span class="txt">Questionário (2 min)</span>${I("seta")}</button>
-      <button class="item" id="part">${I("partilhar")}<span class="txt">Partilhar</span>${I("seta")}</button>
-      <button class="item" id="novo">${I("reiniciar")}<span class="txt">Jogar outra vez</span>${I("seta")}</button></div>
+      <button class="item" id="part"><span class="txt">Partilhar o resultado</span></button>
+      <button class="item" id="novo"><span class="txt">Jogar outra vez</span></button></div>
     <div class="rodape">${PROX?`<button class="prim larga grande" id="prox">${I("play")}Próximo: ${PROX.nome}</button>
       <button class="larga" id="ini">${I("casa")}Início</button>`
       :`<button class="prim larga grande" id="ini">${I("casa")}Continuar</button>`}</div></main>`;
   if(window.RA3D){const v=document.getElementById("v3d");
     RA3D.visualizador(v,PECAS.map(p=>p.id),{montado:true}).then(()=>{v.querySelectorAll(".slot,.fundo").forEach(e=>e.remove());v.insertAdjacentHTML("beforeend",'<span class="dica3d">Arrasta para rodar</span>')}).catch(()=>{})}
   falar(`Parabéns! Reconstruíram ${MONUMENTO.nome}. Acertaram ${certas} de ${PECAS.length} perguntas.`);
-  document.getElementById("prof").onclick=()=>partilhar(`Caçadores da História — ${MONUMENTO.nome}\n${J.equipa.join(", ")}: ${certas}/${PECAS.length} certas.\nCódigo do resultado (colar no resumo da turma):\n${linha}`);
-  document.getElementById("part").onclick=()=>partilhar(`Reconstruímos a ${MONUMENTO.nome} no jogo Caçadores da História! ${certas}/${PECAS.length} respostas certas.`);
-  document.getElementById("sus").onclick=questionarioSUS;
+  if(document.getElementById("prof"))document.getElementById("prof").onclick=()=>partilhar(`Caçadores da História — ${MONUMENTO.nome}\n${J.equipa.join(", ")}: ${certas}/${PECAS.length} certas.\nCódigo do resultado (colar no resumo da turma):\n${linha}`);
+  document.getElementById("part").onclick=()=>partilhar(`Reconstruí ${MONUMENTO.nome} no jogo Caçadores da História em ${mmss(tf)}! ${certas}/${PECAS.length} respostas certas, ${J.pontos} pontos.`);
+  if(document.getElementById("sus"))document.getElementById("sus").onclick=questionarioSUS;
   if(PROX)document.getElementById("prox").onclick=()=>{irNivel(PROX.id);toast(`Nível ${NIVEIS.indexOf(PROX)+1} desbloqueado: ${PROX.nome}`);J?retomar():configurar()};
   document.getElementById("novo").onclick=()=>{J=null;guardar();configurar()};
   document.getElementById("ini").onclick=()=>{J=null;guardar();if(PROX)irNivel(PROX.id);inicio()};
@@ -1749,12 +1779,11 @@ function menuJogo(){
     <p class="nota">${contar("recolhida")}/${PECAS.length} peças · ${contar("colocada")}/${PECAS.length} montadas · ${J.pontos} pontos · ${mmss(tempoJogo())}</p></main>`;
   abrirFolha(`<div class="appbar"><h2 id="ftit">Pausa</h2></div>
     <button class="prim larga grande" id="cont">${I("play")}Continuar</button>
-    ${[["ra","camara","Jogar com realidade aumentada"],["pers","utilizador","Jogar com a personagem"],["semra","pino","Jogar sem câmara"]].filter(m=>m[0]!==J.modo)
-      .map(([m,ic,t])=>`<button class="item" data-modo="${m}">${I(ic)}<span class="txt">${t}</span>${m==="semra"?`<span class="dir">poupa bateria</span>`:""}</button>`).join("")}
-    <button class="item" id="ajuda">${I("ajuda")}<span class="txt">Como se joga</span>${I("seta")}</button>
-    <button class="item" id="fdef">${I("definicoes")}<span class="txt">Definições</span>${I("seta")}</button>
-    <div class="sep"></div>
-    <button class="item" id="sair">${I("casa")}<span class="txt">Sair para o início</span><span class="dir">o jogo fica guardado</span></button>`,
+    <div class="grupo def">${[["ra","Mudar para realidade aumentada"],["pers","Mudar para a aventura com a Kiala"],["semra","Mudar para a caça às imagens"]].filter(m=>m[0]!==J.modo)
+      .map(([m,t])=>`<button class="item" data-modo="${m}"><span class="txt">${t}</span></button>`).join("")}
+    <button class="item" id="ajuda"><span class="txt">Como se joga</span></button>
+    <button class="item" id="fdef"><span class="txt">Definições</span></button>
+    <button class="item" id="sair"><span class="txt">Sair para o início<small>O jogo fica guardado</small></span></button></div>`,
   v=>{
     const $=id=>v.querySelector("#"+id);
     $("cont").onclick=()=>{fecharFolha();retomar()};
@@ -1936,7 +1965,7 @@ function instalar(){
         <div class="item" style="cursor:default"><span class="txt">1. Abre o ficheiro descarregado.</span></div>
         <div class="item" style="cursor:default"><span class="txt">2. Se o telemóvel pedir, permite <b>instalar apps desta origem</b> (é só para esta app).</span></div>
         <div class="item" style="cursor:default"><span class="txt">3. Toca em <b>Instalar</b> e depois em <b>Abrir</b>.</span></div></div>
-      ${android?"":`<p class="nota">Estás num computador: lê o código QR da Área da professora com o telemóvel, ou abre este link no telemóvel.</p>`}`}`,
+      ${android?"":`<p class="nota">Estás num computador: lê com o telemóvel o código QR que está ao lado do jogo.</p>`}`}`,
   v=>{v.querySelector("#fx").onclick=fecharFolha;
     const b=v.querySelector("#ipwa");if(b)b.onclick=async()=>{const e=PEDIDO_INSTALAR;PEDIDO_INSTALAR=null;fecharFolha();try{e.prompt();await e.userChoice}catch(x){}};
     const a=v.querySelector("#iapk");if(a)a.onclick=()=>setTimeout(()=>toast("A descarregar… abre o ficheiro quando acabar."),100);});
@@ -1970,7 +1999,7 @@ if("serviceWorker" in navigator&&location.protocol!=="file:"){navigator.serviceW
 if("speechSynthesis" in window)speechSynthesis.getVoices();
 inicio();
 if(PEDIU_INSTALAR&&!instalada())setTimeout(instalar,300);
-if(TURMA_URL)toast("Turma "+TURMA_URL+": toca em Jogar para começar.",4000);
+try{if(new URLSearchParams(location.search).has("ferramentas"))setTimeout(ferramentas,400)}catch(e){}
 </script>
 </body>
 </html>

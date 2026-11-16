@@ -272,7 +272,7 @@ async function mundo(contentor, pecas, op = {}, cb = {}) {
   const feixeMat = new THREE.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0.28, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
   for (const p of pecas) {
     const k = pecas.indexOf(p), a = THREE.MathUtils.degToRad(p.az + (rnd(k + 7) - 0.5) * 20);
-    const R = Math.min(MUNDO - 3, RM + 3 + ((k * 7) % 4) * 3 + rnd(k) * 2);
+    const R = Math.min(MUNDO - 3, RM + (3 + ((k * 7) % 4) * 3 + rnd(k) * 2) * (op.dist || 1));   // a dificuldade afasta as peças
     const o = new THREE.Group();
     o.position.set(Math.sin(a) * R, 0, -Math.cos(a) * R);
     const m = normalizar(await modelo(p.id), 1.3); m.position.y = 1; o.add(m);
@@ -346,7 +346,7 @@ async function mundo(contentor, pecas, op = {}, cb = {}) {
       melhor.o.userData.apanhada = true; melhor.o.children.forEach(c => { if (c !== melhor.o.userData.m) c.visible = false; });
     }
     if (melhor && !apanhar) {
-      seta.visible = melhor.dist > 2.5;
+      seta.visible = op.seta !== false && melhor.dist > 2.5;   // no difícil não há seta
       seta.position.set(P.g.position.x, 2.35 + Math.sin(t * 4) * 0.08, P.g.position.z);
       seta.rotation.y = Math.atan2(melhor.dx, melhor.dz);
       const az = (THREE.MathUtils.radToDeg(Math.atan2(melhor.dx, -melhor.dz)) + 360) % 360; // 0 = para cima no ecrã

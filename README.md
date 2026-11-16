@@ -88,6 +88,9 @@ python3 -m http.server 8080      # ou: npx http-server
 |---|---|
 | Ecrã 1 Procurar: radar (A1), quente/frio (C1), "Mais perto!" (DC3) | RA por orientação: câmara traseira + giroscópio + **contador de passos** (acelerómetro). As peças estão a 4–14 m (sala: 2–7 m) e só aparecem a menos de 4 m; apanha-se a menos de 1,6 m. No modo família ficam à volta, a rodar no lugar (**modo sentado**, R14) |
 | Duas versões de procurar (além de "sem câmara") | **Realidade aumentada** (câmara + passos, ou RA no chão com ARCore) e **Com personagem**: a Kiala anda pelo monumento em 3D, guiada por um joystick que aparece onde se toca (ou setas/WASD); seta por cima da cabeça, feixes de luz nas peças, radar e dicas faladas |
+| Dificuldade | Fácil (peças perto, com pegadas e setas, 50 pontos), Normal (100) e Difícil (peças mais longe, só radar, 150) |
+| Jogo, não aula | O jogo não mostra nada de professores nem de turmas. As ferramentas de teste (verificar o telemóvel, dados e SUS) ficam escondidas: abrir o link com `?ferramentas` |
+| Direcção e curvas | O rumo vem dos três ângulos do sensor (câmara apontada, de pé ou deitado) e, no Android, da bússola absoluta; cada passo vai para onde se aponta |
 | Cronómetro | Tempo de jogo sempre visível (pára na pausa); tempo final no fim e melhor tempo por nível em cada conta |
 | Ecrã 2 Peça encontrada: contorno escuro, vibração + som (M2), **Fixar** | ✓ |
 | Ecrã 3 Pergunta: curiosidade em áudio + legenda (R8, R13), 3 respostas, certo/errado já com a resposta certa | Voz por `speechSynthesis`; a pergunta só abre depois da curiosidade (D1); só a resposta certa dá pontos |

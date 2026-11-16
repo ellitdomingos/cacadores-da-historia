@@ -236,8 +236,8 @@ function criarPersonagem(cor) {
   return { g, pe, pd, be, bd };
 }
 
-async function mundo(contentor, pecas, op = {}, cb = {}) {
-  const r = novoRenderer(contentor);
+// O mundo do monumento (igual no ecrã e na VR): chão, monumento incompleto, árvores e peças com feixe de luz
+async function construirMundo(pecas, op = {}) {
   const CEU = 0x9fd3f5;
   const cena = new THREE.Scene();
   cena.background = new THREE.Color(CEU);
@@ -282,6 +282,13 @@ async function mundo(contentor, pecas, op = {}, cb = {}) {
     o.userData = { id: p.id, m, anel };
     cena.add(o); objs.push(o);
   }
+
+  return { cena, objs, RM, MUNDO };
+}
+
+async function mundo(contentor, pecas, op = {}, cb = {}) {
+  const r = novoRenderer(contentor);
+  const { cena, objs, RM, MUNDO } = await construirMundo(pecas, op);
 
   // a personagem
   const P = criarPersonagem(op.cor || 0x2a9d8f);
@@ -368,6 +375,181 @@ async function mundo(contentor, pecas, op = {}, cb = {}) {
     parar() { if (parado) return; parado = true; cancelAnimationFrame(raf); window.removeEventListener("resize", ajustar); libertar(r, cena); },
   };
   return api;
+}
+
+/* ------------------------------------------------------------------
+   VR com óculos ligados ao PC (WebXR immersive-vr: Meta Quest com Link,
+   SteamVR, Windows Mixed Reality…). O jogador fica no lugar da Kiala,
+   dentro do monumento. Manípulo esquerdo: andar; direito: rodar 30°.
+   A curiosidade e a pergunta aparecem num painel; responde-se apontando
+   o comando e carregando no gatilho.
+   ------------------------------------------------------------------ */
+async function vrSuportado() {
+  try { return !!(window.isSecureContext && navigator.xr && await navigator.xr.isSessionSupported("immersive-vr")); }
+  catch (e) { return false; }
+}
+
+// Painel de texto e botões (desenhado num canvas, mostrado num plano dentro da VR)
+function criarPainel() {
+  const W = 1024, H = 800;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const ctx = cv.getContext("2d");
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5 * H / W), new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+  mesh.visible = false;
+  let c = null, foco = -1, botoes = [];
+  const FD = '"Fredoka", system-ui, sans-serif';
+  const linhas = (txt, max) => {
+    const out = []; let l = "";
+    for (const w of String(txt).split(/\s+/)) { const t = l ? l + " " + w : w; if (ctx.measureText(t).width > max && l) { out.push(l); l = w; } else l = t; }
+    if (l) out.push(l); return out;
+  };
+  const caixa = (x, y, w, h, r) => { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); };
+  function desenhar() {
+    ctx.clearRect(0, 0, W, H);
+    caixa(8, 8, W - 16, H - 16, 44); ctx.fillStyle = "rgba(11,16,22,.95)"; ctx.fill();
+    ctx.lineWidth = 6; ctx.strokeStyle = c.cor || "#FFC93C"; ctx.stroke();
+    let y = 86;
+    if (c.sub) { ctx.font = `600 30px ${FD}`; ctx.fillStyle = c.cor || "#FFC93C"; ctx.fillText(c.sub.toUpperCase(), 64, y); y += 58; }
+    ctx.font = `600 50px ${FD}`; ctx.fillStyle = "#FFFFFF";
+    for (const l of linhas(c.titulo || "", W - 128)) { ctx.fillText(l, 64, y); y += 60; }
+    y += 10;
+    // botões em baixo; o texto ocupa o espaço que sobra
+    const n = (c.botoes || []).length, BH = 86, G = 16, topoB = H - 48 - n * (BH + G) + G;
+    let tam = 34;
+    if (c.texto) {
+      let L;
+      do { ctx.font = `500 ${tam}px system-ui, sans-serif`; L = linhas(c.texto, W - 128); } while (y + L.length * tam * 1.3 > topoB - 20 && --tam > 22);
+      ctx.fillStyle = "#C9D4DF";
+      for (const l of L) { y += tam * 1.1; ctx.fillText(l, 64, y); y += tam * 0.2; }
+    }
+    botoes = (c.botoes || []).map((b, i) => {
+      const r = { x: 64, y: topoB + i * (BH + G), w: W - 128, h: BH, f: b.f };
+      caixa(r.x, r.y, r.w, r.h, 26); ctx.fillStyle = b.prim ? "#FFC93C" : "#223040"; ctx.fill();
+      if (i === foco) { ctx.lineWidth = 6; ctx.strokeStyle = "#FFFFFF"; ctx.stroke(); }
+      ctx.font = `600 36px ${FD}`; ctx.fillStyle = b.prim ? "#0B1016" : "#FFFFFF"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(b.t, W / 2, r.y + BH / 2, r.w - 40); ctx.textAlign = "start"; ctx.textBaseline = "alphabetic";
+      return r;
+    });
+    tex.needsUpdate = true;
+  }
+  return {
+    mesh, canvas: cv,
+    mostrar(conteudo) { c = conteudo; foco = -1; desenhar(); mesh.visible = true; },
+    esconder() { mesh.visible = false; c = null; },
+    visivel: () => mesh.visible,
+    botaoEm(uv) { const x = uv.x * W, y = (1 - uv.y) * H; return botoes.findIndex(b => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h); },
+    focar(i) { if (c && i !== foco) { foco = i; desenhar(); } },
+    carregar(i) { const b = botoes[i]; if (b && b.f) b.f(); },
+  };
+}
+
+// cb: { apanhar(id) -> dados da peça, responder(id, i) -> {certa, texto}, sair(motivo) }
+async function sessaoVR(pecas, op, cb) {
+  const sessao = await navigator.xr.requestSession("immersive-vr", { optionalFeatures: ["local-floor", "bounded-floor"] });
+  try { return await montarVR(sessao, pecas, op, cb); }
+  catch (e) { try { await sessao.end(); } catch (e2) {} throw e; }
+}
+
+async function montarVR(sessao, pecas, op, cb) {
+  const r = new THREE.WebGLRenderer({ antialias: true });
+  r.outputColorSpace = THREE.SRGBColorSpace;
+  r.xr.enabled = true;
+  // "local-floor": a altura real da cabeça; se não houver, põe-se a cabeça a 1,6 m
+  let chaoReal = true;
+  try { await sessao.requestReferenceSpace("local-floor"); r.xr.setReferenceSpaceType("local-floor"); }
+  catch (e) { chaoReal = false; r.xr.setReferenceSpaceType("local"); }
+  const { cena, objs, RM, MUNDO } = await construirMundo(pecas, op);
+  const cam = new THREE.PerspectiveCamera(70, 1, 0.05, 200);
+  const rig = new THREE.Group(); rig.add(cam); cena.add(rig);
+  rig.position.set(0, chaoReal ? 0 : 1.6, RM + 5);          // de frente para o monumento
+
+  const painel = criarPainel(); cena.add(painel.mesh);
+  const cabeca = new THREE.Vector3(), dir = new THREE.Vector3(), tmp = new THREE.Vector3();
+  const mostrarPainel = conteudo => {
+    const xc = r.xr.getCamera(); xc.getWorldPosition(cabeca); xc.getWorldDirection(dir);
+    dir.y = 0; if (dir.lengthSq() < 1e-4) dir.set(0, 0, -1); dir.normalize();
+    painel.mesh.position.copy(cabeca).addScaledVector(dir, 1.7); painel.mesh.position.y = cabeca.y - 0.15;
+    painel.mesh.lookAt(cabeca.x, painel.mesh.position.y, cabeca.z);
+    painel.mostrar(conteudo);
+  };
+
+  // comandos: um raio amarelo para apontar ao painel; gatilho = escolher
+  const raycaster = new THREE.Raycaster(), matRot = new THREE.Matrix4();
+  const apontar = ctl => { matRot.identity().extractRotation(ctl.matrixWorld); raycaster.ray.origin.setFromMatrixPosition(ctl.matrixWorld); raycaster.ray.direction.set(0, 0, -1).applyMatrix4(matRot);
+    const h = painel.visivel() ? raycaster.intersectObject(painel.mesh)[0] : null; return h ? painel.botaoEm(h.uv) : -1; };
+  const comandos = [0, 1].map(i => {
+    const ctl = r.xr.getController(i);
+    const linha = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -3)]), new THREE.LineBasicMaterial({ color: 0xffc93c }));
+    ctl.add(linha); rig.add(ctl);
+    ctl.addEventListener("select", () => { const b = apontar(ctl); if (b >= 0) painel.carregar(b); });
+    return ctl;
+  });
+
+  const restam = () => objs.filter(o => !o.userData.apanhada).length;
+  const terminar = motivo => { terminou = motivo; try { sessao.end(); } catch (e) {} };
+  let terminou = null;
+  const fluxoPeca = (id, info) => {
+    mostrarPainel({ sub: "Peça encontrada: " + info.nome, titulo: "Sabias que…", texto: info.curio,
+      botoes: [{ t: "Responder à pergunta", prim: true, f: () => pergunta(id, info) }] });
+  };
+  const pergunta = (id, info) => {
+    mostrarPainel({ sub: "Pergunta", titulo: info.q, botoes: info.o.map((o, i) => ({ t: "ABC"[i] + ".  " + o, f: () => {
+      const res = cb.responder(id, i), falta = restam();
+      mostrarPainel({ sub: res.certa ? "Certo!" : "Não foi desta", cor: res.certa ? "#5BE38A" : "#FF8A80", titulo: res.texto, texto: info.explica,
+        botoes: [{ t: falta ? `Procurar a próxima peça (faltam ${falta})` : "Sair da VR e montar", prim: true, f: () => { painel.esconder(); if (!falta) terminar("todas"); } }] });
+    } })) });
+  };
+  mostrarPainel({ sub: "Caçadores da História", titulo: "Bem-vindo ao monumento!",
+    texto: "Manípulo esquerdo: andar. Manípulo direito: rodar. Vai até às luzes douradas para apanhar as peças. Aponta o comando e carrega no gatilho para escolher.",
+    botoes: [{ t: "Começar", prim: true, f: () => painel.esconder() }] });
+
+  await r.xr.setSession(sessao);
+  sessao.addEventListener("end", () => {
+    r.setAnimationLoop(null);
+    cena.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+    r.dispose();
+    cb.sair(terminou || "saiu");
+  });
+
+  let ultimo = performance.now(), rodou = false;
+  r.setAnimationLoop(agora => {
+    const dt = Math.min(0.05, (agora - ultimo) / 1000); ultimo = agora; const t = agora / 1000;
+    const xc = r.xr.getCamera(); xc.getWorldPosition(cabeca); xc.getWorldDirection(dir); dir.y = 0; if (dir.lengthSq() > 1e-4) dir.normalize();
+    // manípulos (gamepad "xr-standard": eixos 2 e 3)
+    if (!painel.visivel()) for (const src of sessao.inputSources) {
+      const g = src.gamepad; if (!g || !g.axes) continue;
+      const ax = g.axes.length >= 4 ? g.axes[2] : g.axes[0] || 0, ay = g.axes.length >= 4 ? g.axes[3] : g.axes[1] || 0;
+      if (src.handedness === "right") {
+        if (Math.abs(ax) > 0.7 && !rodou) {     // rodar 30° à volta da cabeça
+          rodou = true; const a = -Math.sign(ax) * Math.PI / 6;
+          tmp.copy(rig.position).sub(cabeca).applyAxisAngle(new THREE.Vector3(0, 1, 0), a); rig.position.copy(cabeca).add(tmp); rig.rotation.y += a;
+        } else if (Math.abs(ax) < 0.3) rodou = false;
+      } else if (Math.hypot(ax, ay) > 0.15) {
+        const dirX = -dir.z, dirZ = dir.x;        // direita = frente rodada 90°
+        rig.position.x += (dir.x * -ay + dirX * ax) * 2.6 * dt;
+        rig.position.z += (dir.z * -ay + dirZ * ax) * 2.6 * dt;
+      }
+    }
+    // não atravessa o monumento nem sai do mundo (conta a posição da cabeça)
+    xc.getWorldPosition(cabeca);
+    const d = Math.hypot(cabeca.x, cabeca.z);
+    if (d < RM) { const k = RM / d - 1; rig.position.x += cabeca.x * k; rig.position.z += cabeca.z * k; }
+    if (d > MUNDO) { const k = MUNDO / d - 1; rig.position.x += cabeca.x * k; rig.position.z += cabeca.z * k; }
+    // peças: flutuam; apanha-se ao chegar perto
+    for (const o of objs) {
+      if (o.userData.apanhada) continue;
+      o.userData.m.rotation.y = t * 0.8; o.userData.m.position.y = 1 + Math.sin(t * 2 + o.id) * 0.12;
+      if (!painel.visivel() && Math.hypot(o.position.x - cabeca.x, o.position.z - cabeca.z) < 1.4) {
+        o.userData.apanhada = true; o.visible = false;
+        fluxoPeca(o.userData.id, cb.apanhar(o.userData.id));
+      }
+    }
+    // realce do botão para onde se aponta
+    if (painel.visivel()) { let f = -1; for (const c of comandos) { const b = apontar(c); if (b >= 0) f = b; } painel.focar(f); }
+    r.render(cena, cam);
+  });
+  return { terminar() { terminar("saiu"); } };
 }
 
 /* ------------------------------------------------------------------
@@ -545,8 +727,11 @@ async function montarXR(sessao, pecas, cb, escala) {
 }
 
 if (webglOK()) {
-  window.RA3D = { procura, visualizador, modelo, xrSuportado, sessaoXR, precarregar, mundo };
+  window.RA3D = { procura, visualizador, modelo, xrSuportado, sessaoXR, precarregar, mundo, sessaoVR,
+    // para testar o painel da VR sem óculos: devolve a imagem do painel
+    painelImagem(conteudo) { const p = criarPainel(); p.mostrar(conteudo); return p.canvas.toDataURL(); } };
   xrSuportado().then(ok => { window.RA3D.xr = ok; window.dispatchEvent(new Event("ra3d-xr")); });
+  vrSuportado().then(ok => { window.RA3D.vr = ok; window.dispatchEvent(new Event("ra3d-vr")); });
   // pré-carregar os modelos (são poucos KB) para não haver espera no local
   if (window.NIVEL_PASTA && window.NIVEIS) precarregar((window.NIVEIS.find(n => `modelos/${n.id}/` === window.NIVEL_PASTA) || { pecas: [] }).pecas.map(p => p.id));
   window.dispatchEvent(new Event("ra3d-pronto"));

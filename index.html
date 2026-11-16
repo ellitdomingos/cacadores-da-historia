@@ -31,7 +31,7 @@ html{font-size:100%;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg)}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;line-height:1.45;overscroll-behavior:none;
   background:radial-gradient(120% 60% at 50% 0%,#1A2634 0%,var(--bg) 60%) fixed}
-#app{min-height:var(--alt)}
+#app,#ecra{min-height:var(--alt)}
 .ecra{max-width:34rem;margin:0 auto;padding:1rem 1rem 5rem;animation:entra .25s ease-out}
 @keyframes entra{from{opacity:0;transform:translateY(.4rem)}}
 h1{font-size:2rem;line-height:1.1;margin:.4rem 0 .6rem;letter-spacing:-.01em}
@@ -448,7 +448,7 @@ input[type=text],textarea{min-height:3.4rem;border-radius:1rem;padding:.8rem 1re
   <div class="qrl" id="qrlado"></div>
   <p style="font-size:.9rem">No computador também dá para experimentar: ← → para rodar, ↑ para andar.</p>
 </aside>
-<div id="app"></div>
+<div id="app"><div id="ecra"></div><div id="camada"></div></div>
 <script src="modelos/tabuleiros.js"></script>
 <script src="vendor/qrcode.js"></script>
 <script>
@@ -705,11 +705,12 @@ function aplicarDef(){document.documentElement.style.fontSize=(100*DEF.letra)+"%
 aplicarDef();
 
 /* ---------------- Utilitários ---------------- */
-const app=document.getElementById("app");
+// #ecra: o ecrã actual (substituído a cada mudança); #camada: mensagens e painéis por cima, que não se apagam
+const app=document.getElementById("ecra"), camada=document.getElementById("camada");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const norm=d=>((d%360)+540)%360-180;
 const contar=k=>PECAS.filter(p=>J.pecas[p.id][k]).length;
-function toast(msg,ms=2200){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;(document.querySelector(".xr-ov")||app).appendChild(t);setTimeout(()=>t.remove(),ms)}
+function toast(msg,ms=2200){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;(document.querySelector(".xr-ov")||camada).appendChild(t);setTimeout(()=>t.remove(),ms)}
 let actx=null;
 function som(tipo){
   if(!DEF.som)return;
@@ -865,7 +866,7 @@ function abrirFolha(html,aoMontar){
   v.innerHTML=`<div class="folha" role="dialog" aria-modal="true" aria-labelledby="ftit"><div class="pega" aria-hidden="true"></div>${html}</div>`;
   v.addEventListener("click",e=>{if(e.target===v)fecharFolha()});
   v.addEventListener("keydown",e=>{if(e.key==="Escape")fecharFolha()});
-  app.appendChild(v);aoMontar&&aoMontar(v);
+  camada.appendChild(v);aoMontar&&aoMontar(v);
   const f=v.querySelector("button");f&&f.focus();
 }
 function definicoes(){
@@ -1013,7 +1014,7 @@ function configurar(){
       <h3 style="margin-top:.6rem">Modo de jogo</h3>
       <div class="cartoes" role="group">
         <button class="cartao" data-m="ra" aria-pressed="${modo==="ra"}">${I("camara")}<span><b>Realidade aumentada</b><small>Anda de verdade: as peças aparecem na câmara quando chegas perto.</small></span></button>
-        <button class="cartao" data-m="pers" aria-pressed="${modo==="pers"}">${I("utilizador")}<span><b>Aventura com a Kiala</b><small>Guia a Kiala pelo monumento em 3D com o dedo.</small></span></button>
+        <button class="cartao" data-m="pers" aria-pressed="${modo==="pers"}">${I("utilizador")}<span><b>Aventura com a Kiala</b><small>Guia a Kiala pelo monumento em 3D. Com óculos VR ligados ao PC, entras no monumento.</small></span></button>
         <button class="cartao" data-m="semra" aria-pressed="${modo==="semra"}">${I("pino")}<span><b>Caça às imagens</b><small>Encontra os sítios das imagens. Sem câmara.</small></span></button></div>
       <h3>Dificuldade</h3>
       <div class="seg" role="group">${Object.entries(DIFS).map(([k,[t]])=>`<button data-d="${k}" aria-pressed="${dif===k}">${t}</button>`).join("")}</div>
@@ -1296,9 +1297,14 @@ function procurarPersonagem(){
     <div class="fundo-cam">
       <button id="bmenu">${I("pausa")}Pausa</button>
       <button id="bexemplo">${I("ajuda")}Ajuda</button>
+      <button id="bvr" class="prim" hidden>${I("cubo")}Jogar em VR</button>
       <button id="bmontar">${I("grelha")}Montar (${contar("recolhida")-contar("colocada")})</button>
     </div></div>`;
   const $=id=>document.getElementById(id), dica=$("dica"), joy=$("joy");
+  // óculos VR ligados ao PC: aparece "Jogar em VR"
+  const mostrarVR=()=>{const b=$("bvr");if(b&&window.RA3D&&RA3D.vr)b.hidden=false};
+  mostrarVR();window.addEventListener("ra3d-vr",mostrarVR,{once:true});
+  $("bvr").onclick=()=>{guardarPos();iniciarVR()};
   ligarBotaoVoz($("cvoz"));
   $("bmenu").onclick=()=>{guardarPos();menuJogo()};
   $("bmontar").onclick=()=>{guardarPos();passar("monta",montar)};
@@ -1372,6 +1378,39 @@ function rumoCamara(a,b,g){
   return (Math.atan2(x,y)/d+360)%360;
 }
 
+/* ---------------- VR com óculos ligados ao PC ---------------- */
+function iniciarVR(){
+  pararCamara();pararVoz();reg("vr");
+  const faltam=PECAS.filter(p=>!J.pecas[p.id].recolhida);
+  app.innerHTML=`<main class="passa"><div class="ic-grande">${I("cubo")}</div><h2>Põe os óculos VR</h2>
+    <p>O jogo continua nos óculos. Quando tiveres todas as peças, voltas aqui para montar o monumento.</p>
+    <button class="larga" id="vsair" style="margin-top:auto">Sair da VR</button></main>`;
+  let sessao=null, saiu=false;
+  const acabar=()=>{if(saiu)return;saiu=true;XR_SAIR=null;pararVoz();
+    const tudo=PECAS.every(p=>J.pecas[p.id].recolhida&&J.pecas[p.id].respondida);
+    tudo?passar("monta",montar):retomar()};
+  const sair=()=>{if(sessao)sessao.terminar();setTimeout(acabar,1500)};
+  XR_SAIR=sair;document.getElementById("vsair").onclick=sair;
+  const c=conta(), cor=c&&/^#/.test(c.avatar||"")?parseInt(c.avatar.slice(1),16):0x2a9d8f;
+  RA3D.sessaoVR(faltam,{fundo:N.fundo,cor,dist:dific().dist},{
+    apanhar(id){
+      const p=PECAS.find(x=>x.id===id);
+      J.pecas[id].recolhida=true;reg("peca",{id});guardar();som("encontrar");falar(p.curio);
+      return {nome:p.nome,curio:p.curio,q:p.q,o:p.o,a:p.a,explica:p.explica};
+    },
+    responder(id,i){
+      const p=PECAS.find(x=>x.id===id), certa=i===p.a, st=J.pecas[id];
+      reg("resposta",{id,certa,ms:0});
+      st.respondida=true;st.certa=certa;if(certa)J.pontos+=dific().pontos;guardar();
+      som(certa?"certo":"errado");
+      const txt=certa?`Certo! ${p.o[p.a]}. Mais ${dific().pontos} pontos.`:`A resposta certa é: ${p.o[p.a]}.`;
+      falar(txt+" "+p.explica);
+      return {certa,texto:txt};
+    },
+    sair:acabar,
+  }).then(s=>{sessao=s}).catch(()=>{if(saiu)return;saiu=true;XR_SAIR=null;toast("Não foi possível abrir a VR. Os óculos estão ligados ao PC?",3500);procurarPersonagem()});
+}
+
 const PEGADAS=`<span>${I("pe")}</span><span>${I("pe")}</span><span>${I("pe")}</span>`;
 // Exemplo animado: como pegar numa peça (mostrar, não só dizer)
 function demoRecolher(id){
@@ -1385,7 +1424,7 @@ function demoRecolher(id){
       <li><b>2.</b> …até chegares perto e a peça ficar no meio. Aparece a <b>moldura amarela</b>.</li>
       <li><b>3.</b> <b>Toca na peça</b> para a pegar. Vai para a mochila.</li></ol>
     <button class="prim larga grande" id="demook">Percebi</button></div>`;
-  app.appendChild(d);
+  camada.appendChild(d);
   const ok=d.querySelector("#demook");ok.focus();ok.onclick=()=>d.remove();
 }
 

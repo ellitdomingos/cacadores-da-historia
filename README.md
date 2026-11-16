@@ -88,6 +88,7 @@ python3 -m http.server 8080      # ou: npx http-server
 |---|---|
 | Ecrã 1 Procurar: radar (A1), quente/frio (C1), "Mais perto!" (DC3) | RA por orientação: câmara traseira + giroscópio + **contador de passos** (acelerómetro). As peças estão a 4–14 m (sala: 2–7 m) e só aparecem a menos de 4 m; apanha-se a menos de 1,6 m. No modo família ficam à volta, a rodar no lugar (**modo sentado**, R14) |
 | Duas versões de procurar (além de "sem câmara") | **Realidade aumentada** (câmara + passos, ou RA no chão com ARCore) e **Com personagem**: a Kiala anda pelo monumento em 3D, guiada por um joystick que aparece onde se toca (ou setas/WASD); seta por cima da cabeça, feixes de luz nas peças, radar e dicas faladas |
+| VR com óculos ligados ao PC | No modo da Kiala, se o Chrome/Edge do PC detectar óculos (Meta Quest com Link, SteamVR…), aparece "Jogar em VR": o jogador fica dentro do monumento, anda com o manípulo esquerdo, roda com o direito e responde num painel (aponta e gatilho). Monta-se depois no ecrã. |
 | Dificuldade | Fácil (peças perto, com pegadas e setas, 50 pontos), Normal (100) e Difícil (peças mais longe, só radar, 150) |
 | Jogo, não aula | O jogo não mostra nada de professores nem de turmas. As ferramentas de teste (verificar o telemóvel, dados e SUS) ficam escondidas: abrir o link com `?ferramentas` |
 | Direcção e curvas | O rumo vem dos três ângulos do sensor (câmara apontada, de pé ou deitado) e, no Android, da bússola absoluta; cada passo vai para onde se aponta |

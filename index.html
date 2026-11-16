@@ -641,6 +641,20 @@ usarNivel(NIVEL_URL||(()=>{try{return localStorage.getItem("ch-nivel-atual")}cat
 // Dificuldade: distância das peças, ajudas no caminho e pontos por resposta certa
 const DIFICULDADE={facil:{dist:.5,pistas:true,pontos:50},normal:{dist:1,pistas:true,pontos:100},dificil:{dist:1.4,pistas:false,pontos:150}};
 const dific=()=>DIFICULDADE[(J&&J.dif)||"normal"]||DIFICULDADE.normal;
+/* Responder: quem erra à primeira pode tentar outra vez (vale metade dos pontos).
+   Devolve {fim:false} se ainda há segunda tentativa, ou {fim:true, certa, pontos, texto}.
+   A peça fica sempre na mochila. */
+function responderPeca(p,i,ms){
+  const st=J.pecas[p.id], certa=i===p.a;
+  st.tentativas=(st.tentativas||0)+1;
+  reg("resposta",{id:p.id,certa,ms,tentativa:st.tentativas});
+  if(!certa&&st.tentativas===1){guardar();return {fim:false,texto:"Ainda não! Tenta outra vez: agora vale metade dos pontos."}}
+  const pontos=certa?(st.tentativas===1?dific().pontos:Math.round(dific().pontos/2)):0;
+  st.respondida=true;st.certa=certa;J.pontos+=pontos;guardar();
+  const texto=certa?(st.tentativas===1?`Certo! ${p.o[p.a]}. Mais ${pontos} pontos.`:`Certo à segunda! ${p.o[p.a]}. Mais ${pontos} pontos.`)
+    :`Não foi desta. A resposta certa é: ${p.o[p.a]}.`;
+  return {fim:true,certa,pontos,texto};
+}
 
 /* ---------------- Imagens das peças (renderizadas no Blender a partir dos modelos 3D) ---------------- */
 // vista "cima": recorte da planta (tabuleiro, mochila); vista "3q": três quartos (fotografias, curiosidade)
@@ -1399,13 +1413,10 @@ function iniciarVR(){
       return {nome:p.nome,curio:p.curio,q:p.q,o:p.o,a:p.a,explica:p.explica};
     },
     responder(id,i){
-      const p=PECAS.find(x=>x.id===id), certa=i===p.a, st=J.pecas[id];
-      reg("resposta",{id,certa,ms:0});
-      st.respondida=true;st.certa=certa;if(certa)J.pontos+=dific().pontos;guardar();
-      som(certa?"certo":"errado");
-      const txt=certa?`Certo! ${p.o[p.a]}. Mais ${dific().pontos} pontos.`:`A resposta certa é: ${p.o[p.a]}.`;
-      falar(txt+" "+p.explica);
-      return {certa,texto:txt};
+      const p=PECAS.find(x=>x.id===id), r=responderPeca(p,i,0);
+      som(r.fim&&r.certa?"certo":"errado");
+      falar(r.fim?r.texto+" "+p.explica:r.texto);
+      return r;
     },
     sair:acabar,
   }).then(s=>{sessao=s}).catch(()=>{if(saiu)return;saiu=true;XR_SAIR=null;toast("Não foi possível abrir a VR. Os óculos estão ligados ao PC?",3500);procurarPersonagem()});
@@ -1573,21 +1584,27 @@ function curiosidade(p){
 function pergunta(p){
   app.innerHTML=`<main class="ecra">
     <div class="barra-topo"><span class="pill" style="color:var(--ouro)">${I("estrela")}<span style="color:var(--fg)">${J.pontos} pontos</span></span>${crono()}${etiquetaPapel("responde")}</div>
-    <div class="q-zona"><p class="sub" style="margin:0">Pergunta</p><h2>${esc(p.q)}</h2></div>
+    <div class="q-zona"><p class="sub" style="margin:0">Pergunta</p><h2>${esc(p.q)}</h2>
+      <p class="retro" id="tenta" role="status" aria-live="assertive" style="color:var(--erro);font-size:1.15rem" hidden></p></div>
     <div class="rodape"><div class="opcoes">${p.o.map((o,i)=>`<button data-i="${i}"><span class="letra">${"ABC"[i]}</span>${esc(o)}</button>`).join("")}</div></div>
     <div id="retro" role="status" aria-live="assertive"></div></main>`;
   falar(p.q);
   const t0=Date.now();
   document.querySelectorAll(".opcoes button").forEach(b=>b.onclick=()=>{
     pararVoz();
-    const i=+b.dataset.i, certa=i===p.a;
-    reg("resposta",{id:p.id,certa,ms:Date.now()-t0});
-    // irreversível de propósito (evita responder ao acaso)
+    const i=+b.dataset.i, r=responderPeca(p,i,Date.now()-t0);
+    if(!r.fim){
+      // primeira resposta errada: essa opção fica marcada e pode tentar outra vez
+      b.disabled=true;b.style.opacity=1;b.classList.add("errada");
+      const t=document.getElementById("tenta");t.hidden=false;t.textContent=r.texto;
+      som("errado");vibrar(150);falar(r.texto);return;
+    }
+    const certa=r.certa;
     document.querySelectorAll(".opcoes button").forEach((x,k)=>{x.disabled=true;x.style.opacity=1;if(k===p.a)x.classList.add("certa")});
     if(!certa)b.classList.add("errada");
-    const st=J.pecas[p.id];st.respondida=true;st.certa=certa;if(certa)J.pontos+=dific().pontos;guardar();
+    document.getElementById("tenta").hidden=true;
     som(certa?"certo":"errado");vibrar(certa?60:[200,80,200]);
-    const txt=certa?`Certo! ${p.o[p.a]}. Mais ${dific().pontos} pontos.`:`Não foi desta. A resposta certa é: ${p.o[p.a]}.`;
+    const txt=r.texto;
     document.getElementById("retro").innerHTML=`<div class="resultado${certa?"":" mal"}"><div class="pega" aria-hidden="true" style="width:2.6rem;height:.3rem;border-radius:999px;background:var(--linha);margin:.2rem auto 0"></div>
       <p class="retro" style="color:${certa?"var(--ok)":"var(--erro)"}">${esc(txt)}</p>
       <p class="legenda">${esc(p.explica)}</p>

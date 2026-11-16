@@ -493,9 +493,12 @@ async function montarVR(sessao, pecas, op, cb) {
     mostrarPainel({ sub: "Peça encontrada: " + info.nome, titulo: "Sabias que…", texto: info.curio,
       botoes: [{ t: "Responder à pergunta", prim: true, f: () => pergunta(id, info) }] });
   };
-  const pergunta = (id, info) => {
-    mostrarPainel({ sub: "Pergunta", titulo: info.q, botoes: info.o.map((o, i) => ({ t: "ABC"[i] + ".  " + o, f: () => {
-      const res = cb.responder(id, i), falta = restam();
+  const pergunta = (id, info, errada = -1, aviso = "") => {
+    // segunda tentativa: a opção errada desaparece e aparece o aviso
+    mostrarPainel({ sub: aviso ? "Tenta outra vez" : "Pergunta", cor: aviso ? "#FF8A80" : null, titulo: info.q, texto: aviso,
+      botoes: info.o.map((o, i) => ({ i, t: "ABC"[i] + ".  " + o })).filter(b => b.i !== errada).map(b => ({ t: b.t, f: () => {
+      const i = b.i, res = cb.responder(id, i), falta = restam();
+      if (!res.fim) return pergunta(id, info, i, res.texto);
       mostrarPainel({ sub: res.certa ? "Certo!" : "Não foi desta", cor: res.certa ? "#5BE38A" : "#FF8A80", titulo: res.texto, texto: info.explica,
         botoes: [{ t: falta ? `Procurar a próxima peça (faltam ${falta})` : "Sair da VR e montar", prim: true, f: () => { painel.esconder(); if (!falta) terminar("todas"); } }] });
     } })) });

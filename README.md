@@ -6,7 +6,7 @@ PL 3–8 (`IHC/pl/guioes`). HTML/CSS/JS sem build; three.js r160 guardado em `ve
 ## Estrutura
 | Ficheiro | O que é |
 |---|---|
-| `index.html` | O jogo (ecrãs, regras, equipa, professora) |
+| `index.html` | O jogo (ecrãs, regras, modos, equipa, recordes) |
 | `ra3d.js` | Camada 3D (three.js): peças por cima da câmara, peça a rodar na curiosidade, monumento montado no fim, RA no chão (WebXR) |
 | `ferramentas/gerar_pecas.py` | Blender: nível 1, Fortaleza de São Miguel |
 | `ferramentas/gerar_niveis.py` | Blender: níveis 2–4 (Palácio de Ferro, Mbanza Kongo, Museu Nacional da Escravatura) |
@@ -32,8 +32,8 @@ python3 ferramentas/recortar_tabuleiro.py                    # recorta as peças
 | 3 | Mbanza Kongo, ruínas da Kulumbimbi (Zaire) | planta | fachada, paredes, cabeceira, árvore Yala Nkuwu, túmulos dos reis |
 | 4 | Museu Nacional da Escravatura, Capela da Casa Grande (Luanda) | vista de frente | fachada, telhado, porta, frontão, cruz, pia baptismal |
 
-Ciclo de jogo: concluir um nível desbloqueia o seguinte ("Próximo nível"). O QR da professora leva
-`?turma=…&nivel=…` e abre o monumento da visita, mesmo bloqueado. Os textos de cada nível estão em
+Ciclo de jogo: concluir um nível desbloqueia o seguinte ("Próximo nível"). Em "Níveis" há os **Recordes**
+(5 melhores tempos de cada monumento neste aparelho). Os textos de cada nível estão em
 `NIVEIS` no `index.html` e **devem ser revistos por um professor de História**; as formas 3D são aproximadas.
 A fortaleza segue a planta real em **estrela de quatro pontas** (sistema abaluartado): baluartes com
 guaritas e parapeitos com canhoneiras, cortinas, pátio, casa do governador, casamata dos azulejos e
@@ -69,7 +69,7 @@ ou seja, num repositório `ellitdomingos.github.io` (com `.nojekyll`).
    ```
 3. No GitHub: **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: `main` / `(root)` → Save**.
 4. Ao fim de 1–2 minutos o jogo fica em `https://<utilizador>.github.io/cacadores-da-historia/` (https, por isso
-   a câmara, o giroscópio, a RA no chão e o QR da turma funcionam no telemóvel).
+   a câmara, o giroscópio e a RA no chão funcionam no telemóvel).
 
 Para actualizar: `git add -A && git commit -m "…" && git push`. O jogo vai primeiro à rede, por isso
 os telemóveis apanham a versão nova da próxima vez que o abrirem com internet.
@@ -98,13 +98,12 @@ python3 -m http.server 8080      # ou: npx http-server
 | Ecrã 4 Montar: tabuleiro 2D (D2), íman (DC1), rodar com um toque (DC2) | ✓ |
 | Modo de equipa, papéis Aponta/Responde/Monta, "Passa a…" (D3, R4) | 1 a 3 jogadores num telemóvel |
 | Sem RA: fotografias dos locais (B2) | O "Estou aqui" serve para as salas fechadas (sem GPS) |
-| Código da turma e resumo para a professora (R5, R10) | O resultado vai por WhatsApp como uma linha `CH1;…`, e a professora cola-a no resumo |
 | R6 só alcunha · R7 contraste alto · alvos ≥ 48 px · R11 offline | ✓ |
 | Modo família (D5): o avô ou a avó conta a história, e os netos procuram, respondem e montam | Opção "Família" ao configurar o jogo |
 | Guardar o progresso sem repetir o que já se fez | Contas locais (alcunha, cor, PIN opcional): "Continuar", "Reiniciar o nível" e "Recomeçar tudo" |
 | Orientação (IHC): para onde andar, como apanhar, como montar | Pegadas e setas para o lado da peça, mão animada, demonstração de apanhar e de montar, dica depois de 2 encaixes falhados |
-| QR da turma (interacção 8) | O QR abre o jogo com `?turma=CÓDIGO` já preenchido (`vendor/qrcode.js`, MIT) |
-| Metas da secção 5.3 / PL 14 | Registo automático (1.ª peça, montar, respostas, ajudas no jogo, encaixes falhados), questionário SUS no fim, tabela comparada com as metas e CSV (Área da professora → 3) |
+| QR (interacção 8) | QR do jogo e da instalação no painel ao lado, no computador (`vendor/qrcode.js`, MIT) |
+| Metas da secção 5.3 / PL 14 | Registo automático (1.ª peça, montar, respostas, ajudas no jogo, encaixes falhados), questionário SUS no fim, tabela comparada com as metas e CSV (só com `?ferramentas`) |
 | Instalar no Android | `icon-192.png`, `icon-512.png` (gerados a partir da planta da fortaleza) |
 
 ## Limitações (para discutir nas aulas)
@@ -116,5 +115,5 @@ python3 -m http.server 8080      # ou: npx http-server
   No iPhone (o Safari não tem WebXR) e nos outros aparelhos fica a RA por **orientação** (peças a 3 m, sem chão).
 - Ainda não há reconhecimento por imagem nas salas fechadas.
 - Os modelos são simplificados (blocos low-poly), não réplicas dos monumentos reais.
-- Não há servidor: o resumo da turma junta os resultados guardados neste aparelho e os que a professora colar.
+- Não há servidor: os progressos e os recordes ficam só neste aparelho.
 - As "fotografias" do modo sem RA são desenhos das peças. Para a visita real, substituir por fotos do local.

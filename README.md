@@ -60,6 +60,36 @@ Para a app abrir **sem barra de endereço**, o ficheiro `.well-known/assetlinks.
 SHA-256 da chave) tem de estar na raiz do domínio: `https://ellitdomingos.github.io/.well-known/assetlinks.json`,
 ou seja, num repositório `ellitdomingos.github.io` (com `.nojekyll`).
 
+## Jogar no navegador do telemóvel (o que é preciso permitir)
+Não é preciso activar nenhuma opção escondida do navegador. Basta abrir o jogo pelo link **https**
+(o do GitHub Pages) e aceitar as autorizações que o jogo pede.
+
+**O que o jogo pede quando se começa o modo de Realidade Aumentada (RA):**
+- **Câmara:** o navegador pergunta se o jogo pode usar a câmara. Escolher "Permitir". Se for recusada,
+  o jogo continua com um fundo desenhado.
+- **Sensores de movimento (giroscópio/bússola):**
+  - **Android/Chrome:** já vêm ligados. Só se foram desligados antes é preciso verificar em
+    Definições do site → Sensores de movimento.
+  - **iPhone/Safari:** aparece "Permitir acesso ao movimento". Tocar em "Permitir". Sem sensores,
+    o jogo mostra setas no ecrã.
+
+**Coisas que podem falhar:**
+- **Link sem https** (por exemplo, `http://192.168…` a partir do PC): a câmara e os sensores ficam
+  bloqueados. Usar sempre o link https.
+- **Câmara bloqueada por engano:** tocar no cadeado ao lado do endereço → Permissões → Câmara →
+  Permitir, e recarregar a página.
+- **Navegação privada/anónima:** o progresso e os recordes não ficam guardados.
+- **RA no chão (WebXR):** só em Android com Chrome e "Google Play Services para RA" (ARCore)
+  instalado. No iPhone não existe, e o jogo usa a RA por orientação.
+- **Voz em português:** se não se ouvir, instalar uma voz portuguesa em Definições → Texto para voz.
+- **Jogar sem internet:** abrir o jogo uma vez com internet. No Chrome também se pode usar o menu →
+  "Instalar aplicação".
+
+**Para testar um telemóvel:** abrir o link com `?ferramentas` no fim
+(`https://ellitdomingos.github.io/cacadores-da-historia/?ferramentas`) e usar "Verificar este telemóvel".
+Mostra se a câmara, o giroscópio, a RA, a voz, o guardar do progresso e o jogo sem internet funcionam
+nesse aparelho.
+
 ## Publicar no GitHub Pages
 1. Em https://github.com/new criar um repositório **público** chamado `cacadores-da-historia` (sem README).
 2. Nesta pasta:

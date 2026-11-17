@@ -1213,14 +1213,36 @@ function procurar(){
     const a=rumo*Math.PI/180;eu.x+=Math.sin(a)*PASSO;eu.y+=Math.cos(a)*PASSO;passos++;
     const n=$("npassos");if(n)n.lastElementChild.textContent=passos+(passos===1?" passo":" passos");
   }
-  let filtro=9.8, emCima=false, ultimo=0;
+  // Contagem adaptável: cada telemóvel tem um acelerómetro diferente (gravidade medida, ruído,
+  // frequência das leituras). Por isso não há limiares fixos: o jogo aprende a "linha de base"
+  // (gravidade), o ruído com o telemóvel parado e a altura típica dos passos de quem joga.
+  // Os filtros usam o tempo real entre leituras, por isso funcionam a 30, 60 ou 200 leituras/s.
+  const ST={s:null,base:null,ruido:.15,amp:1.2,emCima:false,pico:0,ultimo:0,t:0};
+  const fator=(dt,tau)=>1-Math.exp(-dt/tau);
   cam.movimento=e=>{
-    const g=e.accelerationIncludingGravity;if(!g||g.x==null)return;
+    const g=e.accelerationIncludingGravity, a=e.acceleration;
+    let m;
+    if(g&&g.x!=null)m=Math.hypot(g.x,g.y,g.z);
+    else if(a&&a.x!=null)m=9.8+Math.hypot(a.x,a.y,a.z);   // aparelhos que só dão a aceleração sem gravidade
+    else return;
     if(!movimento){movimento=true;$("ra").hidden=true}
-    filtro=filtro*.75+Math.hypot(g.x,g.y,g.z)*.25;
-    const t=performance.now();
-    if(!emCima&&filtro>11.2&&t-ultimo>300){emCima=true;ultimo=t;passo()}
-    else if(emCima&&filtro<10.3)emCima=false;
+    const t=performance.now(), dt=ST.t?Math.min(.2,Math.max(.002,(t-ST.t)/1000)):.016;ST.t=t;
+    if(ST.s==null){ST.s=ST.base=m;return}
+    ST.s+=(m-ST.s)*fator(dt,.06);            // tira o tremor da mão
+    ST.base+=(ST.s-ST.base)*fator(dt,1.5);   // gravidade como este telemóvel a mede
+    const d=ST.s-ST.base, parado=t-ST.ultimo>1500;
+    if(parado){
+      ST.ruido+=(Math.abs(d)-ST.ruido)*fator(dt,2);   // ruído do sensor com o telemóvel quieto
+      ST.amp=Math.max(.6,ST.amp*Math.exp(-dt/4));     // sem passos: fica mais sensível aos poucos
+    }
+    const sobe=Math.max(.35,3*ST.ruido,.5*ST.amp), desce=sobe*.4;
+    if(!ST.emCima){
+      if(d>sobe&&t-ST.ultimo>280){ST.emCima=true;ST.pico=d;ST.ultimo=t;passo()}
+    }else{
+      ST.pico=Math.max(ST.pico,d);
+      if(d<desce){ST.emCima=false;   // fim do passo: aprende a altura dos passos (sem deixar um abanão estragar)
+        ST.amp+=(Math.min(ST.pico,3*ST.amp)-ST.amp)*.2;ST.amp=Math.min(5,Math.max(.6,ST.amp))}
+    }
   };
   window.addEventListener("devicemotion",cam.movimento);
   // Sem sensores (computador, para testar): ◀ ▶ para rodar e o botão das pegadas (ou ↑) para andar

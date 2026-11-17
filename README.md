@@ -73,6 +73,16 @@ Não é preciso activar nenhuma opção escondida do navegador. Basta abrir o jo
   - **iPhone/Safari:** aparece "Permitir acesso ao movimento". Tocar em "Permitir". Sem sensores,
     o jogo mostra setas no ecrã.
 
+**Confirmar (normalmente já está bem):**
+- **Android, sensores de movimento:** no Chrome, cadeado ao lado do endereço → Definições do site →
+  **Sensores de movimento: Permitir**.
+- **iPhone, movimento:** Definições → Safari → **Acesso ao movimento e orientação** ligado
+  (em versões mais antigas do iOS).
+- **Poupança de bateria desligada** enquanto se joga: em muitos Android abranda os sensores e os passos
+  deixam de contar bem.
+- **Só para a "RA no chão" (Android):** instalar **"Google Play Services para RA"** (ARCore) na Play Store.
+  Se o telemóvel não for compatível, não aparece, e o jogo usa a RA normal.
+
 **Coisas que podem falhar:**
 - **Link sem https** (por exemplo, `http://192.168…` a partir do PC): a câmara e os sensores ficam
   bloqueados. Usar sempre o link https.
@@ -89,6 +99,29 @@ Não é preciso activar nenhuma opção escondida do navegador. Basta abrir o jo
 (`https://ellitdomingos.github.io/cacadores-da-historia/?ferramentas`) e usar "Verificar este telemóvel".
 Mostra se a câmara, o giroscópio, a RA, a voz, o guardar do progresso e o jogo sem internet funcionam
 nesse aparelho.
+
+### Porque é que o jogo se porta de maneira diferente em telemóveis diferentes
+É das duas coisas, mas sobretudo do telemóvel.
+
+**Vem do telemóvel (não se pode mudar):**
+- **Os sensores.** O acelerómetro, o giroscópio e a bússola variam de modelo para modelo: os passos contam
+  mais ou menos e as peças podem "fugir" ao rodar. Telemóveis baratos às vezes nem têm giroscópio ou bússola.
+- **ARCore.** Sem ARCore, o botão "RA no chão" nunca aparece.
+- **A potência.** Um telemóvel fraco mostra as peças em 2D (sem WebGL) ou fica lento.
+- **O sistema.** No iPhone tem de se tocar em "Permitir movimento", não há RA no chão e a bússola é outra.
+
+**Vem da configuração (pode-se acertar):**
+- **As definições do jogo ficam guardadas em cada telemóvel:** câmara ligada ou desligada, dificuldade,
+  último modo e voz. Para comparar, pôr a mesma dificuldade e o mesmo modo em todos.
+- **Permissões** da câmara ou dos sensores recusadas: o jogo usa o fundo desenhado ou as setas.
+- **Poupança de bateria** ligada: os passos deixam de contar bem.
+- **Navegador:** usar o Chrome no Android e o Safari no iPhone. Outros (Samsung Internet, Opera, ou o
+  navegador dentro do WhatsApp ou do Facebook) podem bloquear sensores ou a RA.
+- **Calibrar a bússola:** se as peças saltam de sítio, fazer um "8" no ar com o telemóvel, longe de metais.
+- **Como se segura o telemóvel:** à frente, firme, a andar normalmente.
+
+**Como saber qual é o caso:** pôr as mesmas definições em dois telemóveis, no Chrome e sem poupança de
+bateria. Se mesmo assim se portarem de maneira diferente, é o telemóvel.
 
 ## Publicar no GitHub Pages
 1. Em https://github.com/new criar um repositório **público** chamado `cacadores-da-historia` (sem README).
